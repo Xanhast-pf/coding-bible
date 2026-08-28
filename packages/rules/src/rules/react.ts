@@ -12,6 +12,14 @@ export const reactRules = [
     pack: "react",
     status: "stable",
     tags: ["architecture", "components", "separation-of-concerns"],
+    bad: {
+      language: "tsx",
+      code: "const Checkout = ({ cart }) => {\n  const subtotal = cart.items.reduce((sum, item) => sum + item.price, 0);\n  const total = subtotal + calculateTax(subtotal);\n\n  return <CheckoutSummary total={total} />;\n};",
+    },
+    good: {
+      language: "tsx",
+      code: "const Checkout = ({ cart }) => {\n  const summary = useCheckoutSummary(cart);\n\n  return <CheckoutSummary summary={summary} />;\n};",
+    },
     detection: { autoFixable: false, detectable: true, strategy: "semantic" },
   },
   {
@@ -25,6 +33,14 @@ export const reactRules = [
     pack: "react",
     status: "stable",
     tags: ["performance", "react"],
+    bad: {
+      language: "tsx",
+      code: "const fullName = useMemo(() => `${firstName} ${lastName}`, [firstName, lastName]);",
+    },
+    good: {
+      language: "tsx",
+      code: "const fullName = `${firstName} ${lastName}`;",
+    },
     references: [
       {
         label: "React — useMemo",
@@ -48,6 +64,14 @@ export const reactRules = [
     pack: "react",
     status: "stable",
     tags: ["architecture", "data-flow", "state"],
+    bad: {
+      language: "tsx",
+      code: "// Global store for state owned by one component\nconst modalStore = createStore({ isOpen: false });",
+    },
+    good: {
+      language: "tsx",
+      code: "const [isOpen, setIsOpen] = useState(false);",
+    },
     detection: { autoFixable: false, detectable: false },
   },
   {
@@ -82,6 +106,14 @@ export const reactRules = [
     pack: "react",
     status: "stable",
     tags: ["effects", "react"],
+    bad: {
+      language: "tsx",
+      code: "const [shouldSave, setShouldSave] = useState(false);\n\nuseEffect(() => {\n  if (shouldSave) saveForm(form);\n}, [form, shouldSave]);",
+    },
+    good: {
+      language: "tsx",
+      code: "const handleSave = () => {\n  saveForm(form);\n};",
+    },
     references: [
       {
         label: "React — You Might Not Need an Effect",
@@ -125,6 +157,14 @@ export const reactRules = [
     pack: "react",
     status: "stable",
     tags: ["purity", "react", "rendering"],
+    bad: {
+      language: "tsx",
+      code: "const UserCard = ({ user }) => {\n  analytics.track(\"UserCard rendered\", { userId: user.id });\n  return <h2>{user.name}</h2>;\n};",
+    },
+    good: {
+      language: "tsx",
+      code: "const UserCard = ({ user }) => {\n  useEffect(() => {\n    analytics.track(\"UserCard viewed\", { userId: user.id });\n  }, [user.id]);\n\n  return <h2>{user.name}</h2>;\n};",
+    },
     detection: { autoFixable: false, detectable: true, strategy: "semantic" },
   },
   {
@@ -138,6 +178,14 @@ export const reactRules = [
     pack: "react",
     status: "stable",
     tags: ["components", "performance", "react"],
+    bad: {
+      language: "tsx",
+      code: "const CountrySelect = () => {\n  const options = [\"Canada\", \"France\", \"Japan\"];\n  return <Select options={options} />;\n};",
+    },
+    good: {
+      language: "tsx",
+      code: "const countryOptions = [\"Canada\", \"France\", \"Japan\"];\n\nconst CountrySelect = () => <Select options={countryOptions} />;",
+    },
     detection: { autoFixable: false, detectable: true, strategy: "ast" },
   },
   {
@@ -151,6 +199,14 @@ export const reactRules = [
     pack: "react",
     status: "stable",
     tags: ["hooks", "react", "safety"],
+    bad: {
+      language: "tsx",
+      code: "if (isEnabled) {\n  const [count, setCount] = useState(0);\n}",
+    },
+    good: {
+      language: "tsx",
+      code: "const [count, setCount] = useState(0);\n\nif (!isEnabled) return null;",
+    },
     references: [
       {
         label: "React — Rules of Hooks",
@@ -191,6 +247,14 @@ export const reactRules = [
     pack: "react",
     status: "stable",
     tags: ["immutability", "props", "react", "state"],
+    bad: {
+      language: "tsx",
+      code: "const UserName = ({ user }) => {\n  user.name = user.name.trim();\n  return <span>{user.name}</span>;\n};",
+    },
+    good: {
+      language: "tsx",
+      code: "const UserName = ({ user }) => {\n  const displayName = user.name.trim();\n  return <span>{displayName}</span>;\n};",
+    },
     references: [
       {
         label: "React — Components and Hooks must be pure",
@@ -210,6 +274,14 @@ export const reactRules = [
     pack: "react",
     status: "stable",
     tags: ["dependencies", "effects", "hooks", "react"],
+    bad: {
+      language: "tsx",
+      code: "useEffect(() => {\n  loadUser(userId);\n  // eslint-disable-next-line react-hooks/exhaustive-deps\n}, []);",
+    },
+    good: {
+      language: "tsx",
+      code: "useEffect(() => {\n  loadUser(userId);\n}, [userId]);",
+    },
     references: [
       {
         label: "React — useMemo",
@@ -229,6 +301,15 @@ export const reactRules = [
     pack: "react",
     status: "stable",
     tags: ["components", "hooks", "react", "separation-of-concerns"],
+    bad: {
+      language: "tsx",
+      code: "const Dashboard = () => {\n  const billing = useBilling();\n  const notifications = useNotifications();\n  const search = useSearch();\n\n  return <DashboardView {...{ billing, notifications, search }} />;\n};",
+    },
+    good: {
+      language: "tsx",
+      code: "const Dashboard = () => (\n  <>\n    <BillingPanel />\n    <NotificationsPanel />\n    <SearchPanel />\n  </>\n);",
+      note: "Split by coherent responsibility, not because a file crossed an arbitrary line count.",
+    },
     detection: { autoFixable: false, detectable: true, strategy: "semantic" },
   },
 ] satisfies readonly CodingRule[];

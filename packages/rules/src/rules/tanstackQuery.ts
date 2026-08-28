@@ -12,6 +12,14 @@ export const tanstackQueryRules = [
     pack: "tanstack-query",
     status: "stable",
     tags: ["cache", "query-keys", "tanstack-query"],
+    bad: {
+      language: "tsx",
+      code: "useQuery({\n  queryKey: [\"todo\"],\n  queryFn: () => fetchTodo(todoId),\n});",
+    },
+    good: {
+      language: "tsx",
+      code: "useQuery({\n  queryKey: [\"todo\", todoId],\n  queryFn: () => fetchTodo(todoId),\n});",
+    },
     references: [
       {
         label: "TanStack Query — Query Keys",
@@ -31,6 +39,14 @@ export const tanstackQueryRules = [
     pack: "tanstack-query",
     status: "stable",
     tags: ["cache", "query-keys", "serialization", "tanstack-query"],
+    bad: {
+      language: "ts",
+      code: "const queryKey = [\"todos\", () => status];",
+    },
+    good: {
+      language: "ts",
+      code: "const queryKey = [\"todos\", { page, status }];",
+    },
     references: [
       {
         label: "TanStack Query — Query Keys",
@@ -50,6 +66,14 @@ export const tanstackQueryRules = [
     pack: "tanstack-query",
     status: "stable",
     tags: ["freshness", "refetch", "stale-time", "tanstack-query"],
+    bad: {
+      language: "ts",
+      code: "const queryClient = new QueryClient({\n  defaultOptions: {\n    queries: {\n      refetchOnMount: false,\n      refetchOnReconnect: false,\n      refetchOnWindowFocus: false,\n    },\n  },\n});",
+    },
+    good: {
+      language: "tsx",
+      code: "const catalogStaleTimeMs = 5 * 60 * 1000;\n\nuseQuery({\n  queryKey: [\"catalog\"],\n  queryFn: fetchCatalog,\n  staleTime: catalogStaleTimeMs,\n});",
+    },
     references: [
       {
         label: "TanStack Query — Important Defaults",
@@ -69,6 +93,14 @@ export const tanstackQueryRules = [
     pack: "tanstack-query",
     status: "stable",
     tags: ["invalidation", "mutations", "tanstack-query"],
+    bad: {
+      language: "tsx",
+      code: "useMutation({\n  mutationFn: addTodo,\n});",
+    },
+    good: {
+      language: "tsx",
+      code: "useMutation({\n  mutationFn: addTodo,\n  onSuccess: () =>\n    queryClient.invalidateQueries({ queryKey: [\"todos\"] }),\n});",
+    },
     references: [
       {
         label: "TanStack Query — Invalidations from Mutations",
@@ -88,6 +120,14 @@ export const tanstackQueryRules = [
     pack: "tanstack-query",
     status: "stable",
     tags: ["errors", "query-functions", "tanstack-query"],
+    bad: {
+      language: "ts",
+      code: "const fetchTodos = async () => {\n  const response = await fetch(\"/api/todos\");\n  return response.json();\n};",
+    },
+    good: {
+      language: "ts",
+      code: "const fetchTodos = async () => {\n  const response = await fetch(\"/api/todos\");\n  if (!response.ok) throw new Error(\"Failed to load todos\");\n  return response.json();\n};",
+    },
     references: [
       {
         label: "TanStack Query — Query Functions",

@@ -39,6 +39,15 @@ export const legendStateRules = [
     pack: "legend-state",
     status: "stable",
     tags: ["legend-state", "peek", "reactivity", "tracking"],
+    bad: {
+      language: "ts",
+      code: "const userId = session$.userId.get();\nanalytics.track(\"checkout\", { userId });",
+    },
+    good: {
+      language: "ts",
+      code: "const userId = session$.userId.peek();\nanalytics.track(\"checkout\", { userId });",
+      note: "peek() makes the intentional non-reactive read explicit.",
+    },
     references: [
       {
         label: "Legend-State v3 — Observable",
@@ -58,6 +67,14 @@ export const legendStateRules = [
     pack: "legend-state",
     status: "stable",
     tags: ["legend-state", "mutation", "reactivity"],
+    bad: {
+      language: "ts",
+      code: "const profile = store$.profile.peek();\nprofile.name = \"Ada\";\nstore$.profile.set(profile);",
+    },
+    good: {
+      language: "ts",
+      code: "store$.profile.name.set(\"Ada\");",
+    },
     references: [
       {
         label: "Legend-State v3 — Observable",
@@ -77,6 +94,14 @@ export const legendStateRules = [
     pack: "legend-state",
     status: "stable",
     tags: ["batching", "legend-state", "performance", "updates"],
+    bad: {
+      language: "ts",
+      code: "store$.data.set(response.data);\nstore$.isLoading.set(false);",
+    },
+    good: {
+      language: "ts",
+      code: "store$.assign({\n  data: response.data,\n  isLoading: false,\n});",
+    },
     references: [
       {
         label: "Legend-State v3 — Observable",
@@ -96,6 +121,14 @@ export const legendStateRules = [
     pack: "legend-state",
     status: "stable",
     tags: ["legend-state", "performance", "subscriptions"],
+    bad: {
+      language: "tsx",
+      code: "const state = useValue(store$);\nreturn <Badge>{state.notifications.unread}</Badge>;",
+    },
+    good: {
+      language: "tsx",
+      code: "const unread = useValue(store$.notifications.unread);\nreturn <Badge>{unread}</Badge>;",
+    },
     references: [
       {
         label: "Legend-State v3 — Performance",
@@ -119,6 +152,15 @@ export const legendStateRules = [
     pack: "legend-state",
     status: "stable",
     tags: ["legend-state", "persistence", "serialization", "sync"],
+    bad: {
+      language: "ts",
+      code: "store$.session.set({\n  lastSeen: new Date(),\n  onClose: closeSession,\n});",
+    },
+    good: {
+      language: "ts",
+      code: "store$.session.set({\n  lastSeenIso: new Date().toISOString(),\n});",
+      note: "Use plain values for observable nodes that are persisted, synchronized, or transported.",
+    },
     exceptions: [
       "Purely in-memory observables that never cross a serialization boundary may intentionally contain functions or other supported runtime values.",
     ],
