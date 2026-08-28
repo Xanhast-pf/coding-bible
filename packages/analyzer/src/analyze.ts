@@ -10,6 +10,8 @@ const scriptKindByLanguage = {
   tsx: ts.ScriptKind.TSX,
 } satisfies Record<AnalyzerLanguage, ts.ScriptKind>;
 
+const ruleIdsChecked = [...new Set(detectors.map((detector) => detector.ruleId))].sort();
+
 const defaultFileNameByLanguage = {
   js: "snippet.js",
   jsx: "snippet.jsx",
@@ -19,7 +21,7 @@ const defaultFileNameByLanguage = {
 
 export const analyze = ({ fileName, language, source }: AnalyzeInput): AnalyzeResult => {
   if (!source.trim()) {
-    return { checksRun: detectors.length, findings: [] };
+    return { checksRun: detectors.length, findings: [], ruleIdsChecked };
   }
 
   const sourceFile = ts.createSourceFile(
@@ -42,5 +44,6 @@ export const analyze = ({ fileName, language, source }: AnalyzeInput): AnalyzeRe
   return {
     checksRun: detectors.length,
     findings,
+    ruleIdsChecked,
   };
 };

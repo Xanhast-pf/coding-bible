@@ -121,7 +121,7 @@ export const AnalyzeView = () => {
           <p className={styles.kicker}>AST analyzer · local only</p>
           <h2 id="analyzer-heading">Paste code. Find the rule.</h2>
           <p className={styles.description}>
-            The MVP runs focused TypeScript/React checks in your browser. Your
+            The analyzer runs focused source-local checks in your browser. Your
             source stays on this page and is not uploaded anywhere.
           </p>
         </div>
@@ -179,8 +179,8 @@ export const AnalyzeView = () => {
 
           <div className={styles.actions}>
             <p className={styles.hint}>
-              First pass: high-confidence local checks only. No architecture
-              fortune-telling.
+              Automated subset only: a DON'T example flags when that rule is
+              currently implemented. No architecture fortune-telling.
             </p>
             <button
               className={styles.analyzeButton}
@@ -219,15 +219,17 @@ export const AnalyzeView = () => {
                   <strong>{result.findings.length}</strong>
                   <span>{result.findings.length === 1 ? " finding" : " findings"}</span>
                 </div>
-                <span>{result.checksRun} checks run</span>
+                <span>
+                  {result.checksRun} checks · {result.ruleIdsChecked.length} rules
+                </span>
               </div>
 
               {!result.findings.length ? (
                 <div className={styles.cleanState}>
                   <h3>No supported violations found.</h3>
                   <p>
-                    Clean for the checks this MVP knows how to prove. It is not a
-                    substitute for the rest of the Bible—or a code review.
+                    Clean for {result.ruleIdsChecked.length} automated rules out of{" "}
+                    {rules.length}. The rest still requires the Bible—or a code review.
                   </p>
                 </div>
               ) : (

@@ -201,11 +201,11 @@ export const reactRules = [
     tags: ["hooks", "react", "safety"],
     bad: {
       language: "tsx",
-      code: "if (isEnabled) {\n  const [count, setCount] = useState(0);\n}",
+      code: "const Counter = ({ isEnabled }) => {\n  if (isEnabled) {\n    const [count, setCount] = useState(0);\n    return <span>{count}</span>;\n  }\n\n  return null;\n};",
     },
     good: {
       language: "tsx",
-      code: "const [count, setCount] = useState(0);\n\nif (!isEnabled) return null;",
+      code: "const Counter = ({ isEnabled }) => {\n  const [count, setCount] = useState(0);\n\n  if (!isEnabled) return null;\n  return <span>{count}</span>;\n};",
     },
     references: [
       {
@@ -226,7 +226,10 @@ export const reactRules = [
     pack: "react",
     status: "stable",
     tags: ["components", "react", "rendering"],
-    bad: { language: "tsx", code: "const content = UserCard({ user });" },
+    bad: {
+      language: "tsx",
+      code: "const UserCard = ({ user }) => <strong>{user.name}</strong>;\nconst content = UserCard({ user });",
+    },
     good: { language: "tsx", code: "const content = <UserCard user={user} />;" },
     references: [
       {

@@ -22,8 +22,9 @@ Compliance is layered:
    external dependency.
 3. **Behavior tests** cover pure utilities and rule-registry invariants with the
    Node.js test runner.
-4. **Analyzer checks** enforce deterministic source-local rules and are covered by
-   detector regression tests.
+4. **Analyzer checks** enforce deterministic source-local rules. Detector tests
+   cover positive/negative behavior, and every automated rule must flag its exact
+   DON'T example without flagging its exact DO example.
 5. **Human review** remains responsible for semantic rules that cannot be proven
    mechanically.
 

@@ -43,15 +43,15 @@ const formatFinding = (finding) => {
   ].join("\n");
 };
 
-const formatSummary = ({ filesScanned, findings }) => {
+const formatSummary = ({ filesScanned, findings, ruleIdsChecked }) => {
   const fileLabel = filesScanned === 1 ? "file" : "files";
   const findingLabel = findings.length === 1 ? "finding" : "findings";
 
   if (!findings.length) {
-    return `✓ Coding Bible found no issues in ${filesScanned} ${fileLabel}.`;
+    return `✓ No violations found among ${ruleIdsChecked.length} automated rules in ${filesScanned} ${fileLabel}.`;
   }
 
-  return `✗ Coding Bible found ${findings.length} ${findingLabel} in ${filesScanned} ${fileLabel}.`;
+  return `✗ Coding Bible found ${findings.length} ${findingLabel} across ${ruleIdsChecked.length} automated rules in ${filesScanned} ${fileLabel}.`;
 };
 
 export const runCli = async (
