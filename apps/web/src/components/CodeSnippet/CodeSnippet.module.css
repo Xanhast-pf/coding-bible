@@ -128,3 +128,7 @@
 .type {
   color: var(--syntaxType);
 }
+
+.toolbarSpacer {
+  flex: 1;
+}

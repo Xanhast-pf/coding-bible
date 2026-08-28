@@ -74,3 +74,28 @@
     white-space: nowrap;
   }
 }
+
+.group {
+  display: grid;
+  gap: 0.25rem;
+  margin-top: 1rem;
+}
+
+.groupLabel {
+  color: var(--matrixDim);
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.08em;
+  margin: 0 0 0.25rem 0.75rem;
+  text-transform: uppercase;
+}
+
+@media (max-width: 52rem) {
+  .group {
+    display: contents;
+  }
+
+  .groupLabel {
+    display: none;
+  }
+}

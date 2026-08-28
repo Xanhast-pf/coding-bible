@@ -160,4 +160,30 @@ export const coreRules = [
     tags: ["comments", "refactoring"],
     detection: { autoFixable: false, detectable: true, strategy: "semantic" },
   },
+  {
+    id: "CORE-010",
+    title: "Keep the public surface minimal",
+    summary:
+      "Do not export functions, types, modules, or abstractions that have no external consumer.",
+    rationale:
+      "Every export becomes a dependency point that constrains future refactoring and increases the surface maintainers must understand.",
+    level: "should",
+    pack: "core",
+    status: "stable",
+    tags: ["api-design", "exports", "maintainability"],
+    detection: { autoFixable: false, detectable: true, strategy: "ast" },
+  },
+  {
+    id: "CORE-011",
+    title: "Hoist context-free helpers",
+    summary:
+      "If a helper does not depend on its parent function's local values, define it in a stable outer scope.",
+    rationale:
+      "Hoisting communicates independence, avoids needless recreation, and makes the helper easier to test or reuse locally.",
+    level: "prefer",
+    pack: "core",
+    status: "stable",
+    tags: ["functions", "scope"],
+    detection: { autoFixable: false, detectable: true, strategy: "ast" },
+  },
 ] satisfies readonly CodingRule[];

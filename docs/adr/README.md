@@ -9,3 +9,5 @@
 | [004](004-dogfooding.md) | The repository dogfoods stable rules |
 | [005](005-no-router-yet.md) | Navigation remains dependency-free |
 | [006](006-dependency-free-code-highlighting.md) | Dependency-free code example highlighting |
+| [007](007-url-state-and-reference-ux.md) | Shareable URL state and reference UX |
+| [008](008-framework-rule-packs.md) | Framework-specific rule packs and official references |

@@ -3,14 +3,24 @@ import type { CodingRule, RulePack } from "./types";
 const ruleIdPrefixByPack = {
   accessibility: "A11Y",
   ai: "AI",
+  apollo: "APOLLO",
   architecture: "ARCH",
   core: "CORE",
   css: "CSS",
   dependencies: "DEP",
+  "feature-flags": "FLAG",
+  graphql: "GQL",
+  internationalization: "I18N",
+  javascript: "JS",
+  "legend-state": "LEGEND",
+  nextjs: "NEXT",
   performance: "PERF",
   react: "REACT",
+  redux: "REDUX",
+  "tanstack-query": "TQ",
   testing: "TEST",
   typescript: "TS",
+  workflow: "WORK",
 } satisfies Record<RulePack, string>;
 
 const ruleIdPattern = /^[A-Z0-9]+-\d{3}$/;
@@ -84,6 +94,14 @@ export const defineRuleRegistry = <const Rules extends readonly CodingRule[]>(
 
       validateText(errors, rule.id, "example language", example.language);
       validateText(errors, rule.id, "example code", example.code);
+    }
+
+    for (const reference of rule.references ?? []) {
+      validateText(errors, rule.id, "reference label", reference.label);
+
+      if (!reference.url.startsWith("https://")) {
+        errors.push(`${rule.id}: reference URLs must use HTTPS.`);
+      }
     }
   }
 

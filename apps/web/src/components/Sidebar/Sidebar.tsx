@@ -1,3 +1,7 @@
+import {
+  rulePackGroups,
+  rulePackLabels,
+} from "@coding-bible/rules";
 import type { RulePack } from "@coding-bible/rules";
 
 import styles from "./Sidebar.module.css";
@@ -9,6 +13,14 @@ interface SidebarProps {
   selectedPack: RulePack | "all";
   totalCount: number;
 }
+
+const groupLabels = {
+  ecosystem: "Ecosystem",
+  foundation: "Foundations",
+  quality: "Quality",
+} as const;
+
+const groupOrder = ["foundation", "quality", "ecosystem"] as const;
 
 export const Sidebar = ({
   counts,
@@ -32,19 +44,31 @@ export const Sidebar = ({
         <span className={styles.count}>{totalCount}</span>
       </button>
 
-      {packs.map((pack) => (
-        <button
-          aria-pressed={selectedPack === pack}
-          className={styles.item}
-          data-active={selectedPack === pack}
-          key={pack}
-          onClick={() => onSelectPack(pack)}
-          type="button"
-        >
-          <span>{pack}</span>
-          <span className={styles.count}>{counts[pack]}</span>
-        </button>
-      ))}
+      {groupOrder.map((group) => {
+        const groupPacks = packs.filter(
+          (pack) => rulePackGroups[pack] === group,
+        );
+
+        return (
+          <div className={styles.group} key={group}>
+            <p className={styles.groupLabel}>{groupLabels[group]}</p>
+
+            {groupPacks.map((pack) => (
+              <button
+                aria-pressed={selectedPack === pack}
+                className={styles.item}
+                data-active={selectedPack === pack}
+                key={pack}
+                onClick={() => onSelectPack(pack)}
+                type="button"
+              >
+                <span>{rulePackLabels[pack]}</span>
+                <span className={styles.count}>{counts[pack]}</span>
+              </button>
+            ))}
+          </div>
+        );
+      })}
     </aside>
   );
 };
