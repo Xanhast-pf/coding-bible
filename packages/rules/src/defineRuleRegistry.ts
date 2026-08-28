@@ -6,6 +6,7 @@ const ruleIdPrefixByPack = {
   architecture: "ARCH",
   core: "CORE",
   css: "CSS",
+  dependencies: "DEP",
   performance: "PERF",
   react: "REACT",
   testing: "TEST",

@@ -3,9 +3,12 @@ import type { RulePack } from "@coding-bible/rules";
 import { useState } from "react";
 
 import { RuleCard } from "./components/RuleCard/RuleCard";
+import { RuleSearch } from "./components/RuleSearch/RuleSearch";
 import { Sidebar } from "./components/Sidebar/Sidebar";
-import { filterRules } from "./utils/rules";
+import { countRulesByPack, filterRules } from "./utils/rules";
 import styles from "./App.module.css";
+
+const ruleCounts = countRulesByPack(rules, rulePacks);
 
 export const App = () => {
   const [query, setQuery] = useState("");
@@ -23,22 +26,16 @@ export const App = () => {
           Structured enough for humans, tooling, and AI agents.
         </p>
 
-        <label className={styles.search}>
-          <span className={styles.searchLabel}>Search rules</span>
-          <input
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search by rule, concept, or ID…"
-            type="search"
-            value={query}
-          />
-        </label>
+        <RuleSearch onChange={setQuery} value={query} />
       </header>
 
       <div className={styles.layout}>
         <Sidebar
+          counts={ruleCounts}
           onSelectPack={setSelectedPack}
           packs={rulePacks}
           selectedPack={selectedPack}
+          totalCount={rules.length}
         />
 
         <section aria-label="Rules">

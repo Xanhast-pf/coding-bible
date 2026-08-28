@@ -41,8 +41,15 @@ docs/
 ```bash
 nvm use
 pnpm install
+pnpm check
+pnpm build
 pnpm dev
 ```
+
+TypeScript is installed at the workspace root because multiple workspace
+packages use `tsc`. pnpm is also configured to allow the `esbuild` lifecycle
+script required by Vite, so a fresh install does not require a manual
+`pnpm approve-builds` step.
 
 ## GitHub Pages
 
@@ -55,6 +62,8 @@ https://xanhast-pf.github.io/coding-bible/
 Pushes to `main` are deployed by `.github/workflows/deploy-pages.yml`.
 
 In the GitHub repository, set **Settings → Pages → Source** to **GitHub Actions**.
+
+Search can be focused with `⌘/Ctrl+K`.
 
 Rule deep links use fragments such as:
 
