@@ -12,6 +12,10 @@
   },
   "scripts": {
     "test": "node --test test/*.test.mjs",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "cli": "node bin/coding-bible.mjs"
+  },
+  "bin": {
+    "coding-bible": "./bin/coding-bible.mjs"
   }
 }

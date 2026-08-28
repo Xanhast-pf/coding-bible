@@ -10,7 +10,8 @@
     "check": "pnpm typecheck && pnpm test && pnpm build",
     "dev": "pnpm --filter @coding-bible/web dev",
     "test": "pnpm -r --if-present test",
-    "typecheck": "pnpm -r --if-present typecheck"
+    "typecheck": "pnpm -r --if-present typecheck",
+    "bible:check": "node packages/analyzer/bin/coding-bible.mjs check ."
   },
   "devDependencies": {
     "typescript": "^5.9.2"
