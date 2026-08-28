@@ -8,3 +8,4 @@
 | [003](003-static-hosting-and-deep-links.md) | GitHub Pages hosting and fragment deep links |
 | [004](004-dogfooding.md) | The repository dogfoods stable rules |
 | [005](005-no-router-yet.md) | Navigation remains dependency-free |
+| [006](006-dependency-free-code-highlighting.md) | Dependency-free code example highlighting |
