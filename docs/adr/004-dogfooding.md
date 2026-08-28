@@ -22,8 +22,8 @@ Compliance is layered:
    external dependency.
 3. **Behavior tests** cover pure utilities and rule-registry invariants with the
    Node.js test runner.
-4. **Future analyzer checks** will enforce deterministic Coding Bible rules once
-   executable analyzer behavior exists.
+4. **Analyzer checks** enforce deterministic source-local rules and are covered by
+   detector regression tests.
 5. **Human review** remains responsible for semantic rules that cannot be proven
    mechanically.
 

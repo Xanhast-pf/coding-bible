@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "dependencies": {
+    "@coding-bible/analyzer": "workspace:*",
     "@coding-bible/rules": "workspace:*",
     "react": "^19.1.1",
     "react-dom": "^19.1.1"

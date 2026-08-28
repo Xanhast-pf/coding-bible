@@ -15,7 +15,7 @@ That single source can eventually power:
 - the public website
 - full-text search
 - AI context files
-- a paste-in code reviewer
+- the browser code analyzer
 - a CLI
 - editor integrations
 - PR review tooling
@@ -28,6 +28,7 @@ apps/
   web/                  Public website
 
 packages/
+  analyzer/             AST-backed source analyzer
   rules/                Canonical rule schema + rule content
 
 docs/
@@ -82,6 +83,10 @@ In the GitHub repository, set **Settings → Pages → Source** to **GitHub Acti
 
 Search can be focused with `⌘/Ctrl+K`. Search and filters are reflected in the URL so useful rule views can be bookmarked or shared.
 
+The **Analyze** mode accepts TypeScript, TSX, JavaScript, and JSX snippets and
+runs supported checks locally in the browser. The analyzer is lazy-loaded so the
+TypeScript parser does not increase the initial Learn-page bundle.
+
 Rule deep links use fragments such as:
 
 ```text
@@ -96,13 +101,14 @@ dependency.
 The Coding Bible follows its own applicable `stable` rules.
 
 The rule registry validates itself at runtime without an additional dependency,
-and pure behavior is covered with Node's built-in test runner. A deterministic
-analyzer will become a workspace package only when there is executable analyzer
-behavior to ship.
+and pure behavior is covered with Node's built-in test runner. The analyzer is a
+separate AST-backed package with regression tests for every supported detector,
+while semantic rules remain a human-review responsibility.
 
 A self-violation is treated as useful feedback: either the implementation is
 wrong or the rule needs better scope, severity, or exceptions.
 
 ## Status
 
-Foundation / pre-alpha. Rule quality and architecture come before visual polish.
+Pre-alpha. The rule library and Learn experience are established; the first
+AST-backed analyzer is now the second product surface.
