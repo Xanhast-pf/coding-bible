@@ -12,6 +12,14 @@ export const performanceRules = [
     pack: "performance",
     status: "stable",
     tags: ["iteration", "performance"],
+    bad: {
+      language: "ts",
+      code: "let settingsItem: MenuItem | undefined;\nfor (let index = 0; index < menuItems.length; index += 1) {\n  if (menuItems[index]?.id === \"settings\") {\n    settingsItem = menuItems[index];\n    break;\n  }\n}",
+    },
+    good: {
+      language: "ts",
+      code: "const settingsItem = menuItems.find(\n  (item) => item.id === \"settings\",\n);",
+    },
     detection: { autoFixable: false, detectable: true, strategy: "semantic" },
   },
   {
@@ -25,6 +33,14 @@ export const performanceRules = [
     pack: "performance",
     status: "stable",
     tags: ["measurement", "performance", "profiling"],
+    bad: {
+      language: "ts",
+      code: "// \"This looks slow.\"\nconst cachedNormalizeUsers = memoize(normalizeUsers);",
+    },
+    good: {
+      language: "ts",
+      code: "performance.mark(\"normalize:start\");\nconst users = normalizeUsers(payload);\nperformance.mark(\"normalize:end\");\nperformance.measure(\n  \"normalizeUsers\",\n  \"normalize:start\",\n  \"normalize:end\",\n);",
+    },
     detection: { autoFixable: false, detectable: false },
   },
   {
@@ -38,6 +54,14 @@ export const performanceRules = [
     pack: "performance",
     status: "stable",
     tags: ["collections", "iteration", "performance"],
+    bad: {
+      language: "ts",
+      code: "const total = rows\n  .filter(isBillable)\n  .map(getAmount)\n  .reduce((sum, amount) => sum + amount, 0);",
+    },
+    good: {
+      language: "ts",
+      code: "let total = 0;\nfor (const row of rows) {\n  if (isBillable(row)) {\n    total += getAmount(row);\n  }\n}",
+    },
     exceptions: [
       "For small collections or non-hot paths, a readable map/filter chain may be the better engineering choice.",
     ],
@@ -54,6 +78,14 @@ export const performanceRules = [
     pack: "performance",
     status: "stable",
     tags: ["algorithms", "data-structures", "performance"],
+    bad: {
+      language: "ts",
+      code: "const rows = orders.map((order) => ({\n  order,\n  user: users.find((user) => user.id === order.userId),\n}));",
+    },
+    good: {
+      language: "ts",
+      code: "const usersById = new Map(users.map((user) => [user.id, user]));\n\nconst rows = orders.map((order) => ({\n  order,\n  user: usersById.get(order.userId),\n}));",
+    },
     detection: { autoFixable: false, detectable: true, strategy: "semantic" },
   },
 ] satisfies readonly CodingRule[];

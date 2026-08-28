@@ -12,6 +12,14 @@ export const coreRules = [
     pack: "core",
     status: "stable",
     tags: ["clarity", "maintainability"],
+    bad: {
+      language: "ts",
+      code: "return users.filter((u) => u.a && !u.s).map((u) => u.e);",
+    },
+    good: {
+      language: "ts",
+      code: "const activeUsers = users.filter(\n  (user) => user.active && !user.suspended,\n);\n\nreturn activeUsers.map((user) => user.email);",
+    },
     detection: { autoFixable: false, detectable: false },
   },
   {
@@ -84,6 +92,14 @@ export const coreRules = [
     pack: "core",
     status: "stable",
     tags: ["cleanup", "dead-code", "maintainability"],
+    bad: {
+      language: "ts",
+      code: "const calculateLegacyTax = (total: number) => total * 0.07;\n\nexport const calculateTax = (total: number) =>\n  taxService.calculate(total);",
+    },
+    good: {
+      language: "ts",
+      code: "export const calculateTax = (total: number) =>\n  taxService.calculate(total);",
+    },
     detection: { autoFixable: false, detectable: true, strategy: "ast" },
   },
   {
@@ -121,6 +137,14 @@ export const coreRules = [
     pack: "core",
     status: "stable",
     tags: ["cohesion", "files", "maintainability"],
+    bad: {
+      language: "ts",
+      code: "// formatPrice.ts\nexport const formatPrice = (value: number) => { /* ... */ };\n\n// getCurrencySymbol.ts\nexport const getCurrencySymbol = (currency: Currency) => { /* ... */ };",
+    },
+    good: {
+      language: "ts",
+      code: "// pricing/formatters.ts\nexport const formatPrice = (value: number) => { /* ... */ };\nexport const getCurrencySymbol = (currency: Currency) => { /* ... */ };",
+    },
     detection: { autoFixable: false, detectable: true, strategy: "semantic" },
   },
   {
@@ -158,6 +182,14 @@ export const coreRules = [
     pack: "core",
     status: "stable",
     tags: ["comments", "refactoring"],
+    bad: {
+      language: "ts",
+      code: "const MAX_PAYMENT_RETRIES = 2;\n\nexport const retryPayment = () => { /* ... */ };",
+    },
+    good: {
+      language: "ts",
+      code: "// Gateway may duplicate charges after 2 retries; see PAY-1842.\nconst MAX_PAYMENT_RETRIES = 2;\n\nexport const retryPayment = () => { /* ... */ };",
+    },
     detection: { autoFixable: false, detectable: true, strategy: "semantic" },
   },
   {
@@ -171,6 +203,14 @@ export const coreRules = [
     pack: "core",
     status: "stable",
     tags: ["api-design", "exports", "maintainability"],
+    bad: {
+      language: "ts",
+      code: "export const normalizeEmail = (email: string) =>\n  email.trim().toLowerCase();\n\nexport const createUser = (email: string) =>\n  repository.create(normalizeEmail(email));",
+    },
+    good: {
+      language: "ts",
+      code: "const normalizeEmail = (email: string) =>\n  email.trim().toLowerCase();\n\nexport const createUser = (email: string) =>\n  repository.create(normalizeEmail(email));",
+    },
     detection: { autoFixable: false, detectable: true, strategy: "ast" },
   },
   {
@@ -184,6 +224,14 @@ export const coreRules = [
     pack: "core",
     status: "stable",
     tags: ["functions", "scope"],
+    bad: {
+      language: "ts",
+      code: "export const buildReport = (rows: Row[]) => {\n  const formatCurrency = (value: number) => `$${value.toFixed(2)}`;\n\n  return rows.map((row) => formatCurrency(row.total));\n};",
+    },
+    good: {
+      language: "ts",
+      code: "const formatCurrency = (value: number) => `$${value.toFixed(2)}`;\n\nexport const buildReport = (rows: Row[]) =>\n  rows.map((row) => formatCurrency(row.total));",
+    },
     detection: { autoFixable: false, detectable: true, strategy: "ast" },
   },
 ] satisfies readonly CodingRule[];

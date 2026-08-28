@@ -2,6 +2,8 @@
 
 Total rules: **128**
 
+Stable rules with paired **DON'T / DO** examples: **128 / 128**
+
 | Pack | Rules |
 | --- | ---: |
 | `accessibility` | 6 |
