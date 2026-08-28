@@ -1,0 +1,10 @@
+{
+  "name": "@coding-bible/analyzer",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "dependencies": {
+    "@coding-bible/rules": "workspace:*"
+  }
+}

@@ -1,0 +1,88 @@
+.page {
+  margin-inline: auto;
+  max-width: 88rem;
+  padding: 0 2rem 6rem;
+}
+
+.hero {
+  max-width: 68rem;
+  padding: 7rem 0 5rem;
+}
+
+.eyebrow {
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  margin: 0 0 1rem;
+}
+
+.intro {
+  color: var(--muted);
+  font-size: 1.25rem;
+  line-height: 1.65;
+  max-width: 48rem;
+}
+
+.search {
+  display: block;
+  margin-top: 2.5rem;
+  max-width: 38rem;
+}
+
+.searchLabel {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 650;
+  margin-bottom: 0.5rem;
+}
+
+.search input {
+  background: var(--surfaceRaised);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  color: var(--text);
+  inline-size: 100%;
+  outline: none;
+  padding: 0.9rem 1rem;
+}
+
+.search input:focus-visible {
+  border-color: var(--text);
+  box-shadow: 0 0 0 0.1875rem var(--focusRing);
+}
+
+.layout {
+  display: grid;
+  gap: 4rem;
+  grid-template-columns: 12rem minmax(0, 1fr);
+}
+
+.results {
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  margin: 0 0 0.75rem;
+}
+
+.empty {
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  padding-top: 2rem;
+}
+
+@media (max-width: 52rem) {
+  .page {
+    padding-inline: 1rem;
+  }
+
+  .hero {
+    padding-block: 4rem 3rem;
+  }
+
+  .layout {
+    gap: 2rem;
+    grid-template-columns: 1fr;
+  }
+}

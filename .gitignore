@@ -1,0 +1,24 @@
+node_modules/
+dist/
+coverage/
+.vite/
+.cache/
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+playwright-report/
+test-results/
+
+# Private maintainer / agent context
+AGENT.md
+AGENTS.md
+CLAUDE.md
+.private/
+.agents/

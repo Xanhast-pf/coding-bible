@@ -1,0 +1,49 @@
+.sidebar {
+  align-self: start;
+  display: grid;
+  gap: 0.25rem;
+  position: sticky;
+  top: 1.5rem;
+}
+
+.label {
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  margin: 0 0 0.5rem;
+  text-transform: uppercase;
+}
+
+.item {
+  background: transparent;
+  border: 0;
+  border-radius: 0.5rem;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 0.55rem 0.75rem;
+  text-align: left;
+  text-transform: capitalize;
+}
+
+.item:hover,
+.item[data-active="true"] {
+  background: var(--surfaceRaised);
+  color: var(--text);
+}
+
+@media (max-width: 52rem) {
+  .sidebar {
+    display: flex;
+    overflow-x: auto;
+    position: static;
+  }
+
+  .label {
+    display: none;
+  }
+
+  .item {
+    white-space: nowrap;
+  }
+}
