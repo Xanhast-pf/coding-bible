@@ -3,8 +3,10 @@ import { useEffect, useRef, useState } from "react";
 import styles from "./CopyButton.module.css";
 
 interface CopyButtonProps {
+  accessibleLabel?: string;
   label: string;
-  value: string;
+  value: string | (() => string);
+  variant?: "accent" | "default";
 }
 
 type CopyStatus = "copied" | "error" | "idle";
@@ -17,7 +19,12 @@ const copyFeedbackByStatus: Record<CopyStatus, string | null> = {
   idle: null,
 };
 
-export const CopyButton = ({ label, value }: CopyButtonProps) => {
+export const CopyButton = ({
+  accessibleLabel,
+  label,
+  value,
+  variant = "default",
+}: CopyButtonProps) => {
   const [status, setStatus] = useState<CopyStatus>("idle");
   const resetTimeout = useRef<number | null>(null);
 
@@ -42,7 +49,8 @@ export const CopyButton = ({ label, value }: CopyButtonProps) => {
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(value);
+      const copyValue = typeof value === "function" ? value() : value;
+      await navigator.clipboard.writeText(copyValue);
       setStatus("copied");
     } catch {
       setStatus("error");
@@ -53,9 +61,12 @@ export const CopyButton = ({ label, value }: CopyButtonProps) => {
 
   return (
     <button
+      aria-label={accessibleLabel}
       className={styles.button}
       data-status={status}
+      data-variant={variant}
       onClick={handleCopy}
+      title={accessibleLabel}
       type="button"
     >
       <span aria-atomic="true" aria-live="polite">

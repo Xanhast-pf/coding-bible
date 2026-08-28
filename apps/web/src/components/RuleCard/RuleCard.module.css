@@ -17,6 +17,7 @@
 .meta {
   align-items: center;
   display: flex;
+  flex-wrap: wrap;
   gap: 0.75rem;
 }
 
@@ -111,6 +112,12 @@
 
 .metaSpacer {
   flex: 1;
+}
+
+.actions {
+  align-items: center;
+  display: flex;
+  gap: 0.5rem;
 }
 
 .references a {

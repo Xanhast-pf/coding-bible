@@ -1,12 +1,19 @@
-import { ruleLevels, rulePacks, rules } from "@coding-bible/rules";
+import {
+  buildRuleSetAgentPrompt,
+  ruleLevels,
+  rulePacks,
+  rules,
+} from "@coding-bible/rules";
 
 import { AnalyzeView } from "./components/AnalyzeView/AnalyzeView";
 import { AppNavigation } from "./components/AppNavigation/AppNavigation";
+import { CopyButton } from "./components/CopyButton/CopyButton";
 import { LevelFilter } from "./components/LevelFilter/LevelFilter";
 import { RuleCard } from "./components/RuleCard/RuleCard";
 import { RuleSearch } from "./components/RuleSearch/RuleSearch";
 import { Sidebar } from "./components/Sidebar/Sidebar";
 import { useRuleBrowserState } from "./hooks/useRuleBrowserState";
+import { createCanonicalBibleUrl } from "./utils/canonicalUrls";
 import {
   countRulesByLevel,
   countRulesByPack,
@@ -33,7 +40,7 @@ const LearnView = () => {
     selectedPack,
     selectedLevel,
   );
-
+  const canonicalBibleUrl = createCanonicalBibleUrl(window.location.href);
   return (
     <>
       <header className={styles.hero}>
@@ -66,9 +73,24 @@ const LearnView = () => {
         />
 
         <section aria-label="Rules">
-          <p aria-live="polite" className={styles.results}>
-            {visibleRules.length} {visibleRules.length === 1 ? "rule" : "rules"}
-          </p>
+          <div className={styles.resultsRow}>
+            <p aria-live="polite" className={styles.results}>
+              {visibleRules.length} {visibleRules.length === 1 ? "rule" : "rules"}
+            </p>
+
+            {visibleRules.length ? (
+              <CopyButton
+                accessibleLabel={`Copy AI prompt for ${visibleRules.length} visible ${
+                  visibleRules.length === 1 ? "rule" : "rules"
+                }`}
+                label="tldr;"
+                value={() =>
+                  buildRuleSetAgentPrompt(visibleRules, canonicalBibleUrl)
+                }
+                variant="accent"
+              />
+            ) : null}
+          </div>
 
           {visibleRules.map((rule) => (
             <RuleCard key={rule.id} rule={rule} />

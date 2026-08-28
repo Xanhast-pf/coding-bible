@@ -1,3 +1,4 @@
+export { buildRuleAgentPrompt, buildRuleSetAgentPrompt } from "./agentPrompt";
 export { accessibilityRules } from "./rules/accessibility";
 export { aiRules } from "./rules/ai";
 export { apolloRules } from "./rules/apollo";
