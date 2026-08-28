@@ -28,6 +28,7 @@ export interface AnalyzerFinding {
 export interface AnalyzeResult {
   checksRun: number;
   findings: readonly AnalyzerFinding[];
+  ruleIdsChecked: readonly string[];
 }
 
 export interface DetectorContext {

@@ -1,7 +1,7 @@
 import { readdir, readFile, stat } from "node:fs/promises";
 import path from "node:path";
 
-import { analyze } from "../src/index.ts";
+import { analyze, detectors } from "../src/index.ts";
 
 const languageByExtension = new Map([
   [".js", "js"],
@@ -9,6 +9,8 @@ const languageByExtension = new Map([
   [".ts", "ts"],
   [".tsx", "tsx"],
 ]);
+
+const ruleIdsChecked = [...new Set(detectors.map((detector) => detector.ruleId))].sort();
 
 const ignoredDirectoryNames = new Set([
   ".git",
@@ -112,5 +114,6 @@ export const checkPaths = async (targets, { cwd = process.cwd() } = {}) => {
     checksRun,
     filesScanned: filePaths.length,
     findings,
+    ruleIdsChecked,
   };
 };

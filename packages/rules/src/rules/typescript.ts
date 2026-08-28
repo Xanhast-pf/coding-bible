@@ -55,7 +55,7 @@ export const typescriptRules = [
     tags: ["imports", "types"],
     bad: {
       language: "ts",
-      code: 'import { User } from "./types";',
+      code: 'import { User } from "./types";\n\nconst user: User = getUser();',
     },
     good: {
       language: "ts",

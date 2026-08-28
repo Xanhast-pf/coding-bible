@@ -60,6 +60,7 @@ test("checkPaths returns file-aware analyzer findings", async () => {
     assert.equal(result.findings.length, 1);
     assert.equal(result.findings[0]?.filePath, path.join("src", "bad.ts"));
     assert.equal(result.findings[0]?.ruleId, "TS-001");
+    assert.equal(result.ruleIdsChecked.length, 19);
   });
 });
 
@@ -79,5 +80,26 @@ test("runCli exits non-zero for findings and supports JSON output", async () => 
     assert.equal(exitCode, 1);
     assert.equal(stderr.value, "");
     assert.equal(result.findings[0].ruleId, "TS-001");
+    assert.equal(result.ruleIdsChecked.length, 19);
+  });
+});
+
+
+test("CLI clean summary states automated coverage instead of implying a full review", async () => {
+  await withFixture(async (directory) => {
+    await writeFile(path.join(directory, "good.ts"), "const value = 1;\n");
+    const stdout = createWriter();
+    const stderr = createWriter();
+
+    const exitCode = await runCli(["check", "."], {
+      cwd: directory,
+      stderr,
+      stdout,
+    });
+
+    assert.equal(exitCode, 0);
+    assert.equal(stderr.value, "");
+    assert.match(stdout.value, /19 automated rules/);
+    assert.doesNotMatch(stdout.value, /found no issues/);
   });
 });

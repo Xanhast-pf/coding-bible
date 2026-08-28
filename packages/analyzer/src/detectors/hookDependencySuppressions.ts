@@ -2,16 +2,35 @@ import ts from "typescript";
 
 import type { AnalyzerFinding, Detector } from "../types.ts";
 
-const suppressionPattern = /eslint-disable(?:-next-line|-line)?[^\n]*react-hooks\/exhaustive-deps/g;
+const suppressionPattern = /eslint-disable(?:-next-line|-line)?[^\n]*react-hooks\/exhaustive-deps/;
 
 export const hookDependencySuppressionsDetector: Detector = {
   id: "react-hook-dependency-suppression",
   ruleId: "REACT-012",
   analyze: (context) => {
     const findings: AnalyzerFinding[] = [];
+    const scanner = ts.createScanner(
+      ts.ScriptTarget.Latest,
+      false,
+      context.sourceFile.languageVariant,
+      context.source,
+    );
 
-    for (const match of context.source.matchAll(suppressionPattern)) {
-      const start = match.index;
+    for (let token = scanner.scan(); token !== ts.SyntaxKind.EndOfFileToken; token = scanner.scan()) {
+      if (
+        token !== ts.SyntaxKind.SingleLineCommentTrivia &&
+        token !== ts.SyntaxKind.MultiLineCommentTrivia
+      ) {
+        continue;
+      }
+
+      const comment = scanner.getTokenText();
+      const match = suppressionPattern.exec(comment);
+      if (!match) {
+        continue;
+      }
+
+      const start = scanner.getTokenPos() + match.index;
       const end = start + match[0].length;
       const startPosition = context.sourceFile.getLineAndCharacterOfPosition(start);
       const endPosition = context.sourceFile.getLineAndCharacterOfPosition(end);
