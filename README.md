@@ -51,6 +51,24 @@ packages use `tsc`. pnpm is also configured to allow the `esbuild` lifecycle
 script required by Vite, so a fresh install does not require a manual
 `pnpm approve-builds` step.
 
+## Source distillation
+
+Project review standards are treated as evidence, not automatically as universal
+law. Rules are promoted only when their rationale survives outside the source
+repository; style-only conventions remain project-specific.
+
+See `docs/principles/source-distillation.md`.
+
+## Framework-specific packs
+
+Framework guidance is intentionally separated from universal rules. Current
+packs include React, Legend-State, Redux, GraphQL, Apollo Client, TanStack Query,
+and Next.js. Framework rules link to official documentation where available.
+
+This separation matters: different state libraries can legitimately have
+different invariants. The Bible documents the model rather than forcing one
+library's assumptions onto another.
+
 ## GitHub Pages
 
 The production site is configured for:
@@ -63,7 +81,7 @@ Pushes to `main` are deployed by `.github/workflows/deploy-pages.yml`.
 
 In the GitHub repository, set **Settings → Pages → Source** to **GitHub Actions**.
 
-Search can be focused with `⌘/Ctrl+K`.
+Search can be focused with `⌘/Ctrl+K`. Search and filters are reflected in the URL so useful rule views can be bookmarked or shared.
 
 Rule deep links use fragments such as:
 

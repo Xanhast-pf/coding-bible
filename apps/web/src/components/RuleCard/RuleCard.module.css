@@ -107,3 +107,24 @@
     grid-template-columns: 1fr;
   }
 }
+
+.pack {
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  text-transform: capitalize;
+}
+
+.metaSpacer {
+  flex: 1;
+}
+
+.references a {
+  color: var(--matrixDim);
+  text-decoration-color: color-mix(in srgb, var(--matrixDim) 50%, transparent);
+  text-underline-offset: 0.18em;
+}
+
+.references a:hover {
+  color: var(--matrixBright);
+}

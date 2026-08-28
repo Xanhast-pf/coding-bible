@@ -25,6 +25,16 @@ export const reactRules = [
     pack: "react",
     status: "stable",
     tags: ["performance", "react"],
+    references: [
+      {
+        label: "React — useMemo",
+        url: "https://react.dev/reference/react/useMemo",
+      },
+      {
+        label: "React — React Compiler",
+        url: "https://react.dev/learn/react-compiler",
+      },
+    ],
     detection: { autoFixable: false, detectable: true, strategy: "semantic" },
   },
   {
@@ -72,6 +82,12 @@ export const reactRules = [
     pack: "react",
     status: "stable",
     tags: ["effects", "react"],
+    references: [
+      {
+        label: "React — You Might Not Need an Effect",
+        url: "https://react.dev/learn/you-might-not-need-an-effect",
+      },
+    ],
     detection: { autoFixable: false, detectable: true, strategy: "semantic" },
   },
   {
@@ -123,5 +139,96 @@ export const reactRules = [
     status: "stable",
     tags: ["components", "performance", "react"],
     detection: { autoFixable: false, detectable: true, strategy: "ast" },
+  },
+  {
+    id: "REACT-009",
+    title: "Follow the Rules of Hooks",
+    summary:
+      "Call Hooks only at the top level of React components or custom Hooks, never inside loops, conditions, nested functions, or try/catch blocks.",
+    rationale:
+      "React relies on stable Hook call order to associate state and effects with the correct component instance.",
+    level: "must",
+    pack: "react",
+    status: "stable",
+    tags: ["hooks", "react", "safety"],
+    references: [
+      {
+        label: "React — Rules of Hooks",
+        url: "https://react.dev/reference/rules/rules-of-hooks",
+      },
+    ],
+    detection: { autoFixable: false, detectable: true, strategy: "lint" },
+  },
+  {
+    id: "REACT-010",
+    title: "Let React call components",
+    summary:
+      "Render components through JSX instead of invoking component functions directly.",
+    rationale:
+      "React must control component invocation to preserve Hook behavior, reconciliation, and component identity.",
+    level: "must",
+    pack: "react",
+    status: "stable",
+    tags: ["components", "react", "rendering"],
+    bad: { language: "tsx", code: "const content = UserCard({ user });" },
+    good: { language: "tsx", code: "const content = <UserCard user={user} />;" },
+    references: [
+      {
+        label: "React — Rules of React",
+        url: "https://react.dev/reference/rules",
+      },
+    ],
+    detection: { autoFixable: false, detectable: true, strategy: "ast" },
+  },
+  {
+    id: "REACT-011",
+    title: "Treat props, state, and Hook inputs as immutable snapshots",
+    summary:
+      "Do not mutate values supplied by React or values already passed into Hooks or JSX.",
+    rationale:
+      "React assumes render inputs remain stable for the duration of a render so it can restart, reuse, and optimize work safely.",
+    level: "must",
+    pack: "react",
+    status: "stable",
+    tags: ["immutability", "props", "react", "state"],
+    references: [
+      {
+        label: "React — Components and Hooks must be pure",
+        url: "https://react.dev/reference/rules/components-and-hooks-must-be-pure",
+      },
+    ],
+    detection: { autoFixable: false, detectable: true, strategy: "semantic" },
+  },
+  {
+    id: "REACT-012",
+    title: "Do not suppress Hook dependency correctness",
+    summary:
+      "Include the reactive values a Hook depends on instead of silencing exhaustive-dependency checks to preserve an intended stale closure.",
+    rationale:
+      "Missing dependencies make Effects and memoized callbacks observe outdated values and create timing-sensitive bugs.",
+    level: "must",
+    pack: "react",
+    status: "stable",
+    tags: ["dependencies", "effects", "hooks", "react"],
+    references: [
+      {
+        label: "React — useMemo",
+        url: "https://react.dev/reference/react/useMemo",
+      },
+    ],
+    detection: { autoFixable: false, detectable: true, strategy: "lint" },
+  },
+  {
+    id: "REACT-013",
+    title: "Extract coherent React responsibilities, not arbitrary line counts",
+    summary:
+      "Split a component or custom Hook when it owns multiple independent responsibilities or becomes difficult to scan, not merely because it crossed a fixed LOC threshold.",
+    rationale:
+      "Small focused units are easier to test and understand, but mechanical file-size limits often create fragmentation without improving cohesion.",
+    level: "should",
+    pack: "react",
+    status: "stable",
+    tags: ["components", "hooks", "react", "separation-of-concerns"],
+    detection: { autoFixable: false, detectable: true, strategy: "semantic" },
   },
 ] satisfies readonly CodingRule[];

@@ -1,4 +1,8 @@
-import type { CodingRule, RulePack } from "@coding-bible/rules";
+import type {
+  CodingRule,
+  RuleLevel,
+  RulePack,
+} from "@coding-bible/rules";
 
 const getRuleSearchText = (rule: CodingRule) => {
   return [
@@ -7,6 +11,7 @@ const getRuleSearchText = (rule: CodingRule) => {
     rule.summary,
     rule.rationale,
     rule.pack,
+    rule.level,
     ...rule.tags,
     ...(rule.exceptions ?? []),
     rule.bad?.code ?? "",
@@ -14,6 +19,21 @@ const getRuleSearchText = (rule: CodingRule) => {
   ]
     .join(" ")
     .toLocaleLowerCase();
+};
+
+export const countRulesByLevel = (
+  rules: readonly CodingRule[],
+  levels: readonly RuleLevel[],
+) => {
+  const counts = Object.fromEntries(
+    levels.map((level) => [level, 0]),
+  ) as Record<RuleLevel, number>;
+
+  for (const rule of rules) {
+    counts[rule.level] += 1;
+  }
+
+  return counts;
 };
 
 export const countRulesByPack = (
@@ -35,13 +55,16 @@ export const filterRules = (
   rules: readonly CodingRule[],
   query: string,
   selectedPack: RulePack | "all",
+  selectedLevel: RuleLevel | "all",
 ) => {
   const normalizedQuery = query.trim().toLocaleLowerCase();
 
   return rules.filter((rule) => {
     const matchesPack = selectedPack === "all" || rule.pack === selectedPack;
+    const matchesLevel =
+      selectedLevel === "all" || rule.level === selectedLevel;
 
-    if (!matchesPack) {
+    if (!matchesPack || !matchesLevel) {
       return false;
     }
 

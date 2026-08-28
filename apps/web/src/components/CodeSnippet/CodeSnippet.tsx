@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 
+import { CopyButton } from "../CopyButton/CopyButton";
 import styles from "./CodeSnippet.module.css";
 
 type SnippetTone = "good" | "bad";
@@ -11,7 +12,7 @@ interface CodeSnippetProps {
 }
 
 const tokenPattern =
-  /(\/\/.*$|\/\*.*?\*\/|'(?:\\.|[^'\\])*'|"(?:\\.|[^"\\])*"|`(?:\\.|[^`\\])*`|\b(?:as|async|await|break|case|catch|class|const|continue|default|else|export|extends|false|finally|for|from|function|if|implements|import|in|interface|keyof|let|new|null|of|readonly|return|satisfies|switch|throw|true|try|type|typeof|undefined|unknown|var|void|while)\b|\b\d+(?:\.\d+)?\b|<\/?[A-Za-z][A-Za-z0-9.-]*|[A-Za-z_$][\w$]*(?=\s*\()|[=!<>+\-*/&|?:]+|\b[A-Z][A-Za-z0-9_$]*\b)/g;
+  /(\/\/.*$|\/\*.*?\*\/|'(?:\\.|[^'\\])*'|"(?:\\.|[^"\\])*"|`(?:\\.|[^`\\])*`|\b(?:as|async|await|break|case|catch|class|const|continue|default|else|export|extends|false|finally|for|from|function|if|fragment|implements|import|in|interface|keyof|let|mutation|new|null|of|on|query|readonly|return|satisfies|subscription|switch|throw|true|try|type|typeof|undefined|unknown|var|void|while)\b|\b\d+(?:\.\d+)?\b|<\/?[A-Za-z][A-Za-z0-9.-]*|[A-Za-z_$][\w$]*(?=\s*\()|[=!<>+\-*/&|?:]+|\b[A-Z][A-Za-z0-9_$]*\b)/g;
 
 const getTokenKind = (token: string) => {
   if (token.startsWith("//") || token.startsWith("/*")) {
@@ -59,6 +60,11 @@ const getTokenKind = (token: string) => {
       "extends",
       "false",
       "finally",
+      "subscription",
+      "query",
+      "on",
+      "mutation",
+      "fragment",
       "for",
       "from",
       "function",
@@ -134,6 +140,8 @@ export const CodeSnippet = ({ code, language, tone }: CodeSnippetProps) => {
       <div className={styles.toolbar}>
         <span className={styles.statusDot} />
         <span className={styles.language}>{language}</span>
+        <span className={styles.toolbarSpacer} />
+        <CopyButton label="Copy" value={code} />
       </div>
 
       <pre className={styles.pre}>

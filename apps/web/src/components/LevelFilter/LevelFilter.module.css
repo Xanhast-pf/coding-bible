@@ -1,0 +1,47 @@
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.filter {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 999rem;
+  color: var(--muted);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.04em;
+  padding: 0.35rem 0.625rem;
+  text-transform: uppercase;
+}
+
+.filter span {
+  color: var(--matrixDim);
+  margin-left: 0.25rem;
+}
+
+.filter:hover,
+.filter[data-active="true"] {
+  background: rgb(52 255 109 / 5%);
+  border-color: var(--borderStrong);
+  color: var(--matrixBright);
+}
+
+.filter[data-active="true"][data-level="must"] {
+  border-color: var(--matrix);
+  color: var(--matrix);
+}
+
+.filter[data-active="true"][data-level="avoid"] {
+  background: rgb(255 72 72 / 5%);
+  border-color: var(--dangerBorder);
+  color: var(--danger);
+}
+
+.filter[data-active="true"][data-level="should"],
+.filter[data-active="true"][data-level="prefer"] {
+  color: var(--matrixBright);
+}
