@@ -64,11 +64,11 @@
   }
 
   .hero {
-    padding-block: 5rem 3rem;
+    padding-block: 7rem 3rem;
   }
 
   .hero::before {
-    top: 2.5rem;
+    top: 4.5rem;
   }
 
   .layout {

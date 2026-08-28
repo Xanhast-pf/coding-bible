@@ -14,6 +14,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@coding-bible/analyzer':
+        specifier: workspace:*
+        version: link:../../packages/analyzer
       '@coding-bible/rules':
         specifier: workspace:*
         version: link:../../packages/rules
@@ -39,9 +42,9 @@ importers:
 
   packages/analyzer:
     dependencies:
-      '@coding-bible/rules':
-        specifier: workspace:*
-        version: link:../rules
+      typescript:
+        specifier: ^5.9.2
+        version: 5.9.3
 
   packages/rules: {}
 

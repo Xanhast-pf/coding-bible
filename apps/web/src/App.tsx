@@ -1,5 +1,7 @@
 import { ruleLevels, rulePacks, rules } from "@coding-bible/rules";
 
+import { AnalyzeView } from "./components/AnalyzeView/AnalyzeView";
+import { AppNavigation } from "./components/AppNavigation/AppNavigation";
 import { LevelFilter } from "./components/LevelFilter/LevelFilter";
 import { RuleCard } from "./components/RuleCard/RuleCard";
 import { RuleSearch } from "./components/RuleSearch/RuleSearch";
@@ -15,7 +17,7 @@ import styles from "./App.module.css";
 const levelCounts = countRulesByLevel(rules, ruleLevels);
 const ruleCounts = countRulesByPack(rules, rulePacks);
 
-export const App = () => {
+const LearnView = () => {
   const {
     level: selectedLevel,
     pack: selectedPack,
@@ -33,8 +35,9 @@ export const App = () => {
   );
 
   return (
-    <main className={styles.page}>
+    <>
       <header className={styles.hero}>
+        <AppNavigation activeView="learn" />
         <p className={styles.eyebrow}>CODING BIBLE</p>
         <h1>Engineering standards for software that lasts.</h1>
         <p className={styles.intro}>
@@ -78,6 +81,33 @@ export const App = () => {
           ) : null}
         </section>
       </div>
-    </main>
+    </>
   );
 };
+
+const AnalyzerPage = () => (
+  <>
+    <header className={styles.hero}>
+      <AppNavigation activeView="analyze" />
+      <p className={styles.eyebrow}>CODING BIBLE · ANALYZER BETA</p>
+      <h1>Find the rule. Fix the code.</h1>
+      <p className={styles.intro}>
+        AST-backed checks for violations we can prove from a snippet—without
+        pretending engineering judgment can be reduced to regex.
+      </p>
+    </header>
+
+    <AnalyzeView />
+  </>
+);
+
+const readAppView = () =>
+  new URLSearchParams(window.location.search).get("view") === "analyze"
+    ? "analyze"
+    : "learn";
+
+export const App = () => (
+  <main className={styles.page}>
+    {readAppView() === "analyze" ? <AnalyzerPage /> : <LearnView />}
+  </main>
+);

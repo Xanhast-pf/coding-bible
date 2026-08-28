@@ -11,3 +11,4 @@
 | [006](006-dependency-free-code-highlighting.md) | Dependency-free code example highlighting |
 | [007](007-url-state-and-reference-ux.md) | Shareable URL state and reference UX |
 | [008](008-framework-rule-packs.md) | Framework-specific rule packs and official references |
+| [009](009-browser-analyzer-mvp.md) | Browser analyzer MVP uses the TypeScript AST |
