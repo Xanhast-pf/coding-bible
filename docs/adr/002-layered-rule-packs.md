@@ -5,17 +5,36 @@
 
 ## Decision
 
-Rules are grouped into composable packs:
+Rules are grouped into composable packs under three reader-facing layers:
 
 ```text
-core
-typescript
-react
-css
-testing
-performance
-accessibility
-ai
+Foundations
+  accessibility
+  architecture
+  core
+  css
+  javascript
+  typescript
+
+Quality
+  ai
+  dependencies
+  feature-flags
+  internationalization
+  performance
+  testing
+  workflow
+
+Ecosystem
+  apollo
+  graphql
+  legend-state
+  nextjs
+  react
+  redux
+  tanstack-query
 ```
 
-Future integrations may add independent packs such as a Lattice-specific pack.
+The canonical pack list and grouping live in `packages/rules/src/types.ts`; this
+ADR records the layering decision rather than creating a second configuration
+source.

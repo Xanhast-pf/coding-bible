@@ -29,7 +29,6 @@ apps/
 
 packages/
   rules/                Canonical rule schema + rule content
-  analyzer/             Future deterministic / AST analysis engine
 
 docs/
   adr/                  Architecture Decision Records
@@ -42,14 +41,14 @@ docs/
 nvm use
 pnpm install
 pnpm check
-pnpm build
 pnpm dev
 ```
 
-TypeScript is installed at the workspace root because multiple workspace
-packages use `tsc`. pnpm is also configured to allow the `esbuild` lifecycle
-script required by Vite, so a fresh install does not require a manual
-`pnpm approve-builds` step.
+`pnpm check` runs typechecking, the dependency-free Node test suites, and a
+production build. TypeScript is installed at the workspace root because
+multiple workspace packages use `tsc`. pnpm is also configured to allow the
+`esbuild` lifecycle script required by Vite, so a fresh install does not require
+a manual `pnpm approve-builds` step.
 
 ## Source distillation
 
@@ -97,8 +96,9 @@ dependency.
 The Coding Bible follows its own applicable `stable` rules.
 
 The rule registry validates itself at runtime without an additional dependency,
-and future deterministic analyzer rules will run against this repository before
-they are considered ready for other projects.
+and pure behavior is covered with Node's built-in test runner. A deterministic
+analyzer will become a workspace package only when there is executable analyzer
+behavior to ship.
 
 A self-violation is treated as useful feedback: either the implementation is
 wrong or the rule needs better scope, severity, or exceptions.

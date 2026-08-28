@@ -18,19 +18,27 @@ const getRuleSearchText = (rule: CodingRule) => {
     rule.good?.code ?? "",
   ]
     .join(" ")
-    .toLocaleLowerCase();
+    .toLowerCase();
+};
+
+const createCountMap = <Key extends string>(keys: readonly Key[]) => {
+  const counts = new Map<Key, number>();
+
+  for (const key of keys) {
+    counts.set(key, 0);
+  }
+
+  return counts;
 };
 
 export const countRulesByLevel = (
   rules: readonly CodingRule[],
   levels: readonly RuleLevel[],
 ) => {
-  const counts = Object.fromEntries(
-    levels.map((level) => [level, 0]),
-  ) as Record<RuleLevel, number>;
+  const counts = createCountMap(levels);
 
   for (const rule of rules) {
-    counts[rule.level] += 1;
+    counts.set(rule.level, (counts.get(rule.level) ?? 0) + 1);
   }
 
   return counts;
@@ -40,12 +48,10 @@ export const countRulesByPack = (
   rules: readonly CodingRule[],
   packs: readonly RulePack[],
 ) => {
-  const counts = Object.fromEntries(
-    packs.map((pack) => [pack, 0]),
-  ) as Record<RulePack, number>;
+  const counts = createCountMap(packs);
 
   for (const rule of rules) {
-    counts[rule.pack] += 1;
+    counts.set(rule.pack, (counts.get(rule.pack) ?? 0) + 1);
   }
 
   return counts;
@@ -57,7 +63,7 @@ export const filterRules = (
   selectedPack: RulePack | "all",
   selectedLevel: RuleLevel | "all",
 ) => {
-  const normalizedQuery = query.trim().toLocaleLowerCase();
+  const normalizedQuery = query.trim().toLowerCase();
 
   return rules.filter((rule) => {
     const matchesPack = selectedPack === "all" || rule.pack === selectedPack;

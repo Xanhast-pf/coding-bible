@@ -20,9 +20,11 @@ Compliance is layered:
 1. **Type system and build checks** enforce what they can prove.
 2. **Rule-registry validation** enforces rule metadata invariants without an
    external dependency.
-3. **Future analyzer checks** will enforce deterministic Coding Bible rules
-   against this repository before they are offered to other projects.
-4. **Human review** remains responsible for semantic rules that cannot be proven
+3. **Behavior tests** cover pure utilities and rule-registry invariants with the
+   Node.js test runner.
+4. **Future analyzer checks** will enforce deterministic Coding Bible rules once
+   executable analyzer behavior exists.
+5. **Human review** remains responsible for semantic rules that cannot be proven
    mechanically.
 
 A failure may reveal either:

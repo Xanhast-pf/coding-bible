@@ -3,7 +3,7 @@ import type { RuleLevel } from "@coding-bible/rules";
 import styles from "./LevelFilter.module.css";
 
 interface LevelFilterProps {
-  counts: Readonly<Record<RuleLevel, number>>;
+  counts: ReadonlyMap<RuleLevel, number>;
   levels: readonly RuleLevel[];
   onSelectLevel: (level: RuleLevel | "all") => void;
   selectedLevel: RuleLevel | "all";
@@ -39,7 +39,7 @@ export const LevelFilter = ({
           onClick={() => onSelectLevel(level)}
           type="button"
         >
-          {level} <span>{counts[level]}</span>
+          {level} <span>{counts.get(level) ?? 0}</span>
         </button>
       ))}
     </div>

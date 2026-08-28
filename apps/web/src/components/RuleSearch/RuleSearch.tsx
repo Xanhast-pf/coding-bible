@@ -13,7 +13,7 @@ export const RuleSearch = ({ onChange, value }: RuleSearchProps) => {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       const isSearchShortcut =
-        (event.ctrlKey || event.metaKey) && event.key.toLocaleLowerCase() === "k";
+        (event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k";
 
       if (!isSearchShortcut) {
         return;

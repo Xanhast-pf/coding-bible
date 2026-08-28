@@ -17,6 +17,7 @@
   "scripts": {
     "build": "vite build",
     "dev": "vite",
+    "test": "node --test test/*.test.mjs",
     "typecheck": "tsc --noEmit"
   }
 }

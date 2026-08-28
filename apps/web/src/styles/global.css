@@ -7,14 +7,17 @@
   --danger: #ff4848;
   --dangerBorder: #5e2020;
   --dangerDim: #b64040;
-  --focusRing: rgb(52 255 109 / 28%);
+  --focusRing: color-mix(in srgb, var(--matrix) 28%, transparent);
   --matrix: #34ff6d;
   --matrixBright: #8dffab;
   --matrixDim: #1e8a3f;
+  --placeholder: #51735b;
   --muted: #7ca889;
+  --shadowSubtle: rgb(0 0 0 / 12%);
   --surfaceRaised: #0a140d;
   --text: #d8ffe1;
   --textStrong: #effff3;
+  --selectionText: #001605;
   --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
   --syntaxComment: #607d68;
   --syntaxFunction: #8dffab;
@@ -54,8 +57,15 @@ body {
 
 body::before {
   background-image:
-    linear-gradient(rgb(52 255 109 / 2%) 1px, transparent 1px),
-    linear-gradient(90deg, rgb(52 255 109 / 2%) 1px, transparent 1px);
+    linear-gradient(
+      color-mix(in srgb, var(--matrix) 2%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--matrix) 2%, transparent) 1px,
+      transparent 1px
+    );
   background-size: 2rem 2rem;
   content: "";
   inset: 0;
@@ -67,8 +77,16 @@ body::before {
 
 body::after {
   background:
-    radial-gradient(circle at 25% 0%, rgb(52 255 109 / 7%), transparent 28rem),
-    linear-gradient(to bottom, rgb(52 255 109 / 1.5%), transparent 16rem);
+    radial-gradient(
+      circle at 25% 0%,
+      color-mix(in srgb, var(--matrix) 7%, transparent),
+      transparent 28rem
+    ),
+    linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--matrix) 1.5%, transparent),
+      transparent 16rem
+    );
   content: "";
   inset: 0;
   pointer-events: none;
@@ -99,12 +117,17 @@ h1 {
   line-height: 0.95;
   margin: 0;
   max-width: 14ch;
-  text-shadow: 0 0 2rem rgb(52 255 109 / 8%);
+  text-shadow: 0 0 2rem color-mix(in srgb, var(--matrix) 8%, transparent);
+}
+
+:where(a, button):focus-visible {
+  outline: 0.125rem solid var(--matrix);
+  outline-offset: 0.1875rem;
 }
 
 ::selection {
   background: var(--matrix);
-  color: #001605;
+  color: var(--selectionText);
 }
 
 @media (prefers-reduced-motion: reduce) {
