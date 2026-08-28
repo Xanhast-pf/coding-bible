@@ -69,6 +69,17 @@
   margin-top: 1.5rem;
 }
 
+.exampleTitle {
+  color: var(--matrix) !important;
+  margin-top: 0 !important;
+  text-shadow: 0 0 0.75rem rgb(52 255 109 / 25%);
+}
+
+.example[data-tone="bad"] .exampleTitle {
+  color: var(--danger) !important;
+  text-shadow: 0 0 0.75rem rgb(255 72 72 / 24%);
+}
+
 .card h3 {
   color: var(--matrixDim);
   font-family: var(--font-mono);
@@ -81,24 +92,6 @@
 .card p,
 .card li {
   line-height: 1.7;
-}
-
-.card pre {
-  background:
-    linear-gradient(180deg, rgb(52 255 109 / 2%), transparent 4rem),
-    var(--codeSurface);
-  border: 1px solid var(--border);
-  border-radius: 0.5rem;
-  box-shadow: inset 0 0 1.5rem rgb(52 255 109 / 1.5%);
-  margin: 0;
-  overflow-x: auto;
-  padding: 1rem;
-}
-
-.card code {
-  color: #b8ffc8;
-  font-family: var(--font-mono);
-  font-size: 0.8125rem;
 }
 
 .card ul {

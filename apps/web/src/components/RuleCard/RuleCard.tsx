@@ -1,5 +1,6 @@
 import type { CodingRule } from "@coding-bible/rules";
 
+import { CodeSnippet } from "../CodeSnippet/CodeSnippet";
 import styles from "./RuleCard.module.css";
 
 interface RuleCardProps {
@@ -28,18 +29,22 @@ export const RuleCard = ({ rule }: RuleCardProps) => {
 
       {rule.good && rule.bad ? (
         <div className={styles.examples}>
-          <section>
-            <h3>Do</h3>
-            <pre>
-              <code>{rule.good.code}</code>
-            </pre>
+          <section className={styles.example} data-tone="good">
+            <h3 className={styles.exampleTitle}>Do</h3>
+            <CodeSnippet
+              code={rule.good.code}
+              language={rule.good.language}
+              tone="good"
+            />
           </section>
 
-          <section>
-            <h3>Don&apos;t</h3>
-            <pre>
-              <code>{rule.bad.code}</code>
-            </pre>
+          <section className={styles.example} data-tone="bad">
+            <h3 className={styles.exampleTitle}>Don&apos;t</h3>
+            <CodeSnippet
+              code={rule.bad.code}
+              language={rule.bad.language}
+              tone="bad"
+            />
           </section>
         </div>
       ) : null}

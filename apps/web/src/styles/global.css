@@ -4,6 +4,9 @@
   --border: #14331d;
   --borderStrong: #1d6d33;
   --codeSurface: #030604;
+  --danger: #ff4848;
+  --dangerBorder: #5e2020;
+  --dangerDim: #b64040;
   --focusRing: rgb(52 255 109 / 28%);
   --matrix: #34ff6d;
   --matrixBright: #8dffab;
@@ -13,6 +16,16 @@
   --text: #d8ffe1;
   --textStrong: #effff3;
   --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  --syntaxComment: #607d68;
+  --syntaxFunction: #8dffab;
+  --syntaxKeyword: #52e8a3;
+  --syntaxLineNumber: #31543a;
+  --syntaxNumber: #e6c77a;
+  --syntaxOperator: #77a981;
+  --syntaxString: #d4ef84;
+  --syntaxTag: #58d6c2;
+  --syntaxText: #b8ffc8;
+  --syntaxType: #7ed7ff;
 
   background: var(--background);
   color: var(--text);
