@@ -7,7 +7,7 @@ import type { RulePack } from "@coding-bible/rules";
 import styles from "./Sidebar.module.css";
 
 interface SidebarProps {
-  counts: Readonly<Record<RulePack, number>>;
+  counts: ReadonlyMap<RulePack, number>;
   onSelectPack: (pack: RulePack | "all") => void;
   packs: readonly RulePack[];
   selectedPack: RulePack | "all";
@@ -63,7 +63,7 @@ export const Sidebar = ({
                 type="button"
               >
                 <span>{rulePackLabels[pack]}</span>
-                <span className={styles.count}>{counts[pack]}</span>
+                <span className={styles.count}>{counts.get(pack) ?? 0}</span>
               </button>
             ))}
           </div>

@@ -11,7 +11,7 @@ would add runtime and maintenance cost for a deliberately small requirement.
 
 ## Decision
 
-- Use a small presentation-only tokenizer owned by `CodeSnippet`.
+- Use a small presentation-only tokenizer utility consumed by `CodeSnippet`.
 - Render tokens as React nodes; do not use `dangerouslySetInnerHTML`.
 - Keep the tokenizer intentionally shallow. It is not a parser or analyzer.
 - Syntax accuracy may be approximate as long as code content is preserved exactly.

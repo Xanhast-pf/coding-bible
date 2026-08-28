@@ -25,7 +25,7 @@
 
 .filter:hover,
 .filter[data-active="true"] {
-  background: rgb(52 255 109 / 5%);
+  background: color-mix(in srgb, var(--matrix) 5%, transparent);
   border-color: var(--borderStrong);
   color: var(--matrixBright);
 }
@@ -36,7 +36,7 @@
 }
 
 .filter[data-active="true"][data-level="avoid"] {
-  background: rgb(255 72 72 / 5%);
+  background: color-mix(in srgb, var(--danger) 5%, transparent);
   border-color: var(--dangerBorder);
   color: var(--danger);
 }

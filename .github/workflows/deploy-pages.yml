@@ -38,16 +38,10 @@ jobs:
         uses: actions/configure-pages@v5
 
       - name: Install dependencies
-        shell: bash
-        run: |
-          if [[ -f pnpm-lock.yaml ]]; then
-            pnpm install --frozen-lockfile
-          else
-            pnpm install --no-frozen-lockfile
-          fi
+        run: pnpm install --frozen-lockfile
 
-      - name: Build website
-        run: pnpm --filter @coding-bible/web build
+      - name: Verify repository
+        run: pnpm check
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

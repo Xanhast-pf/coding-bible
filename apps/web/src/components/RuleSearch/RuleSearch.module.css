@@ -21,7 +21,11 @@
 
 .field input {
   background:
-    linear-gradient(180deg, rgb(52 255 109 / 2%), transparent),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--matrix) 2%, transparent),
+      transparent
+    ),
     var(--surfaceRaised);
   border: 1px solid var(--border);
   border-radius: 0.5rem;
@@ -36,7 +40,7 @@
 }
 
 .field input::placeholder {
-  color: #51735b;
+  color: var(--placeholder);
 }
 
 .field input:hover {
@@ -48,7 +52,7 @@
   border-color: var(--matrix);
   box-shadow:
     0 0 0 0.1875rem var(--focusRing),
-    0 0 1.5rem rgb(52 255 109 / 9%);
+    0 0 1.5rem color-mix(in srgb, var(--matrix) 9%, transparent);
 }
 
 .shortcut {
@@ -72,5 +76,11 @@
 
   .field input {
     padding-right: 1rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .field input {
+    transition: none;
   }
 }

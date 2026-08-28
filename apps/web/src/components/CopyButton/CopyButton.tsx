@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import styles from "./CopyButton.module.css";
 
@@ -7,26 +7,60 @@ interface CopyButtonProps {
   value: string;
 }
 
+type CopyStatus = "copied" | "error" | "idle";
+
 const COPY_FEEDBACK_DURATION_MS = 1400;
 
+const copyFeedbackByStatus: Record<CopyStatus, string | null> = {
+  copied: "Copied",
+  error: "Copy failed",
+  idle: null,
+};
+
 export const CopyButton = ({ label, value }: CopyButtonProps) => {
-  const [copied, setCopied] = useState(false);
+  const [status, setStatus] = useState<CopyStatus>("idle");
+  const resetTimeout = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (resetTimeout.current !== null) {
+        window.clearTimeout(resetTimeout.current);
+      }
+    };
+  }, []);
+
+  const scheduleReset = () => {
+    if (resetTimeout.current !== null) {
+      window.clearTimeout(resetTimeout.current);
+    }
+
+    resetTimeout.current = window.setTimeout(() => {
+      setStatus("idle");
+      resetTimeout.current = null;
+    }, COPY_FEEDBACK_DURATION_MS);
+  };
 
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(value);
-    setCopied(true);
+    try {
+      await navigator.clipboard.writeText(value);
+      setStatus("copied");
+    } catch {
+      setStatus("error");
+    }
 
-    window.setTimeout(() => setCopied(false), COPY_FEEDBACK_DURATION_MS);
+    scheduleReset();
   };
 
   return (
     <button
       className={styles.button}
-      data-copied={copied}
+      data-status={status}
       onClick={handleCopy}
       type="button"
     >
-      {copied ? "Copied" : label}
+      <span aria-atomic="true" aria-live="polite">
+        {copyFeedbackByStatus[status] ?? label}
+      </span>
     </button>
   );
 };

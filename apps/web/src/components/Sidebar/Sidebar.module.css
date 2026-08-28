@@ -38,41 +38,27 @@
 }
 
 .item:hover {
-  background: rgb(52 255 109 / 4%);
+  background: color-mix(in srgb, var(--matrix) 4%, transparent);
   border-color: var(--border);
   color: var(--matrixBright);
 }
 
 .item[data-active="true"] {
   background:
-    linear-gradient(90deg, rgb(52 255 109 / 8%), transparent),
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--matrix) 8%, transparent),
+      transparent
+    ),
     var(--surfaceRaised);
   border-color: var(--borderStrong);
   color: var(--matrix);
-  text-shadow: 0 0 0.75rem rgb(52 255 109 / 32%);
+  text-shadow: 0 0 0.75rem color-mix(in srgb, var(--matrix) 32%, transparent);
 }
 
 .count {
   color: var(--matrixDim);
   font-size: 0.6875rem;
-}
-
-@media (max-width: 52rem) {
-  .sidebar {
-    display: flex;
-    overflow-x: auto;
-    padding-bottom: 0.25rem;
-    position: static;
-  }
-
-  .label {
-    display: none;
-  }
-
-  .item {
-    flex: 0 0 auto;
-    white-space: nowrap;
-  }
 }
 
 .group {
@@ -91,11 +77,33 @@
 }
 
 @media (max-width: 52rem) {
+  .sidebar {
+    display: flex;
+    overflow-x: auto;
+    padding-bottom: 0.25rem;
+    position: static;
+  }
+
+  .label {
+    display: none;
+  }
+
+  .item {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
   .group {
     display: contents;
   }
 
   .groupLabel {
     display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .item {
+    transition: none;
   }
 }

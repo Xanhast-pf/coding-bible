@@ -12,6 +12,7 @@ Before adding a rule, answer:
 5. Is it a MUST, SHOULD, PREFER, or AVOID?
 6. What are valid exceptions?
 7. Can a human and an AI agent understand it from the rule alone?
+8. If it is stable, does it have a short paired DON'T / DO example?
 
 Do not encode repository-specific conventions into the universal rule pack.
 

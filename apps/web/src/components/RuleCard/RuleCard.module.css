@@ -25,7 +25,7 @@
   font-family: var(--font-mono);
   font-size: 0.8125rem;
   text-decoration: none;
-  text-shadow: 0 0 0.75rem rgb(52 255 109 / 22%);
+  text-shadow: 0 0 0.75rem color-mix(in srgb, var(--matrix) 22%, transparent);
 }
 
 .ruleId:hover {
@@ -69,15 +69,15 @@
   margin-top: 1.5rem;
 }
 
-.exampleTitle {
-  color: var(--matrix) !important;
-  margin-top: 0 !important;
-  text-shadow: 0 0 0.75rem rgb(52 255 109 / 25%);
+.card .exampleTitle {
+  color: var(--matrix);
+  margin-top: 0;
+  text-shadow: 0 0 0.75rem color-mix(in srgb, var(--matrix) 25%, transparent);
 }
 
-.example[data-tone="bad"] .exampleTitle {
-  color: var(--danger) !important;
-  text-shadow: 0 0 0.75rem rgb(255 72 72 / 24%);
+.card .example[data-tone="bad"] .exampleTitle {
+  color: var(--danger);
+  text-shadow: 0 0 0.75rem color-mix(in srgb, var(--danger) 24%, transparent);
 }
 
 .card h3 {
@@ -102,12 +102,6 @@
   color: var(--matrixDim);
 }
 
-@media (max-width: 48rem) {
-  .examples {
-    grid-template-columns: 1fr;
-  }
-}
-
 .pack {
   color: var(--muted);
   font-family: var(--font-mono);
@@ -127,4 +121,10 @@
 
 .references a:hover {
   color: var(--matrixBright);
+}
+
+@media (max-width: 48rem) {
+  .examples {
+    grid-template-columns: 1fr;
+  }
 }

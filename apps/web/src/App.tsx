@@ -1,34 +1,29 @@
 import { ruleLevels, rulePacks, rules } from "@coding-bible/rules";
-import type { RuleLevel, RulePack } from "@coding-bible/rules";
-import { useEffect, useState } from "react";
 
 import { LevelFilter } from "./components/LevelFilter/LevelFilter";
 import { RuleCard } from "./components/RuleCard/RuleCard";
 import { RuleSearch } from "./components/RuleSearch/RuleSearch";
 import { Sidebar } from "./components/Sidebar/Sidebar";
+import { useRuleBrowserState } from "./hooks/useRuleBrowserState";
 import {
   countRulesByLevel,
   countRulesByPack,
   filterRules,
 } from "./utils/rules";
-import {
-  readRuleBrowserState,
-  writeRuleBrowserState,
-} from "./utils/urlState";
 import styles from "./App.module.css";
 
-const initialState = readRuleBrowserState();
 const levelCounts = countRulesByLevel(rules, ruleLevels);
 const ruleCounts = countRulesByPack(rules, rulePacks);
 
 export const App = () => {
-  const [query, setQuery] = useState(initialState.query);
-  const [selectedLevel, setSelectedLevel] = useState<RuleLevel | "all">(
-    initialState.level,
-  );
-  const [selectedPack, setSelectedPack] = useState<RulePack | "all">(
-    initialState.pack,
-  );
+  const {
+    level: selectedLevel,
+    pack: selectedPack,
+    query,
+    setLevel: setSelectedLevel,
+    setPack: setSelectedPack,
+    setQuery,
+  } = useRuleBrowserState();
 
   const visibleRules = filterRules(
     rules,
@@ -36,14 +31,6 @@ export const App = () => {
     selectedPack,
     selectedLevel,
   );
-
-  useEffect(() => {
-    writeRuleBrowserState({
-      level: selectedLevel,
-      pack: selectedPack,
-      query,
-    });
-  }, [query, selectedLevel, selectedPack]);
 
   return (
     <main className={styles.page}>
