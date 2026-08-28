@@ -12,6 +12,14 @@ export const workflowRules = [
     pack: "workflow",
     status: "stable",
     tags: ["ci", "quality", "workflow"],
+    bad: {
+      language: "bash",
+      code: "git commit -am \"Ship feature\"\ngit push",
+    },
+    good: {
+      language: "bash",
+      code: "pnpm check\npnpm build\n\n# Then commit and update the PR.",
+    },
     detection: { autoFixable: false, detectable: false },
   },
   {
@@ -25,6 +33,14 @@ export const workflowRules = [
     pack: "workflow",
     status: "stable",
     tags: ["pull-requests", "review", "scope"],
+    bad: {
+      language: "text",
+      code: "PR: Add CSV export\n- Add CSV export\n- Rename utils/ to shared/\n- Replace the test runner\n- Reformat unrelated files",
+    },
+    good: {
+      language: "text",
+      code: "PR: Add CSV export\n- Add CSV export\n- Add export tests\n- Update export documentation",
+    },
     detection: { autoFixable: false, detectable: true, strategy: "semantic" },
   },
   {
@@ -38,6 +54,14 @@ export const workflowRules = [
     pack: "workflow",
     status: "stable",
     tags: ["dead-code", "refactoring", "workflow"],
+    bad: {
+      language: "bash",
+      code: "rm src/legacyParser.ts",
+    },
+    good: {
+      language: "bash",
+      code: "rg \"legacyParser|parseLegacy\" src tests config\n# Inspect dynamic imports and generated/config wiring too.\nrm src/legacyParser.ts",
+    },
     detection: { autoFixable: false, detectable: true, strategy: "semantic" },
   },
   {
@@ -51,6 +75,14 @@ export const workflowRules = [
     pack: "workflow",
     status: "stable",
     tags: ["communication", "pull-requests", "workflow"],
+    bad: {
+      language: "markdown",
+      code: "## PR\nDone.",
+    },
+    good: {
+      language: "markdown",
+      code: "## PR\nAdds the new parser.\n\nFollow-up: #482 removes the legacy parser after migration.\nDepends on: #479 landing first.",
+    },
     detection: { autoFixable: false, detectable: false },
   },
 ] satisfies readonly CodingRule[];

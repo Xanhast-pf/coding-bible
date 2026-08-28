@@ -12,6 +12,14 @@ export const internationalizationRules = [
     pack: "internationalization",
     status: "stable",
     tags: ["i18n", "strings", "ui"],
+    bad: {
+      language: "tsx",
+      code: "<button type=\"button\">Save changes</button>",
+    },
+    good: {
+      language: "tsx",
+      code: "<button type=\"button\">\n  {t(\"actions.saveChanges\")}\n</button>",
+    },
     detection: { autoFixable: false, detectable: true, strategy: "semantic" },
   },
   {
@@ -25,6 +33,14 @@ export const internationalizationRules = [
     pack: "internationalization",
     status: "stable",
     tags: ["i18n", "messages", "plurals"],
+    bad: {
+      language: "ts",
+      code: "const message = \"You have \" + count + (count === 1 ? \" item\" : \" items\");",
+    },
+    good: {
+      language: "ts",
+      code: "const message = t(\"cart.itemCount\", { count });\n\n// cart.itemCount:\n// \"You have {count, plural, one {# item} other {# items}}\"",
+    },
     detection: { autoFixable: false, detectable: true, strategy: "semantic" },
   },
   {
@@ -38,6 +54,14 @@ export const internationalizationRules = [
     pack: "internationalization",
     status: "stable",
     tags: ["dates", "i18n", "intl", "numbers"],
+    bad: {
+      language: "ts",
+      code: "const label = `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;",
+    },
+    good: {
+      language: "ts",
+      code: "const label = new Intl.DateTimeFormat(locale, {\n  dateStyle: \"medium\",\n}).format(date);",
+    },
     detection: { autoFixable: false, detectable: true, strategy: "semantic" },
   },
   {
@@ -51,6 +75,14 @@ export const internationalizationRules = [
     pack: "internationalization",
     status: "stable",
     tags: ["i18n", "layout", "rtl"],
+    bad: {
+      language: "css",
+      code: ".label {\n  margin-left: 8px;\n  width: 120px;\n  white-space: nowrap;\n}",
+    },
+    good: {
+      language: "css",
+      code: ".label {\n  margin-inline-start: var(--space-2);\n  min-inline-size: 0;\n  overflow-wrap: anywhere;\n}",
+    },
     detection: { autoFixable: false, detectable: true, strategy: "semantic" },
   },
 ] satisfies readonly CodingRule[];

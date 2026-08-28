@@ -95,6 +95,14 @@ export const typescriptRules = [
     pack: "typescript",
     status: "stable",
     tags: ["optionality", "safety", "types"],
+    bad: {
+      language: "ts",
+      code: "interface User {\n  id?: string;\n  email?: string;\n}",
+    },
+    good: {
+      language: "ts",
+      code: "interface User {\n  id: string;\n  email: string;\n}",
+    },
     detection: { autoFixable: false, detectable: true, strategy: "semantic" },
   },
   {
@@ -129,6 +137,14 @@ export const typescriptRules = [
     pack: "typescript",
     status: "stable",
     tags: ["assertions", "safety", "types"],
+    bad: {
+      language: "ts",
+      code: "const user = payload as User;\nrenderUser(user);",
+    },
+    good: {
+      language: "ts",
+      code: "if (!isUser(payload)) {\n  throw new Error(\"Invalid user payload\");\n}\n\nrenderUser(payload);",
+    },
     exceptions: [
       "A narrow assertion is acceptable when runtime invariants are stronger than TypeScript can express and that invariant is documented or proven locally.",
     ],

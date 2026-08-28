@@ -31,6 +31,14 @@ export const cssRules = [
     pack: "css",
     status: "stable",
     tags: ["css", "design-tokens", "maintainability"],
+    bad: {
+      language: "css",
+      code: ".saveButton {\n  background: #34ff6d;\n  border-radius: 8px;\n  padding: 8px 16px;\n}\n\n.confirmButton {\n  background: #34ff6d;\n  border-radius: 8px;\n}",
+    },
+    good: {
+      language: "css",
+      code: ":root {\n  --color-accent: #34ff6d;\n  --radius-control: 0.5rem;\n}\n\n.saveButton,\n.confirmButton {\n  background: var(--color-accent);\n  border-radius: var(--radius-control);\n}",
+    },
     exceptions: [
       "A truly one-off value may stay local when promoting it would create a meaningless token.",
     ],
@@ -47,6 +55,14 @@ export const cssRules = [
     pack: "css",
     status: "stable",
     tags: ["css", "layout", "responsive"],
+    bad: {
+      language: "css",
+      code: ".toolbarButton + .toolbarButton {\n  margin-left: 12px;\n}\n\n.toolbarButton:last-child {\n  position: relative;\n  left: 4px;\n}",
+    },
+    good: {
+      language: "css",
+      code: ".toolbar {\n  align-items: center;\n  display: flex;\n  gap: var(--space-3);\n}",
+    },
     detection: { autoFixable: false, detectable: true, strategy: "semantic" },
   },
   {
@@ -60,6 +76,14 @@ export const cssRules = [
     pack: "css",
     status: "stable",
     tags: ["css", "encapsulation", "scope"],
+    bad: {
+      language: "css",
+      code: "button {\n  border-radius: 0;\n}\n\n.card h2 {\n  font-size: 14px;\n}",
+    },
+    good: {
+      language: "css",
+      code: "/* RuleCard.module.css */\n.title {\n  font-size: var(--font-size-heading);\n}\n\n.actionButton {\n  border-radius: var(--radius-control);\n}",
+    },
     detection: { autoFixable: false, detectable: true, strategy: "semantic" },
   },
 ] satisfies readonly CodingRule[];

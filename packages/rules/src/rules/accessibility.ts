@@ -37,6 +37,14 @@ export const accessibilityRules = [
     pack: "accessibility",
     status: "stable",
     tags: ["accessibility", "interaction", "keyboard"],
+    bad: {
+      language: "tsx",
+      code: "<div role=\"button\" tabIndex={0} onClick={openMenu}>\n  Menu\n</div>",
+    },
+    good: {
+      language: "tsx",
+      code: "<button type=\"button\" onClick={openMenu}>\n  Menu\n</button>",
+    },
     detection: { autoFixable: false, detectable: true, strategy: "semantic" },
   },
   {
@@ -50,6 +58,14 @@ export const accessibilityRules = [
     pack: "accessibility",
     status: "stable",
     tags: ["accessibility", "focus", "keyboard"],
+    bad: {
+      language: "css",
+      code: "*:focus {\n  outline: none;\n}",
+    },
+    good: {
+      language: "css",
+      code: ".button:focus-visible {\n  outline: 2px solid var(--focus-ring);\n  outline-offset: 2px;\n}",
+    },
     detection: { autoFixable: false, detectable: true, strategy: "semantic" },
   },
   {
@@ -63,6 +79,14 @@ export const accessibilityRules = [
     pack: "accessibility",
     status: "stable",
     tags: ["accessibility", "forms", "labels"],
+    bad: {
+      language: "tsx",
+      code: "<button type=\"button\" onClick={closeDialog}>\n  <CloseIcon />\n</button>",
+    },
+    good: {
+      language: "tsx",
+      code: "<button\n  type=\"button\"\n  aria-label=\"Close dialog\"\n  onClick={closeDialog}\n>\n  <CloseIcon aria-hidden=\"true\" />\n</button>",
+    },
     detection: { autoFixable: false, detectable: true, strategy: "ast" },
   },
   {
@@ -76,6 +100,14 @@ export const accessibilityRules = [
     pack: "accessibility",
     status: "stable",
     tags: ["accessibility", "color", "semantics"],
+    bad: {
+      language: "tsx",
+      code: "<span className={isOverdue ? \"statusRed\" : \"statusGreen\"}>\n  ●\n</span>",
+    },
+    good: {
+      language: "tsx",
+      code: "<span className={isOverdue ? \"statusRed\" : \"statusGreen\"}>\n  <StatusIcon aria-hidden=\"true\" />\n  {isOverdue ? \"Overdue\" : \"On time\"}\n</span>",
+    },
     detection: { autoFixable: false, detectable: true, strategy: "semantic" },
   },
   {
@@ -89,6 +121,14 @@ export const accessibilityRules = [
     pack: "accessibility",
     status: "stable",
     tags: ["accessibility", "motion", "preferences"],
+    bad: {
+      language: "css",
+      code: ".panel {\n  scroll-behavior: smooth;\n  transition: transform 300ms ease;\n}",
+    },
+    good: {
+      language: "css",
+      code: ".panel {\n  scroll-behavior: smooth;\n  transition: transform 300ms ease;\n}\n\n@media (prefers-reduced-motion: reduce) {\n  .panel {\n    scroll-behavior: auto;\n    transition: none;\n  }\n}",
+    },
     detection: { autoFixable: false, detectable: true, strategy: "semantic" },
   },
 ] satisfies readonly CodingRule[];

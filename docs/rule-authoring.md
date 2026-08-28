@@ -17,8 +17,12 @@ Every rule has:
 - tags
 - detection metadata
 
-Examples and exceptions are required when they materially change how the rule is
-understood.
+Every `stable` rule also requires a paired **DON'T / DO** example. Examples are
+kept short enough to scan before reading the rationale and should demonstrate the
+smallest realistic contrast that teaches the rule. Draft or deprecated rules may
+omit examples when a concrete snippet would be artificial or misleading.
+
+Exceptions are required when they materially change how the rule is understood.
 
 ## Levels
 

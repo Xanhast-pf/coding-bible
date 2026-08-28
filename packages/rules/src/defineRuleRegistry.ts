@@ -87,6 +87,17 @@ export const defineRuleRegistry = <const Rules extends readonly CodingRule[]>(
       );
     }
 
+    const hasBadExample = Boolean(rule.bad);
+    const hasGoodExample = Boolean(rule.good);
+
+    if (hasBadExample !== hasGoodExample) {
+      errors.push(`${rule.id}: examples must include both a good and bad case.`);
+    }
+
+    if (rule.status === "stable" && (!hasBadExample || !hasGoodExample)) {
+      errors.push(`${rule.id}: stable rules require good and bad examples.`);
+    }
+
     for (const example of [rule.bad, rule.good]) {
       if (!example) {
         continue;

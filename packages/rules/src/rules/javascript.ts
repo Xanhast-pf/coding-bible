@@ -12,6 +12,14 @@ export const javascriptRules = [
     pack: "javascript",
     status: "stable",
     tags: ["async", "functions", "promises"],
+    bad: {
+      language: "ts",
+      code: "async function getStatusLabel() {\n  return \"Ready\";\n}",
+    },
+    good: {
+      language: "ts",
+      code: "function getStatusLabel() {\n  return \"Ready\";\n}",
+    },
     detection: { autoFixable: true, detectable: true, strategy: "ast" },
   },
   {
@@ -70,6 +78,14 @@ export const javascriptRules = [
     pack: "javascript",
     status: "stable",
     tags: ["errors", "try-catch"],
+    bad: {
+      language: "ts",
+      code: "try {\n  const payload = buildPayload(form);\n  const result = await api.save(payload);\n  renderResult(result);\n} catch {\n  showNetworkError();\n}",
+    },
+    good: {
+      language: "ts",
+      code: "const payload = buildPayload(form);\n\nlet result: SaveResult;\ntry {\n  result = await api.save(payload);\n} catch {\n  showNetworkError();\n  return;\n}\n\nrenderResult(result);",
+    },
     detection: { autoFixable: false, detectable: true, strategy: "semantic" },
   },
   {
