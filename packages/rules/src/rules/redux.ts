@@ -12,6 +12,14 @@ export const reduxRules = [
     pack: "redux",
     status: "stable",
     tags: ["redux", "redux-toolkit"],
+    bad: {
+      language: "ts",
+      code: "const reducer = (state = initialState, action) => {\n  switch (action.type) {\n    case \"todos/todoAdded\":\n      return { ...state, todos: [...state.todos, action.payload] };\n    default:\n      return state;\n  }\n};",
+    },
+    good: {
+      language: "ts",
+      code: "const todosSlice = createSlice({\n  name: \"todos\",\n  initialState,\n  reducers: {\n    todoAdded(state, action) {\n      state.todos.push(action.payload);\n    },\n  },\n});",
+    },
     references: [{ label: "Redux — Style Guide", url: "https://redux.js.org/style-guide/" }],
     detection: { autoFixable: false, detectable: true, strategy: "semantic" },
   },
@@ -26,6 +34,14 @@ export const reduxRules = [
     pack: "redux",
     status: "stable",
     tags: ["purity", "reducers", "redux"],
+    bad: {
+      language: "ts",
+      code: "markUpdated(state) {\n  state.lastUpdated = Date.now();\n}",
+    },
+    good: {
+      language: "ts",
+      code: "markUpdated(state, action: PayloadAction<number>) {\n  state.lastUpdated = action.payload;\n}\n\ndispatch(markUpdated(Date.now()));",
+    },
     references: [{ label: "Redux — Style Guide", url: "https://redux.js.org/style-guide/" }],
     detection: { autoFixable: false, detectable: true, strategy: "semantic" },
   },
@@ -40,6 +56,14 @@ export const reduxRules = [
     pack: "redux",
     status: "stable",
     tags: ["redux", "serialization", "state"],
+    bad: {
+      language: "ts",
+      code: "dispatch(userLoaded({\n  loadedAt: new Date(),\n  user,\n}));",
+    },
+    good: {
+      language: "ts",
+      code: "dispatch(userLoaded({\n  loadedAtIso: new Date().toISOString(),\n  user,\n}));",
+    },
     exceptions: [
       "Middleware may intentionally intercept a non-serializable action before it reaches reducers.",
     ],
@@ -57,6 +81,14 @@ export const reduxRules = [
     pack: "redux",
     status: "stable",
     tags: ["derived-state", "redux", "selectors"],
+    bad: {
+      language: "ts",
+      code: "const initialState = {\n  todos: [],\n  visibleTodos: [],\n};",
+    },
+    good: {
+      language: "ts",
+      code: "const initialState = { todos: [] };\n\nconst selectVisibleTodos = (state) =>\n  state.todos.filter((todo) => !todo.completed);",
+    },
     references: [
       {
         label: "Redux — Deriving Data with Selectors",
@@ -76,6 +108,14 @@ export const reduxRules = [
     pack: "redux",
     status: "stable",
     tags: ["entities", "normalization", "redux"],
+    bad: {
+      language: "ts",
+      code: "const posts = [\n  { id: \"p1\", author: { id: \"u1\", name: \"Ada\" } },\n  { id: \"p2\", author: { id: \"u1\", name: \"Ada\" } },\n];",
+    },
+    good: {
+      language: "ts",
+      code: "const state = {\n  authors: { byId: { u1: { id: \"u1\", name: \"Ada\" } } },\n  posts: { byId: { p1: { id: \"p1\", authorId: \"u1\" } } },\n};",
+    },
     references: [
       {
         label: "Redux — Normalizing State Shape",
@@ -95,6 +135,14 @@ export const reduxRules = [
     pack: "redux",
     status: "stable",
     tags: ["encapsulation", "redux", "selectors"],
+    bad: {
+      language: "tsx",
+      code: "const currency = useSelector(\n  (state) => state.account.preferences.checkout.currency,\n);",
+    },
+    good: {
+      language: "tsx",
+      code: "const selectCheckoutCurrency = (state) =>\n  state.account.preferences.checkout.currency;\n\nconst currency = useSelector(selectCheckoutCurrency);",
+    },
     references: [
       {
         label: "Redux — Deriving Data with Selectors",
@@ -114,6 +162,14 @@ export const reduxRules = [
     pack: "redux",
     status: "stable",
     tags: ["memoization", "redux", "selectors"],
+    bad: {
+      language: "ts",
+      code: "const selectUserName = createSelector(\n  [(state) => state.user.name],\n  (name) => name,\n);",
+    },
+    good: {
+      language: "ts",
+      code: "const selectUserName = (state) => state.user.name;",
+    },
     references: [
       {
         label: "Redux — Deriving Data with Selectors",
@@ -133,6 +189,14 @@ export const reduxRules = [
     pack: "redux",
     status: "stable",
     tags: ["forms", "redux", "state"],
+    bad: {
+      language: "tsx",
+      code: "<input\n  value={name}\n  onChange={(event) => dispatch(nameChanged(event.target.value))}\n/>",
+    },
+    good: {
+      language: "tsx",
+      code: "const [name, setName] = useState(\"\");\n\n<input value={name} onChange={(event) => setName(event.target.value)} />",
+    },
     references: [{ label: "Redux — Style Guide", url: "https://redux.js.org/style-guide/" }],
     detection: { autoFixable: false, detectable: true, strategy: "semantic" },
   },
@@ -147,6 +211,14 @@ export const reduxRules = [
     pack: "redux",
     status: "stable",
     tags: ["architecture", "redux", "store"],
+    bad: {
+      language: "ts",
+      code: "export const userStore = configureStore({ reducer: userReducer });\nexport const settingsStore = configureStore({ reducer: settingsReducer });",
+    },
+    good: {
+      language: "ts",
+      code: "export const store = configureStore({\n  reducer: {\n    settings: settingsReducer,\n    user: userReducer,\n  },\n});",
+    },
     references: [
       {
         label: "Redux — Style Guide",
@@ -166,6 +238,14 @@ export const reduxRules = [
     pack: "redux",
     status: "stable",
     tags: ["architecture", "features", "redux", "slices"],
+    bad: {
+      language: "text",
+      code: "src/\n  actions/users.ts\n  reducers/users.ts\n  selectors/users.ts",
+    },
+    good: {
+      language: "text",
+      code: "src/\n  features/users/\n    usersSlice.ts\n    usersSelectors.ts",
+    },
     references: [
       {
         label: "Redux — Style Guide",
@@ -185,6 +265,14 @@ export const reduxRules = [
     pack: "redux",
     status: "stable",
     tags: ["data-fetching", "redux", "rtk-query", "server-state"],
+    bad: {
+      language: "ts",
+      code: "const fetchTodos = createAsyncThunk(\"todos/fetch\", fetchTodosApi);\n\n// Slice also tracks request status, cache lifetime, and refetch logic.",
+    },
+    good: {
+      language: "ts",
+      code: "const api = createApi({\n  baseQuery: fetchBaseQuery({ baseUrl: \"/api\" }),\n  endpoints: (build) => ({\n    getTodos: build.query<Todo[], void>({ query: () => \"todos\" }),\n  }),\n});",
+    },
     references: [
       {
         label: "Redux — Style Guide",

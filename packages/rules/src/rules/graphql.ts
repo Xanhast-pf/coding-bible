@@ -12,6 +12,14 @@ export const graphqlRules = [
     pack: "graphql",
     status: "stable",
     tags: ["debugging", "graphql", "operations"],
+    bad: {
+      language: "graphql",
+      code: "query {\n  viewer { id name }\n}",
+    },
+    good: {
+      language: "graphql",
+      code: "query ViewerQuery {\n  viewer { id name }\n}",
+    },
     references: [{ label: "GraphQL — Queries", url: "https://graphql.org/learn/queries/" }],
     detection: { autoFixable: false, detectable: true, strategy: "ast" },
   },
@@ -26,6 +34,14 @@ export const graphqlRules = [
     pack: "graphql",
     status: "stable",
     tags: ["graphql", "queries", "variables"],
+    bad: {
+      language: "ts",
+      code: "const document = gql`\n  query UserQuery {\n    user(id: \"${userId}\") { id name }\n  }\n`;",
+    },
+    good: {
+      language: "ts",
+      code: "const document = gql`\n  query UserQuery($id: ID!) {\n    user(id: $id) { id name }\n  }\n`;\n\nuseQuery(document, { variables: { id: userId } });",
+    },
     references: [{ label: "GraphQL — Queries", url: "https://graphql.org/learn/queries/" }],
     detection: { autoFixable: false, detectable: true, strategy: "ast" },
   },
@@ -40,6 +56,14 @@ export const graphqlRules = [
     pack: "graphql",
     status: "stable",
     tags: ["fragments", "graphql", "reuse"],
+    bad: {
+      language: "graphql",
+      code: "query DashboardQuery {\n  viewer { id name avatarUrl }\n  owner { id name avatarUrl }\n}",
+    },
+    good: {
+      language: "graphql",
+      code: "fragment UserSummary on User {\n  id\n  name\n  avatarUrl\n}\n\nquery DashboardQuery {\n  viewer { ...UserSummary }\n  owner { ...UserSummary }\n}",
+    },
     references: [{ label: "GraphQL — Queries", url: "https://graphql.org/learn/queries/" }],
     detection: { autoFixable: false, detectable: true, strategy: "semantic" },
   },
@@ -54,6 +78,15 @@ export const graphqlRules = [
     pack: "graphql",
     status: "stable",
     tags: ["graphql", "schema", "validation"],
+    bad: {
+      language: "sh",
+      code: "pnpm type-check\n# GraphQL documents are never checked against the schema",
+    },
+    good: {
+      language: "sh",
+      code: "pnpm graphql:validate\npnpm type-check",
+      note: "Use schema-aware validation or code generation in CI; the exact command depends on the project toolchain.",
+    },
     references: [
       {
         label: "GraphQL — Validation",
@@ -73,6 +106,14 @@ export const graphqlRules = [
     pack: "graphql",
     status: "stable",
     tags: ["graphql", "nullability", "schema", "types"],
+    bad: {
+      language: "ts",
+      code: "// Schema: nickname: String\ntype User = { nickname: string };",
+    },
+    good: {
+      language: "ts",
+      code: "// Schema: nickname: String\ntype User = { nickname: string | null };",
+    },
     references: [{ label: "GraphQL — Schema", url: "https://graphql.org/learn/schema/" }],
     detection: { autoFixable: false, detectable: true, strategy: "semantic" },
   },
@@ -87,6 +128,14 @@ export const graphqlRules = [
     pack: "graphql",
     status: "stable",
     tags: ["graphql", "pagination", "performance"],
+    bad: {
+      language: "graphql",
+      code: "query UsersQuery {\n  users { id name }\n}",
+    },
+    good: {
+      language: "graphql",
+      code: "query UsersQuery($after: String, $first: Int!) {\n  users(after: $after, first: $first) {\n    edges { node { id name } }\n    pageInfo { endCursor hasNextPage }\n  }\n}",
+    },
     references: [
       {
         label: "GraphQL — Pagination",

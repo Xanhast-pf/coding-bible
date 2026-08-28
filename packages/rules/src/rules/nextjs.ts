@@ -12,6 +12,14 @@ export const nextjsRules = [
     pack: "nextjs",
     status: "stable",
     tags: ["client-components", "nextjs", "server-components"],
+    bad: {
+      language: "tsx",
+      code: "\"use client\";\n\nconst UsersPage = () => {\n  const [users, setUsers] = useState([]);\n  useEffect(() => void fetch(\"/api/users\").then(/* ... */), []);\n  return <Users users={users} />;\n};",
+    },
+    good: {
+      language: "tsx",
+      code: "const UsersPage = async () => {\n  const users = await getUsers();\n  return <Users users={users} />;\n};",
+    },
     references: [
       {
         label: "Next.js — Server and Client Components",
@@ -31,6 +39,14 @@ export const nextjsRules = [
     pack: "nextjs",
     status: "stable",
     tags: ["bundle-size", "client-components", "nextjs"],
+    bad: {
+      language: "tsx",
+      code: "\"use client\";\n\nexport default function Dashboard() {\n  return <LargeDashboardWithOneInteractiveButton />;\n}",
+    },
+    good: {
+      language: "tsx",
+      code: "// Dashboard.tsx — Server Component\nexport default function Dashboard() {\n  return <FavoriteButton />;\n}\n\n// FavoriteButton.tsx\n\"use client\";",
+    },
     references: [
       {
         label: "Next.js — use client",
@@ -50,6 +66,15 @@ export const nextjsRules = [
     pack: "nextjs",
     status: "stable",
     tags: ["nextjs", "serialization", "server-components"],
+    bad: {
+      language: "tsx",
+      code: "// Server Component\nconst formatPrice = (value: number) => `$${value}`;\nreturn <ClientPrice amount={12} formatPrice={formatPrice} />;",
+    },
+    good: {
+      language: "tsx",
+      code: "// Server Component\nreturn <ClientPrice amount={12} currency=\"USD\" />;",
+      note: "Pass serializable data and keep ordinary client behavior inside the Client Component.",
+    },
     references: [
       {
         label: "Next.js — use client",
@@ -69,6 +94,14 @@ export const nextjsRules = [
     pack: "nextjs",
     status: "stable",
     tags: ["nextjs", "security", "server-only"],
+    bad: {
+      language: "ts",
+      code: "export const getUsers = () => db.user.findMany();\nexport const apiSecret = process.env.API_SECRET;",
+    },
+    good: {
+      language: "ts",
+      code: "import \"server-only\";\n\nexport const getUsers = () => db.user.findMany();",
+    },
     references: [
       {
         label: "Next.js — Server and Client Components",
@@ -88,6 +121,14 @@ export const nextjsRules = [
     pack: "nextjs",
     status: "stable",
     tags: ["data-fetching", "nextjs", "server-components"],
+    bad: {
+      language: "tsx",
+      code: "export default async function UsersPage() {\n  const response = await fetch(\"https://my-app.test/api/users\");\n  const users = await response.json();\n  return <Users users={users} />;\n}",
+    },
+    good: {
+      language: "tsx",
+      code: "export default async function UsersPage() {\n  const users = await getUsers();\n  return <Users users={users} />;\n}",
+    },
     references: [
       {
         label: "Next.js — Production checklist",
@@ -107,6 +148,14 @@ export const nextjsRules = [
     pack: "nextjs",
     status: "stable",
     tags: ["data-fetching", "nextjs", "performance", "suspense"],
+    bad: {
+      language: "ts",
+      code: "const user = await getUser();\nconst posts = await getPosts();",
+    },
+    good: {
+      language: "ts",
+      code: "const [posts, user] = await Promise.all([\n  getPosts(),\n  getUser(),\n]);",
+    },
     references: [
       {
         label: "Next.js — Fetching Data",

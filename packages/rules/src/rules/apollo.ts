@@ -12,6 +12,14 @@ export const apolloRules = [
     pack: "apollo",
     status: "stable",
     tags: ["apollo", "cache", "identity"],
+    bad: {
+      language: "ts",
+      code: "// Product has sku, but no id/_id.\nconst cache = new InMemoryCache();",
+    },
+    good: {
+      language: "ts",
+      code: "const cache = new InMemoryCache({\n  typePolicies: {\n    Product: { keyFields: [\"sku\"] },\n  },\n});",
+    },
     references: [
       {
         label: "Apollo Client — Cache configuration",
@@ -31,6 +39,15 @@ export const apolloRules = [
     pack: "apollo",
     status: "stable",
     tags: ["apollo", "cache", "fetch-policy", "queries"],
+    bad: {
+      language: "ts",
+      code: "const client = new ApolloClient({\n  cache,\n  defaultOptions: {\n    watchQuery: { fetchPolicy: \"network-only\" },\n  },\n});",
+    },
+    good: {
+      language: "tsx",
+      code: "useQuery(GET_PROFILE, {\n  fetchPolicy: \"cache-and-network\",\n  nextFetchPolicy: \"cache-first\",\n});",
+      note: "Choose a policy per freshness requirement; this is one example, not a universal default.",
+    },
     references: [
       {
         label: "Apollo Client — Queries",
@@ -50,6 +67,14 @@ export const apolloRules = [
     pack: "apollo",
     status: "stable",
     tags: ["apollo", "cache", "mutations"],
+    bad: {
+      language: "graphql",
+      code: "mutation RenameUser($id: ID!, $name: String!) {\n  renameUser(id: $id, name: $name) {\n    success\n  }\n}",
+    },
+    good: {
+      language: "graphql",
+      code: "mutation RenameUser($id: ID!, $name: String!) {\n  renameUser(id: $id, name: $name) {\n    user { id name }\n  }\n}",
+    },
     references: [
       {
         label: "Apollo Client — Mutations",
@@ -69,6 +94,14 @@ export const apolloRules = [
     pack: "apollo",
     status: "stable",
     tags: ["apollo", "cache", "mutations", "refetch"],
+    bad: {
+      language: "tsx",
+      code: "await deleteTodo({ variables: { id } });\n// GET_TODOS may still contain the deleted item.",
+    },
+    good: {
+      language: "tsx",
+      code: "await deleteTodo({\n  variables: { id },\n  refetchQueries: [{ query: GET_TODOS }],\n});",
+    },
     references: [
       {
         label: "Apollo Client — Mutations",
@@ -92,6 +125,14 @@ export const apolloRules = [
     pack: "apollo",
     status: "stable",
     tags: ["apollo", "cache", "pagination", "type-policies"],
+    bad: {
+      language: "tsx",
+      code: "const nextPage = await fetchMore({ variables: { offset: items.length } });\nsetItems((items) => [...items, ...nextPage.data.feed]);",
+    },
+    good: {
+      language: "ts",
+      code: "const cache = new InMemoryCache({\n  typePolicies: {\n    Query: {\n      fields: {\n        feed: offsetLimitPagination(),\n      },\n    },\n  },\n});",
+    },
     references: [
       {
         label: "Apollo Client — Cached field behavior",
@@ -111,6 +152,14 @@ export const apolloRules = [
     pack: "apollo",
     status: "stable",
     tags: ["apollo", "errors", "graphql", "partial-data"],
+    bad: {
+      language: "tsx",
+      code: "const { data } = useQuery(DASHBOARD_QUERY, {\n  errorPolicy: \"ignore\",\n});",
+    },
+    good: {
+      language: "tsx",
+      code: "const { data, error } = useQuery(DASHBOARD_QUERY, {\n  errorPolicy: \"all\",\n});\n\nif (error && !data) return <ErrorState />;\nreturn <Dashboard data={data} warning={error?.message} />;",
+    },
     references: [
       {
         label: "Apollo Client — Error handling",
