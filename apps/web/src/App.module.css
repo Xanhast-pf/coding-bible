@@ -7,15 +7,28 @@
 .hero {
   max-width: 68rem;
   padding: 7rem 0 5rem;
+  position: relative;
+}
+
+.hero::before {
+  color: var(--matrixDim);
+  content: "WAKE UP, DEVELOPER_";
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  left: 0;
+  letter-spacing: 0.12em;
+  position: absolute;
+  top: 3.5rem;
 }
 
 .eyebrow {
-  color: var(--muted);
+  color: var(--matrix);
   font-family: var(--font-mono);
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.14em;
   margin: 0 0 1rem;
+  text-shadow: 0 0 0.8rem rgb(52 255 109 / 40%);
 }
 
 .intro {
@@ -32,25 +45,46 @@
 }
 
 .searchLabel {
+  color: var(--matrixBright);
   display: block;
-  font-size: 0.8125rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
   font-weight: 650;
+  letter-spacing: 0.04em;
   margin-bottom: 0.5rem;
+  text-transform: uppercase;
 }
 
 .search input {
-  background: var(--surfaceRaised);
+  background:
+    linear-gradient(180deg, rgb(52 255 109 / 2%), transparent),
+    var(--surfaceRaised);
   border: 1px solid var(--border);
-  border-radius: 0.75rem;
-  color: var(--text);
+  border-radius: 0.5rem;
+  color: var(--textStrong);
   inline-size: 100%;
   outline: none;
-  padding: 0.9rem 1rem;
+  padding: 0.95rem 1rem;
+  transition:
+    border-color 140ms ease,
+    box-shadow 140ms ease,
+    background 140ms ease;
+}
+
+.search input::placeholder {
+  color: #51735b;
+}
+
+.search input:hover {
+  border-color: var(--borderStrong);
 }
 
 .search input:focus-visible {
-  border-color: var(--text);
-  box-shadow: 0 0 0 0.1875rem var(--focusRing);
+  background: var(--backgroundRaised);
+  border-color: var(--matrix);
+  box-shadow:
+    0 0 0 0.1875rem var(--focusRing),
+    0 0 1.5rem rgb(52 255 109 / 9%);
 }
 
 .layout {
@@ -60,9 +94,10 @@
 }
 
 .results {
-  color: var(--muted);
+  color: var(--matrixDim);
   font-family: var(--font-mono);
   font-size: 0.75rem;
+  letter-spacing: 0.04em;
   margin: 0 0 0.75rem;
 }
 
@@ -78,7 +113,11 @@
   }
 
   .hero {
-    padding-block: 4rem 3rem;
+    padding-block: 5rem 3rem;
+  }
+
+  .hero::before {
+    top: 2.5rem;
   }
 
   .layout {
