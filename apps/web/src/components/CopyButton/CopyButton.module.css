@@ -15,6 +15,18 @@
   color: var(--matrixBright);
 }
 
+.button[data-variant="accent"] {
+  background: color-mix(in srgb, var(--matrix) 5%, transparent);
+  border-color: var(--matrixDim);
+  color: var(--matrix);
+}
+
+.button[data-variant="accent"]:hover {
+  background: color-mix(in srgb, var(--matrix) 9%, transparent);
+  border-color: var(--matrix);
+  color: var(--matrixBright);
+}
+
 .button[data-status="copied"] {
   border-color: var(--matrixDim);
   color: var(--matrix);

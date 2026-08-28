@@ -1,6 +1,7 @@
-import { rulePackLabels } from "@coding-bible/rules";
+import { buildRuleAgentPrompt, rulePackLabels } from "@coding-bible/rules";
 import type { CodingRule } from "@coding-bible/rules";
 
+import { createCanonicalRuleUrl } from "../../utils/canonicalUrls";
 import { CodeSnippet } from "../CodeSnippet/CodeSnippet";
 import { CopyButton } from "../CopyButton/CopyButton";
 import styles from "./RuleCard.module.css";
@@ -9,14 +10,9 @@ interface RuleCardProps {
   rule: CodingRule;
 }
 
-const getRuleUrl = (ruleId: string) => {
-  const url = new URL(window.location.href);
-  url.hash = ruleId;
-
-  return url.toString();
-};
-
 export const RuleCard = ({ rule }: RuleCardProps) => {
+  const ruleUrl = createCanonicalRuleUrl(window.location.href, rule.id);
+
   return (
     <article className={styles.card} id={rule.id}>
       <div className={styles.meta}>
@@ -32,7 +28,15 @@ export const RuleCard = ({ rule }: RuleCardProps) => {
 
         <span className={styles.metaSpacer} />
 
-        <CopyButton label="Copy link" value={getRuleUrl(rule.id)} />
+        <div className={styles.actions}>
+          <CopyButton
+            accessibleLabel={`Copy AI prompt for ${rule.id}`}
+            label="tldr;"
+            value={() => buildRuleAgentPrompt(rule, ruleUrl)}
+            variant="accent"
+          />
+          <CopyButton label="Copy link" value={ruleUrl} />
+        </div>
       </div>
 
       <h2 className={styles.title}>{rule.title}</h2>

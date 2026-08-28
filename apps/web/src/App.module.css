@@ -44,12 +44,20 @@
   grid-template-columns: 12rem minmax(0, 1fr);
 }
 
+.resultsRow {
+  align-items: center;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  margin: 0 0 0.75rem;
+}
+
 .results {
   color: var(--matrixDim);
   font-family: var(--font-mono);
   font-size: 0.75rem;
   letter-spacing: 0.04em;
-  margin: 0 0 0.75rem;
+  margin: 0;
 }
 
 .empty {

@@ -87,6 +87,11 @@ The **Analyze** mode accepts TypeScript, TSX, JavaScript, and JSX snippets and
 runs supported checks locally in the browser. The analyzer is lazy-loaded so the
 TypeScript parser does not increase the initial Learn-page bundle.
 
+Each rule also exposes a `tldr;` action that copies an AI-optimized prompt with
+the rule rationale, examples, exceptions, and canonical deep link. The rule-list
+`tldr;` action exports the currently visible rule set, so the same control works
+for a filtered section or the whole Bible.
+
 Rule deep links use fragments such as:
 
 ```text
