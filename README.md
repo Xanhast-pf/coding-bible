@@ -56,6 +56,8 @@ Pushes to `main` are deployed by `.github/workflows/deploy-pages.yml`.
 
 In the GitHub repository, set **Settings → Pages → Source** to **GitHub Actions**.
 
+Search can be focused with `⌘/Ctrl+K`.
+
 Rule deep links use fragments such as:
 
 ```text

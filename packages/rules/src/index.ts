@@ -3,6 +3,7 @@ export { aiRules } from "./rules/ai";
 export { architectureRules } from "./rules/architecture";
 export { coreRules } from "./rules/core";
 export { cssRules } from "./rules/css";
+export { dependencyRules } from "./rules/dependencies";
 export { defineRuleRegistry } from "./defineRuleRegistry";
 export { performanceRules } from "./rules/performance";
 export { reactRules } from "./rules/react";
@@ -25,6 +26,7 @@ import { aiRules } from "./rules/ai";
 import { architectureRules } from "./rules/architecture";
 import { coreRules } from "./rules/core";
 import { cssRules } from "./rules/css";
+import { dependencyRules } from "./rules/dependencies";
 import { performanceRules } from "./rules/performance";
 import { reactRules } from "./rules/react";
 import { testingRules } from "./rules/testing";
@@ -36,6 +38,7 @@ export const rules = defineRuleRegistry([
   ...architectureRules,
   ...coreRules,
   ...cssRules,
+  ...dependencyRules,
   ...performanceRules,
   ...reactRules,
   ...testingRules,

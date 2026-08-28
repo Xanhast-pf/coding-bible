@@ -4,7 +4,8 @@ export const coreRules = [
   {
     id: "CORE-001",
     title: "Optimize for understanding",
-    summary: "Prefer code that communicates intent without requiring reconstruction by the reader.",
+    summary:
+      "Prefer code that communicates intent without requiring reconstruction by the reader.",
     rationale:
       "Code is maintained and reviewed far more often than it is initially written. Readability lowers review cost, defect risk, and onboarding time.",
     level: "must",
@@ -23,9 +24,18 @@ export const coreRules = [
     pack: "core",
     status: "stable",
     tags: ["clarity", "naming"],
-    bad: { language: "ts", code: "strategies.filter((s) => s.goalType);" },
-    good: { language: "ts", code: "strategies.filter((strategy) => strategy.goalType);" },
-    exceptions: ["Established mathematical notation in a clearly mathematical scope."],
+    bad: {
+      language: "ts",
+      code: "strategies.filter((s) => s.goalType);",
+    },
+    good: {
+      language: "ts",
+      code: "strategies.filter((strategy) => strategy.goalType);",
+    },
+    exceptions: [
+      "Established mathematical notation in a clearly mathematical scope.",
+      "Conventional short names whose meaning is unambiguous in the immediate context.",
+    ],
     detection: { autoFixable: false, detectable: true, strategy: "ast" },
   },
   {
@@ -45,7 +55,8 @@ export const coreRules = [
   {
     id: "CORE-004",
     title: "Comments explain why",
-    summary: "Do not narrate obvious code. Document decisions, constraints, and workarounds.",
+    summary:
+      "Do not narrate obvious code. Document decisions, constraints, and workarounds.",
     rationale:
       "Narrative comments duplicate code and become stale. Decision comments preserve context the implementation cannot express.",
     level: "should",
@@ -60,6 +71,93 @@ export const coreRules = [
       language: "ts",
       code: "// Suspended accounts remain for audit history, so exclude only inactive accounts.\nconst activeUsers = users.filter((user) => user.active);",
     },
+    detection: { autoFixable: false, detectable: true, strategy: "semantic" },
+  },
+  {
+    id: "CORE-005",
+    title: "Delete dead code",
+    summary:
+      "Remove unused functions, imports, exports, files, branches, and dependencies when their last real use disappears.",
+    rationale:
+      "Dead code expands the surface maintainers must understand, obscures what is still supported, and creates false confidence that obsolete paths are tested.",
+    level: "must",
+    pack: "core",
+    status: "stable",
+    tags: ["cleanup", "dead-code", "maintainability"],
+    detection: { autoFixable: false, detectable: true, strategy: "ast" },
+  },
+  {
+    id: "CORE-006",
+    title: "Name meaningful constants",
+    summary:
+      "Give unexplained values a name when their meaning, policy, or unit is not obvious from local context.",
+    rationale:
+      "A named value communicates why a number or string exists and makes policy changes less error-prone.",
+    level: "should",
+    pack: "core",
+    status: "stable",
+    tags: ["clarity", "constants"],
+    bad: {
+      language: "ts",
+      code: "if (attempts >= 5) lockAccount();",
+    },
+    good: {
+      language: "ts",
+      code: "const MAX_LOGIN_ATTEMPTS = 5;\n\nif (attempts >= MAX_LOGIN_ATTEMPTS) lockAccount();",
+    },
+    exceptions: [
+      "Values whose meaning is inherent to the operation, such as 0 when checking an array length.",
+    ],
+    detection: { autoFixable: false, detectable: true, strategy: "semantic" },
+  },
+  {
+    id: "CORE-007",
+    title: "Keep cohesive code together",
+    summary:
+      "Place closely related logic together instead of scattering tiny pieces across unnecessary files.",
+    rationale:
+      "Excessive fragmentation forces readers to jump between files to understand one behavior and can be as harmful as oversized modules.",
+    level: "should",
+    pack: "core",
+    status: "stable",
+    tags: ["cohesion", "files", "maintainability"],
+    detection: { autoFixable: false, detectable: true, strategy: "semantic" },
+  },
+  {
+    id: "CORE-008",
+    title: "Reduce nesting when it improves clarity",
+    summary:
+      "Prefer guard clauses and early exits when they make the main control flow easier to follow.",
+    rationale:
+      "Deep nesting increases the amount of state a reader must hold in mind. Early exits can make the successful path visually obvious.",
+    level: "prefer",
+    pack: "core",
+    status: "stable",
+    tags: ["clarity", "control-flow"],
+    bad: {
+      language: "ts",
+      code: "if (user) {\n  if (user.active) {\n    save(user);\n  }\n}",
+    },
+    good: {
+      language: "ts",
+      code: "if (!user || !user.active) return;\n\nsave(user);",
+    },
+    exceptions: [
+      "Do not introduce multiple early exits when they make cleanup or transactional behavior harder to reason about.",
+    ],
+    detection: { autoFixable: false, detectable: true, strategy: "semantic" },
+  },
+  {
+    id: "CORE-009",
+    title: "Preserve non-obvious context during refactors",
+    summary:
+      "When moving code, preserve explanations and constraints that remain relevant to the behavior.",
+    rationale:
+      "Refactors should change structure without silently deleting historical context that future maintainers still need.",
+    level: "must",
+    pack: "core",
+    status: "stable",
+    tags: ["comments", "refactoring"],
     detection: { autoFixable: false, detectable: true, strategy: "semantic" },
   },
 ] satisfies readonly CodingRule[];

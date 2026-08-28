@@ -7,6 +7,7 @@ export const rulePacks = [
   "architecture",
   "core",
   "css",
+  "dependencies",
   "performance",
   "react",
   "testing",

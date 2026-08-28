@@ -3,15 +3,19 @@ import type { RulePack } from "@coding-bible/rules";
 import styles from "./Sidebar.module.css";
 
 interface SidebarProps {
+  counts: Readonly<Record<RulePack, number>>;
   onSelectPack: (pack: RulePack | "all") => void;
   packs: readonly RulePack[];
   selectedPack: RulePack | "all";
+  totalCount: number;
 }
 
 export const Sidebar = ({
+  counts,
   onSelectPack,
   packs,
   selectedPack,
+  totalCount,
 }: SidebarProps) => {
   return (
     <aside aria-label="Rule sections" className={styles.sidebar}>
@@ -24,7 +28,8 @@ export const Sidebar = ({
         onClick={() => onSelectPack("all")}
         type="button"
       >
-        All rules
+        <span>All rules</span>
+        <span className={styles.count}>{totalCount}</span>
       </button>
 
       {packs.map((pack) => (
@@ -36,7 +41,8 @@ export const Sidebar = ({
           onClick={() => onSelectPack(pack)}
           type="button"
         >
-          {pack}
+          <span>{pack}</span>
+          <span className={styles.count}>{counts[pack]}</span>
         </button>
       ))}
     </aside>
