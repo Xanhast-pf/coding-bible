@@ -19,6 +19,8 @@ test("checkCode enriches deterministic findings with canonical rule data", () =>
   assert.equal(result.findings[0]?.ruleId, "TS-001");
   assert.equal(result.findings[0]?.rule.id, "TS-001");
   assert.equal(result.findings[0]?.rule.pack, "typescript");
+  assert.equal(result.findings[0]?.rule.status, "stable");
+  assert.match(result.findings[0]?.rule.summary ?? "", /type/i);
   assert.equal(
     result.findings[0]?.rule.url,
     "https://example.com/coding-bible/#TS-001",

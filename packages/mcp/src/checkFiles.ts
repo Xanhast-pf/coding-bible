@@ -1,7 +1,12 @@
 import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
+import { codingBibleCanonicalUrl } from "./constants.ts";
 import { resolveInsideRoot, toRootRelativePath } from "./pathSafety.ts";
+import {
+  createRuleReferences,
+  type McpRuleReference,
+} from "./ruleReference.ts";
 
 export interface CheckFilesInput {
   paths?: readonly string[];
@@ -9,20 +14,54 @@ export interface CheckFilesInput {
   ignoreBaseline?: boolean;
 }
 
-interface AnalyzerReportSummary {
+export interface AnalyzerReportLocation {
+  line: number;
+  column: number;
+  endLine: number;
+  endColumn: number;
+}
+
+export interface AnalyzerReportDiagnostic {
+  excerpt: string;
+  file: string;
+  location: AnalyzerReportLocation;
+  message: string;
+}
+
+export interface AnalyzerReportFinding {
+  detectorId: string;
+  excerpt: string;
+  file: string;
+  fingerprint: string;
+  fix: unknown;
+  location: AnalyzerReportLocation;
+  message: string;
+  ruleId: string;
+  ruleUrl: string;
+  severity: "error" | "warning";
+  suggestion: string;
+}
+
+export interface AnalyzerReportSummary {
+  baselineSuppressed: number;
+  cacheHits: number;
+  cacheMisses: number;
   diagnostics: number;
   errors: number;
+  filesDiscovered: number;
   filesAnalyzed: number;
   findings: number;
+  reviewFixes: number;
   rulesChecked: number;
+  safeFixes: number;
   warnings: number;
 }
 
 export interface AnalyzerReport {
   schemaVersion: 1;
   summary: AnalyzerReportSummary;
-  diagnostics: readonly unknown[];
-  findings: readonly unknown[];
+  diagnostics: readonly AnalyzerReportDiagnostic[];
+  findings: readonly AnalyzerReportFinding[];
   [key: string]: unknown;
 }
 
@@ -32,6 +71,8 @@ export interface CheckFilesResult {
   root: string;
   targets: readonly string[];
   analyzer: AnalyzerReport;
+  ruleReferences: readonly McpRuleReference[];
+  coverageNote: string;
 }
 
 const analyzerCliPath = fileURLToPath(
@@ -50,23 +91,84 @@ const readNumber = (value: unknown, key: string) => {
   return value[key];
 };
 
+const readString = (value: unknown, key: string) => {
+  if (!isRecord(value) || typeof value[key] !== "string") {
+    throw new Error(`Analyzer JSON report is missing string ${key}.`);
+  }
+
+  return value[key];
+};
+
+const readLocation = (value: unknown): AnalyzerReportLocation => ({
+  line: readNumber(value, "line"),
+  column: readNumber(value, "column"),
+  endLine: readNumber(value, "endLine"),
+  endColumn: readNumber(value, "endColumn"),
+});
+
+const readDiagnostic = (value: unknown): AnalyzerReportDiagnostic => {
+  if (!isRecord(value)) {
+    throw new Error("Analyzer JSON report contains an invalid diagnostic.");
+  }
+
+  return {
+    excerpt: readString(value, "excerpt"),
+    file: readString(value, "file"),
+    location: readLocation(value.location),
+    message: readString(value, "message"),
+  };
+};
+
+const readFinding = (value: unknown): AnalyzerReportFinding => {
+  if (!isRecord(value)) {
+    throw new Error("Analyzer JSON report contains an invalid finding.");
+  }
+
+  const severity = readString(value, "severity");
+  if (severity !== "error" && severity !== "warning") {
+    throw new Error(
+      "Analyzer JSON report contains an invalid finding severity.",
+    );
+  }
+
+  return {
+    detectorId: readString(value, "detectorId"),
+    excerpt: readString(value, "excerpt"),
+    file: readString(value, "file"),
+    fingerprint: readString(value, "fingerprint"),
+    fix: value.fix,
+    location: readLocation(value.location),
+    message: readString(value, "message"),
+    ruleId: readString(value, "ruleId"),
+    ruleUrl: readString(value, "ruleUrl"),
+    severity,
+    suggestion: readString(value, "suggestion"),
+  };
+};
+
 export const parseAnalyzerReport = (value: string): AnalyzerReport => {
   const parsed = JSON.parse(value) as unknown;
-
   if (!isRecord(parsed) || parsed.schemaVersion !== 1) {
     throw new Error("Analyzer returned an unsupported JSON report.");
   }
+
   if (!Array.isArray(parsed.findings) || !Array.isArray(parsed.diagnostics)) {
     throw new Error("Analyzer JSON report is missing findings or diagnostics.");
   }
 
   const summary = parsed.summary;
   const normalizedSummary: AnalyzerReportSummary = {
+    baselineSuppressed: readNumber(summary, "baselineSuppressed"),
+    cacheHits: readNumber(summary, "cacheHits"),
+    cacheMisses: readNumber(summary, "cacheMisses"),
     diagnostics: readNumber(summary, "diagnostics"),
     errors: readNumber(summary, "errors"),
+    filesDiscovered: readNumber(summary, "filesDiscovered"),
     filesAnalyzed: readNumber(summary, "filesAnalyzed"),
     findings: readNumber(summary, "findings"),
+    reviewFixes: readNumber(summary, "reviewFixes"),
     rulesChecked: readNumber(summary, "rulesChecked"),
+    safeFixes: readNumber(summary, "safeFixes"),
     warnings: readNumber(summary, "warnings"),
   };
 
@@ -74,8 +176,8 @@ export const parseAnalyzerReport = (value: string): AnalyzerReport => {
     ...parsed,
     schemaVersion: 1,
     summary: normalizedSummary,
-    diagnostics: parsed.diagnostics,
-    findings: parsed.findings,
+    diagnostics: parsed.diagnostics.map(readDiagnostic),
+    findings: parsed.findings.map(readFinding),
   };
 };
 
@@ -136,6 +238,7 @@ const runAnalyzer = async (
         if (settled) {
           return;
         }
+
         settled = true;
         child.kill();
         reject(error);
@@ -155,6 +258,7 @@ const runAnalyzer = async (
           );
           return;
         }
+
         target.push(chunk);
       };
 
@@ -169,6 +273,7 @@ const runAnalyzer = async (
         if (settled) {
           return;
         }
+
         settled = true;
         resolve({
           exitCode: exitCode ?? 2,
@@ -182,9 +287,11 @@ const runAnalyzer = async (
 export const checkFiles = async (
   input: CheckFilesInput,
   {
+    canonicalBaseUrl = codingBibleCanonicalUrl,
     rootDirectory = process.cwd(),
     signal,
   }: {
+    canonicalBaseUrl?: string;
     rootDirectory?: string;
     signal?: AbortSignal;
   } = {},
@@ -194,7 +301,6 @@ export const checkFiles = async (
     rootDirectory,
   );
   const result = await runAnalyzer(argumentsList, rootDirectory, signal);
-
   if (result.exitCode !== 0 && result.exitCode !== 1) {
     throw new Error(
       result.stderr.trim() ||
@@ -202,11 +308,19 @@ export const checkFiles = async (
     );
   }
 
+  const analyzer = parseAnalyzerReport(result.stdout);
+
   return {
     schemaVersion: 1,
     kind: "file-check",
     root: ".",
     targets,
-    analyzer: parseAnalyzerReport(result.stdout),
+    analyzer,
+    ruleReferences: createRuleReferences(
+      analyzer.findings.map(({ ruleId }) => ruleId),
+      canonicalBaseUrl,
+    ),
+    coverageNote:
+      "A clean result covers only implemented deterministic analyzer rules; semantic Coding Bible rules still require review.",
   };
 };

@@ -60,31 +60,55 @@ test("checkFiles delegates to the project analyzer without writing its cache", a
   assert.equal(result.analyzer.summary.filesAnalyzed, 1);
   assert.equal(result.analyzer.findings.length, 1);
   assert.equal(result.analyzer.findings[0]?.ruleId, "TS-001");
+  assert.equal(result.ruleReferences[0]?.id, "TS-001");
+  assert.match(result.coverageNote, /deterministic/);
   await assert.rejects(
     () => access(path.join(root, ".coding-bible", "cache")),
     /ENOENT/,
   );
 });
 
-test("parseAnalyzerReport accepts the versioned analyzer contract", () => {
+test("parseAnalyzerReport accepts the full versioned analyzer contract", () => {
   const report = parseAnalyzerReport(
     JSON.stringify({
       schemaVersion: 1,
       summary: {
+        baselineSuppressed: 0,
+        cacheHits: 0,
+        cacheMisses: 2,
         diagnostics: 0,
         errors: 1,
+        filesDiscovered: 2,
         filesAnalyzed: 2,
         findings: 1,
+        reviewFixes: 0,
         rulesChecked: 20,
+        safeFixes: 0,
         warnings: 0,
       },
       diagnostics: [],
-      findings: [{ ruleId: "TS-001" }],
+      findings: [
+        {
+          detectorId: "no-explicit-any",
+          excerpt: "const value: any = input;",
+          file: "src/example.ts",
+          fingerprint: "abc123",
+          fix: { available: false, safety: "none" },
+          location: { line: 1, column: 14, endLine: 1, endColumn: 17 },
+          message: "Avoid any.",
+          ruleId: "TS-001",
+          ruleUrl: "https://example.com/#TS-001",
+          severity: "error",
+          suggestion: "Use unknown.",
+        },
+      ],
     }),
   );
 
   assert.equal(report.summary.filesAnalyzed, 2);
+  assert.equal(report.summary.cacheMisses, 2);
   assert.equal(report.findings.length, 1);
+  assert.equal(report.findings[0]?.file, "src/example.ts");
 });
 
 test("parseAnalyzerReport rejects incompatible reports", () => {

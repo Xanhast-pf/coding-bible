@@ -101,26 +101,33 @@ files provide stable pack-level prompts for external tooling.
 
 ## MCP server
 
-Coding Bible also exposes a local stdio MCP server for coding agents:
+Coding Bible also exposes a local stdio MCP server for coding agents. Generate
+a ready-to-paste host configuration with:
 
 ```bash
-pnpm mcp --root /absolute/path/to/project
+pnpm mcp --root /absolute/path/to/project --print-config cursor
+pnpm mcp --root /absolute/path/to/project --print-config vscode
+pnpm mcp --root /absolute/path/to/project --print-config claude-code
 ```
 
-It provides four read-only tools:
+It provides six read-only tools:
 
 - `check_code` — deterministic analysis for an in-memory JS/TS snippet.
-- `check_files` — project-aware CLI analysis for files/directories under the
+- `check_files` — project-aware analysis for files/directories under the
   configured root. MCP scans force `--no-cache` so tool calls do not write the
   analyzer cache.
+- `review_diff` — project-aware analysis filtered to added/modified lines in a
+  supplied Git diff.
+- `search_rules` — ranked rule discovery by concept, ID, title, tags, or pack.
 - `get_rule` — canonical rule data and the corresponding agent prompt.
 - `get_project_guidance` — stable foundation/quality rules plus ecosystem packs
   detected from local package manifests.
 
-`check_code` and `check_files` report only deterministic analyzer coverage; a
-clean result is not a claim that semantic rules were reviewed. The configured
-root is a path boundary for tool inputs, not an operating-system sandbox. See
-`packages/mcp/README.md` and ADR-011 for the server contract.
+Analyzer-backed tools report only deterministic coverage; a clean result is not
+a claim that semantic rules were reviewed. The configured root is a path
+boundary for tool inputs, not an operating-system sandbox. See
+`packages/mcp/README.md`, ADR-011, and ADR-012 for the server contract and
+adoption workflow.
 
 ## GitHub Pages
 
