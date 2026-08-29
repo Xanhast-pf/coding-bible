@@ -33,6 +33,10 @@
         "test/*.test.mjs",
       ],
     },
+    "packages/mcp": {
+      "entry": ["src/index.ts", "bin/*.mjs", "test/*.test.mjs"],
+      "project": ["src/**/*.ts", "bin/*.mjs", "test/*.test.mjs"],
+    },
     "packages/rules": {
       "entry": ["src/index.ts", "test/*.test.mjs"],
       "project": ["src/**/*.ts", "test/*.test.mjs"],

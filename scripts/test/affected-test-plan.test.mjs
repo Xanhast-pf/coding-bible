@@ -5,20 +5,29 @@ import { planAffectedTests } from "../affected-test-plan.mjs";
 const allTargets = [
   "@coding-bible/rules",
   "@coding-bible/analyzer",
+  "@coding-bible/mcp",
   "@coding-bible/web",
 ];
 
-test("rules changes run rules and downstream web tests", () => {
+test("rules changes run rules and downstream consumer tests", () => {
   assert.deepEqual(planAffectedTests(["packages/rules/src/index.ts"]), [
     "@coding-bible/rules",
+    "@coding-bible/mcp",
     "@coding-bible/web",
   ]);
 });
 
-test("analyzer changes run analyzer and downstream web tests", () => {
+test("analyzer changes run analyzer and downstream consumer tests", () => {
   assert.deepEqual(planAffectedTests(["packages/analyzer/src/analyze.ts"]), [
     "@coding-bible/analyzer",
+    "@coding-bible/mcp",
     "@coding-bible/web",
+  ]);
+});
+
+test("mcp-only changes run mcp tests only", () => {
+  assert.deepEqual(planAffectedTests(["packages/mcp/src/server.ts"]), [
+    "@coding-bible/mcp",
   ]);
 });
 

@@ -1,0 +1,25 @@
+{
+  "name": "@coding-bible/mcp",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "bin": {
+    "coding-bible-mcp": "./bin/coding-bible-mcp.mjs"
+  },
+  "dependencies": {
+    "@coding-bible/analyzer": "workspace:*",
+    "@coding-bible/rules": "workspace:*",
+    "@modelcontextprotocol/server": "^2.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.3"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "typecheck": "tsc --noEmit"
+  }
+}

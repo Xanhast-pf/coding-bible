@@ -13,3 +13,4 @@
 | [008](008-framework-rule-packs.md) | Framework-specific rule packs and official references |
 | [009](009-browser-analyzer-mvp.md) | Browser analyzer MVP uses the TypeScript AST |
 | [010](010-agent-interface.md) | Generated, versioned agent interface |
+| [011](011-mcp-server.md) | Local read-only MCP server |
