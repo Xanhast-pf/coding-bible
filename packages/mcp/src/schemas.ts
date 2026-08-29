@@ -1,3 +1,5 @@
+import { rulePacks, ruleStatuses } from "@coding-bible/rules";
+
 export const checkCodeInputSchema = {
   type: "object",
   additionalProperties: false,
@@ -46,6 +48,64 @@ export const checkFilesInputSchema = {
         "When true, report known baseline findings instead of suppressing them.",
     },
   },
+} as const;
+
+export const reviewDiffInputSchema = {
+  type: "object",
+  additionalProperties: false,
+  properties: {
+    diff: {
+      type: "string",
+      minLength: 1,
+      maxLength: 2_000_000,
+      description:
+        "Standard unified Git diff text. The current working-tree files under the configured MCP root are analyzed, then findings are limited to added or modified lines from this diff.",
+    },
+    configPath: {
+      type: "string",
+      minLength: 1,
+      description:
+        "Optional Coding Bible config path relative to the MCP root.",
+    },
+    ignoreBaseline: {
+      type: "boolean",
+      description:
+        "When true, include findings already recorded in the project baseline.",
+    },
+  },
+  required: ["diff"],
+} as const;
+
+export const searchRulesInputSchema = {
+  type: "object",
+  additionalProperties: false,
+  properties: {
+    query: {
+      type: "string",
+      minLength: 1,
+      maxLength: 200,
+      description:
+        "Concept, rule ID, title fragment, tag, or framework term to search for.",
+    },
+    limit: {
+      type: "integer",
+      minimum: 1,
+      maximum: 20,
+      description: "Maximum number of ranked rule matches. Defaults to 10.",
+    },
+    pack: {
+      type: "string",
+      enum: rulePacks,
+      description: "Optional canonical Coding Bible rule-pack filter.",
+    },
+    status: {
+      type: "string",
+      enum: [...ruleStatuses, "all"],
+      description:
+        "Rule lifecycle status to search. Defaults to stable; use all only when draft/deprecated guidance is explicitly useful.",
+    },
+  },
+  required: ["query"],
 } as const;
 
 export const getRuleInputSchema = {

@@ -14,3 +14,4 @@
 | [009](009-browser-analyzer-mvp.md) | Browser analyzer MVP uses the TypeScript AST |
 | [010](010-agent-interface.md) | Generated, versioned agent interface |
 | [011](011-mcp-server.md) | Local read-only MCP server |
+| [012](012-mcp-adoption-and-diff-review.md) | MCP adoption and change-focused review |

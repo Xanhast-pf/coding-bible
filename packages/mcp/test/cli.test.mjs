@@ -14,10 +14,22 @@ test("parseMcpArguments resolves root and canonical URL", () => {
   assert.equal(result.rootDirectory, path.join(cwd, "project"));
   assert.equal(result.canonicalBaseUrl, "https://example.com/bible");
   assert.equal(result.help, false);
+  assert.equal(result.printConfig, null);
 });
 
-test("parseMcpArguments supports help and rejects unknown options", () => {
+test("parseMcpArguments supports config output and help", () => {
+  assert.equal(
+    parseMcpArguments(["--print-config", "cursor"]).printConfig,
+    "cursor",
+  );
   assert.equal(parseMcpArguments(["--help"]).help, true);
+});
+
+test("parseMcpArguments rejects invalid options", () => {
   assert.throws(() => parseMcpArguments(["--wat"]), /Unknown option/);
   assert.throws(() => parseMcpArguments(["--root"]), /requires a value/);
+  assert.throws(
+    () => parseMcpArguments(["--print-config", "unknown"]),
+    /Unknown MCP client/,
+  );
 });

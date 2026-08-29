@@ -4,27 +4,14 @@ import {
   type AnalyzerFinding,
   type AnalyzerLanguage,
 } from "@coding-bible/analyzer";
-import {
-  createAgentRuleUrl,
-  rules,
-  type RuleLevel,
-  type RulePack,
-} from "@coding-bible/rules";
 
 import { codingBibleCanonicalUrl } from "./constants.ts";
+import { createRuleReference, type McpRuleReference } from "./ruleReference.ts";
 
 export interface CheckCodeInput {
   code: string;
   language: AnalyzerLanguage;
   fileName?: string;
-}
-
-export interface McpRuleReference {
-  id: string;
-  level: RuleLevel;
-  pack: RulePack;
-  title: string;
-  url: string;
 }
 
 export interface McpCodeFinding extends AnalyzerFinding {
@@ -53,27 +40,6 @@ const defaultFileNameByLanguage = {
   ts: "snippet.ts",
   tsx: "snippet.tsx",
 } satisfies Record<AnalyzerLanguage, string>;
-
-const rulesById = new Map(rules.map((rule) => [rule.id, rule]));
-
-const createRuleReference = (
-  ruleId: string,
-  canonicalBaseUrl: string,
-): McpRuleReference => {
-  const rule = rulesById.get(ruleId);
-
-  if (!rule) {
-    throw new Error(`Analyzer returned unknown Coding Bible rule ${ruleId}.`);
-  }
-
-  return {
-    id: rule.id,
-    level: rule.level,
-    pack: rule.pack,
-    title: rule.title,
-    url: createAgentRuleUrl(canonicalBaseUrl, rule.id),
-  };
-};
 
 export const checkCode = (
   input: CheckCodeInput,

@@ -91,11 +91,15 @@ When changing MCP tools:
 2. Reuse the in-process analyzer for snippets and the existing project-aware CLI
    for filesystem scans rather than duplicating analyzer behavior.
 3. Preserve the configured root boundary for caller-supplied filesystem paths.
-4. Keep `check_files` free of analyzer cache writes so read-only tool annotations
-   remain honest.
-5. Keep protocol traffic on stdout and diagnostics/runtime logging on stderr.
-6. State deterministic analyzer coverage precisely; semantic review is not
+4. Keep filesystem-backed tools free of analyzer cache writes so read-only tool
+   annotations remain honest.
+5. Diff-review tools must filter analyzer output rather than duplicating detector
+   logic or silently treating unchanged context as newly introduced debt.
+6. Keep protocol traffic on stdout and diagnostics/runtime logging on stderr.
+7. State deterministic analyzer coverage precisely; semantic review is not
    implied by a clean scan.
+8. Keep client setup examples/config generation aligned with current host
+   documentation and covered by tests where the shapes differ.
 
 ## Commit quality gates
 
