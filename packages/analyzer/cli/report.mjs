@@ -42,6 +42,9 @@ export const createAnalyzerReport = (result, { patchFiles = null } = {}) => ({
   schemaVersion: 1,
   scope: result.scope,
   summary: {
+    baselineSuppressed: result.baseline?.suppressed ?? 0,
+    cacheHits: result.cache?.hits ?? 0,
+    cacheMisses: result.cache?.misses ?? 0,
     diagnostics: result.diagnostics.length,
     errors: result.errors,
     filesDiscovered: result.filesDiscovered,
@@ -56,6 +59,8 @@ export const createAnalyzerReport = (result, { patchFiles = null } = {}) => ({
     ).length,
     warnings: result.warnings,
   },
+  baseline: result.baseline ?? null,
+  cache: result.cache ?? null,
   project: {
     configPath: result.configPath,
     projectCount: result.projectCount,

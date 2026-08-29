@@ -17,7 +17,6 @@ const parseOptionalLimit = (name) => {
   if (raw === undefined) {
     return null;
   }
-
   const value = Number(raw);
   if (!Number.isFinite(value) || value <= 0) {
     throw new Error(`${name} must be a positive number when provided.`);
@@ -25,7 +24,8 @@ const parseOptionalLimit = (name) => {
   return value;
 };
 
-const maxMs = parseOptionalLimit("CODING_BIBLE_BENCH_MAX_MS");
+const maxColdMs = parseOptionalLimit("CODING_BIBLE_BENCH_MAX_MS");
+const maxWarmMs = parseOptionalLimit("CODING_BIBLE_BENCH_MAX_WARM_MS");
 const maxRssMb = parseOptionalLimit("CODING_BIBLE_BENCH_MAX_RSS_MB");
 
 const directory = await mkdtemp(path.join(os.tmpdir(), "coding-bible-bench-"));
@@ -47,29 +47,50 @@ try {
     ),
   );
 
-  const result = await checkPaths(["src"], {
+  const cold = await checkPaths(["src"], {
     cwd: directory,
     profile: true,
   });
-  const filesPerSecond = result.filesScanned / (result.profile.totalMs / 1000);
+  const warm = await checkPaths(["src"], {
+    cwd: directory,
+    profile: true,
+  });
+  const coldFilesPerSecond = cold.filesScanned / (cold.profile.totalMs / 1000);
+  const warmFilesPerSecond = warm.filesScanned / (warm.profile.totalMs / 1000);
 
-  console.log(`Coding Bible project benchmark`);
-  console.log(`  files       ${result.filesScanned}`);
-  console.log(`  total       ${result.profile.totalMs.toFixed(1)} ms`);
-  console.log(`  discovery   ${result.profile.discoveryMs.toFixed(1)} ms`);
-  console.log(`  program     ${result.profile.programMs.toFixed(1)} ms`);
-  console.log(`  analysis    ${result.profile.analysisMs.toFixed(1)} ms`);
-  console.log(`  throughput  ${filesPerSecond.toFixed(0)} files/s`);
-  console.log(`  rss         ${result.profile.rssMb.toFixed(1)} MB`);
+  console.log("Coding Bible project benchmark");
+  console.log(`  files       ${cold.filesScanned}`);
+  console.log(`  cold        ${cold.profile.totalMs.toFixed(1)} ms`);
+  console.log(
+    `    cache     ${cold.profile.cacheMs.toFixed(1)} ms ` +
+      `(${cold.profile.cacheHits} hits)`,
+  );
+  console.log(`    program   ${cold.profile.programMs.toFixed(1)} ms`);
+  console.log(`    analysis  ${cold.profile.analysisMs.toFixed(1)} ms`);
+  console.log(`    rate      ${coldFilesPerSecond.toFixed(0)} files/s`);
+  console.log(`  warm        ${warm.profile.totalMs.toFixed(1)} ms`);
+  console.log(
+    `    cache     ${warm.profile.cacheMs.toFixed(1)} ms ` +
+      `(${warm.profile.cacheHits} hits)`,
+  );
+  console.log(`    program   ${warm.profile.programMs.toFixed(1)} ms`);
+  console.log(`    analysis  ${warm.profile.analysisMs.toFixed(1)} ms`);
+  console.log(`    rate      ${warmFilesPerSecond.toFixed(0)} files/s`);
+  console.log(`  rss         ${warm.profile.rssMb.toFixed(1)} MB`);
 
-  if (maxMs !== null && result.profile.totalMs > maxMs) {
+  if (maxColdMs !== null && cold.profile.totalMs > maxColdMs) {
     throw new Error(
-      `Benchmark exceeded ${maxMs} ms (${result.profile.totalMs.toFixed(1)} ms).`,
+      `Cold benchmark exceeded ${maxColdMs} ms (${cold.profile.totalMs.toFixed(1)} ms).`,
     );
   }
-  if (maxRssMb !== null && result.profile.rssMb > maxRssMb) {
+  if (maxWarmMs !== null && warm.profile.totalMs > maxWarmMs) {
     throw new Error(
-      `Benchmark exceeded ${maxRssMb} MB RSS (${result.profile.rssMb.toFixed(1)} MB).`,
+      `Warm benchmark exceeded ${maxWarmMs} ms (${warm.profile.totalMs.toFixed(1)} ms).`,
+    );
+  }
+  if (maxRssMb !== null && warm.profile.rssMb > maxRssMb) {
+    throw new Error(
+      `Benchmark exceeded ${maxRssMb} MB RSS (${warm.profile.rssMb.toFixed(1)} MB).`,
     );
   }
 } finally {

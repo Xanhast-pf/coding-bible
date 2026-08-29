@@ -6,6 +6,7 @@
     "node": ">=24"
   },
   "scripts": {
+    "bible:baseline": "node packages/analyzer/bin/coding-bible.mjs baseline create .",
     "bible:check": "node packages/analyzer/bin/coding-bible.mjs check .",
     "bible:staged": "node packages/analyzer/bin/coding-bible.mjs check . --staged",
     "build": "pnpm -r --if-present build",
