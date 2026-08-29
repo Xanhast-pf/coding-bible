@@ -99,8 +99,25 @@ coding-bible check . --since origin/main
 Projects can add `coding-bible.config.ts` to choose include/ignore patterns,
 enable or disable automated packs/rules, set error versus warning severity, and
 apply file-specific overrides. Git-aware scopes report only requested changes
-while retaining project context for analysis. `--profile` exposes scanner phase
-timings and memory use.
+while retaining project context for analysis. Project-result caching is enabled by
+default under the ignored `.coding-bible/cache/` directory; unchanged projects
+can reuse validated file results without rebuilding a TypeScript Program. Use
+`--no-cache` for a cold run or `--clear-cache` to reset it. `--profile` exposes
+cache hit/miss counts alongside scanner phase timings and memory use.
+
+Existing projects can adopt Coding Bible without fixing all historical debt in
+one commit:
+
+```bash
+coding-bible baseline create .
+coding-bible check .
+coding-bible check . --no-baseline
+```
+
+The committable `.coding-bible-baseline.json` stores stable finding fingerprints.
+Known findings are suppressed, while changed/new violations and syntax errors
+still surface normally. Baselines are intentionally separate from the disposable
+cache.
 
 Analyzer results can also be exported without modifying source files:
 

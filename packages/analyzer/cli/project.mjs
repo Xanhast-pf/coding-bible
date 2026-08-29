@@ -101,6 +101,7 @@ const loadTsConfig = (cwd, configPath) => {
       configPath: null,
       fileNames: [],
       options: defaultCompilerOptions,
+      projectReferences: [],
     };
   }
 
@@ -128,6 +129,7 @@ const loadTsConfig = (cwd, configPath) => {
       allowJs: true,
       noEmit: true,
     },
+    projectReferences: parsed.projectReferences ?? [],
   };
 };
 
@@ -191,22 +193,33 @@ export const createProjectPlans = (
     .map(([configPath, files]) => ({ configPath, files }));
 };
 
-export const createProjectProgram = (plan, { cwd = process.cwd() } = {}) => {
-  const startedAt = performance.now();
+export const prepareProjectPlan = (plan, { cwd = process.cwd() } = {}) => {
   const project = loadTsConfig(cwd, plan.configPath);
   const rootNames = [...new Set([...project.fileNames, ...plan.files])].sort(
     (left, right) => left.localeCompare(right),
   );
-  const program = ts.createProgram({
-    options: project.options,
-    rootNames,
-  });
 
   return {
     files: plan.files,
+    options: project.options,
+    projectReferences: project.projectReferences,
+    rootNames,
+    tsconfigPath: project.configPath,
+  };
+};
+
+export const createProjectProgram = (project) => {
+  const startedAt = performance.now();
+  const program = ts.createProgram({
+    options: project.options,
+    projectReferences: project.projectReferences,
+    rootNames: project.rootNames,
+  });
+
+  return {
+    ...project,
     program,
     programMs: performance.now() - startedAt,
-    projectFiles: rootNames.length,
-    tsconfigPath: project.configPath,
+    projectFiles: project.rootNames.length,
   };
 };

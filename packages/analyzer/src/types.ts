@@ -23,6 +23,8 @@ export interface AnalyzerConfigOverride {
 }
 
 export interface AnalyzerConfig {
+  baseline?: string | false;
+  cache?: string | boolean;
   include?: readonly string[];
   ignore?: readonly string[];
   ignoreDefaults?: boolean;

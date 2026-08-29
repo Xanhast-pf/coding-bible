@@ -16,6 +16,8 @@ const configFileNames = [
 
 const validRuleSettings = new Set(["error", "warning", "off"]);
 const validConfigKeys = new Set([
+  "baseline",
+  "cache",
   "include",
   "ignore",
   "ignoreDefaults",
@@ -95,6 +97,24 @@ const validateConfig = (config) => {
     if (!validConfigKeys.has(key)) {
       throw new Error(`Unknown Coding Bible config option "${key}".`);
     }
+  }
+
+  if (
+    config.baseline !== undefined &&
+    config.baseline !== false &&
+    (typeof config.baseline !== "string" || !config.baseline.trim())
+  ) {
+    throw new Error("baseline must be a non-empty path string or false.");
+  }
+  if (
+    config.cache !== undefined &&
+    config.cache !== false &&
+    config.cache !== true &&
+    (typeof config.cache !== "string" || !config.cache.trim())
+  ) {
+    throw new Error(
+      "cache must be true, false, or a non-empty directory path.",
+    );
   }
 
   assertStringArray(config.include, "include");

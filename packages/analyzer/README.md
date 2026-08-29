@@ -24,6 +24,9 @@ coding-bible check . --staged
 coding-bible check . --since origin/main
 coding-bible check . --json
 coding-bible check . --profile
+coding-bible check . --no-cache
+coding-bible baseline create .
+coding-bible check . --no-baseline
 coding-bible check . --report --patch
 coding-bible check . --report --patch --include-review-fixes
 ```
@@ -38,6 +41,39 @@ Git scopes affect which files are reported, not the TypeScript context used to
 understand them. `--since` includes committed branch changes plus current local
 changes; `--changed` covers the working tree and untracked files; `--staged`
 checks only the index.
+
+### Cache and baselines
+
+Project-result caching is enabled by default at `.coding-bible/cache/`. A cached
+result is reused only when the complete tsconfig project source set, compiler
+options, Coding Bible config, dependency metadata, TypeScript version, and
+analyzer implementation signature are unchanged. Project-reference graphs are
+currently analyzed normally instead of cached. This deliberately favors a cold
+rebuild over a questionable cache hit.
+
+```bash
+coding-bible check . --profile
+coding-bible check . --no-cache
+coding-bible check . --clear-cache
+```
+
+`--profile` reports cache hashing time plus file hit/miss counts. Cache data is
+disposable and belongs under the ignored `.coding-bible/` directory. Set
+`cache: false` or a custom cache directory in config when needed.
+
+Baselines solve a different problem: adopting Coding Bible in a repository that
+already contains known violations. Create one with:
+
+```bash
+coding-bible baseline create .
+```
+
+The default `.coding-bible-baseline.json` is intended to be committed. Ordinary
+checks suppress findings with matching stable fingerprints; line movement does
+not invalidate an entry, while changing the offending code does. Syntax errors
+are never suppressed. Use `--no-baseline` to audit the full current debt or
+`--baseline-file <path>` to override the configured path. Set `baseline: false`
+to disable automatic baseline loading.
 
 ### Reports and proposed fixes
 
@@ -80,6 +116,12 @@ directory as the project root. Supported extensions are `.ts`, `.mts`, `.mjs`,
 import { defineConfig } from "@coding-bible/analyzer";
 
 export default defineConfig({
+  // Disposable warm-scan results. Use false to disable.
+  cache: ".coding-bible/cache",
+
+  // Committable known-debt fingerprint file. Use false to disable.
+  baseline: ".coding-bible-baseline.json",
+
   include: ["src/**/*"],
 
   // Set ignoreDefaults: false only if you intentionally want to scan build,
@@ -163,15 +205,17 @@ config instead of being forced through an invented root compiler setup.
 
 Disabled rules are removed before detector execution. Analysis accepts an
 `AbortSignal`, allowing future editor/agent consumers to cancel stale work.
-`--profile` reports configuration, discovery, Program construction, detector
-runtime, total wall time, and resident memory.
+Warm project scans can reuse validated per-file results and skip TypeScript
+Program construction entirely when the full project signature is unchanged.
+`--profile` reports configuration, discovery, cache hashing/hits, Program
+construction, detector runtime, total wall time, and resident memory.
 
 Run the optional synthetic project benchmark with:
 
 ```bash
 node packages/analyzer/bench/project-benchmark.mjs
 CODING_BIBLE_BENCH_FILES=5000 node packages/analyzer/bench/project-benchmark.mjs
-CODING_BIBLE_BENCH_MAX_MS=2500 CODING_BIBLE_BENCH_MAX_RSS_MB=512 node packages/analyzer/bench/project-benchmark.mjs
+CODING_BIBLE_BENCH_MAX_MS=2500 CODING_BIBLE_BENCH_MAX_WARM_MS=500 CODING_BIBLE_BENCH_MAX_RSS_MB=512 node packages/analyzer/bench/project-benchmark.mjs
 ```
 
 Every automated rule is contract-tested against the registry: its exact DON'T

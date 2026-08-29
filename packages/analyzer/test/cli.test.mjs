@@ -753,3 +753,235 @@ test("review fix export requires patch export", async () => {
   assert.equal(exitCode, 2);
   assert.match(stderr.value, /requires --patch/);
 });
+
+test("project cache skips Program construction on an unchanged warm scan", async () => {
+  await withFixture(async (directory) => {
+    await mkdir(path.join(directory, "src"), { recursive: true });
+    await writeFile(
+      path.join(directory, "tsconfig.json"),
+      JSON.stringify({ compilerOptions: { strict: true }, include: ["src"] }),
+    );
+    await writeFile(
+      path.join(directory, "src", "index.ts"),
+      "export const value: any = 1;\n",
+    );
+
+    const first = await checkPaths(["src"], { cwd: directory, profile: true });
+    const second = await checkPaths(["src"], { cwd: directory, profile: true });
+
+    assert.equal(first.cache.hits, 0);
+    assert.equal(first.cache.misses, 1);
+    assert.equal(second.cache.hits, 1);
+    assert.equal(second.cache.misses, 0);
+    assert.equal(second.profile.programMs, 0);
+    assert.equal(second.findings[0]?.ruleId, "TS-001");
+  });
+});
+
+test("project cache invalidates when another file in the same tsconfig project changes", async () => {
+  await withFixture(async (directory) => {
+    await mkdir(path.join(directory, "src"), { recursive: true });
+    await writeFile(
+      path.join(directory, "tsconfig.json"),
+      JSON.stringify({ compilerOptions: { strict: true }, include: ["src"] }),
+    );
+    await writeFile(
+      path.join(directory, "src", "target.ts"),
+      "export const target: any = 1;\n",
+    );
+    const sibling = path.join(directory, "src", "sibling.ts");
+    await writeFile(sibling, "export const sibling = 1;\n");
+
+    await checkPaths([path.join("src", "target.ts")], {
+      cwd: directory,
+      profile: true,
+    });
+    const warm = await checkPaths([path.join("src", "target.ts")], {
+      cwd: directory,
+      profile: true,
+    });
+    assert.equal(warm.cache.hits, 1);
+
+    await writeFile(sibling, "export const sibling = 2;\n");
+    const invalidated = await checkPaths([path.join("src", "target.ts")], {
+      cwd: directory,
+      profile: true,
+    });
+
+    assert.equal(invalidated.cache.hits, 0);
+    assert.equal(invalidated.cache.misses, 1);
+    assert.ok(invalidated.profile.programMs > 0);
+  });
+});
+
+test("--no-cache bypasses cached analyzer results", async () => {
+  await withFixture(async (directory) => {
+    await writeFile(path.join(directory, "bad.ts"), "const value: any = 1;\n");
+    await checkPaths(["."], { cwd: directory, profile: true });
+    const stdout = createWriter();
+    const stderr = createWriter();
+
+    const exitCode = await runCli(["check", ".", "--no-cache", "--profile"], {
+      cwd: directory,
+      stderr,
+      stdout,
+    });
+
+    assert.equal(exitCode, 1);
+    assert.equal(stderr.value, "");
+    assert.match(stdout.value, /0 hits, 0 misses/);
+  });
+});
+
+test("baseline creation suppresses known findings but --no-baseline reveals them", async () => {
+  await withFixture(async (directory) => {
+    const filePath = path.join(directory, "bad.ts");
+    await writeFile(filePath, "const value: any = 1;\n");
+    const baselineStdout = createWriter();
+
+    const baselineExitCode = await runCli(["baseline", "create", "."], {
+      cwd: directory,
+      stderr: createWriter(),
+      stdout: baselineStdout,
+    });
+
+    assert.equal(baselineExitCode, 0);
+    assert.match(baselineStdout.value, /baseline with 1 finding/);
+    const baseline = JSON.parse(
+      await readFile(
+        path.join(directory, ".coding-bible-baseline.json"),
+        "utf8",
+      ),
+    );
+    assert.equal(baseline.schemaVersion, 1);
+    assert.equal(baseline.findings.length, 1);
+    assert.match(baseline.findings[0].fingerprint, /^[a-f0-9]{24}$/);
+
+    const cleanStdout = createWriter();
+    const cleanExitCode = await runCli(["check", "."], {
+      cwd: directory,
+      stderr: createWriter(),
+      stdout: cleanStdout,
+    });
+    assert.equal(cleanExitCode, 0);
+    assert.match(cleanStdout.value, /1 known baseline finding was suppressed/);
+
+    const rawStdout = createWriter();
+    const rawExitCode = await runCli(["check", ".", "--no-baseline"], {
+      cwd: directory,
+      stderr: createWriter(),
+      stdout: rawStdout,
+    });
+    assert.equal(rawExitCode, 1);
+    assert.match(rawStdout.value, /TS-001/);
+  });
+});
+
+test("baseline fingerprints survive line movement but expose changed violations", async () => {
+  await withFixture(async (directory) => {
+    const filePath = path.join(directory, "bad.ts");
+    await writeFile(filePath, "const value: any = 1;\n");
+    await runCli(["baseline", "create", "."], {
+      cwd: directory,
+      stderr: createWriter(),
+      stdout: createWriter(),
+    });
+
+    await writeFile(filePath, "// unrelated line\nconst value: any = 1;\n");
+    const moved = await checkPaths(["."], { cwd: directory });
+    assert.equal(moved.findings.length, 0);
+    assert.equal(moved.baseline?.suppressed, 1);
+
+    await writeFile(filePath, "// unrelated line\nconst changed: any = 1;\n");
+    const changed = await checkPaths(["."], { cwd: directory });
+    assert.equal(changed.findings.length, 1);
+    assert.equal(changed.findings[0]?.ruleId, "TS-001");
+    assert.equal(changed.baseline?.suppressed, 0);
+  });
+});
+
+test("baseline never hides malformed source diagnostics", async () => {
+  await withFixture(async (directory) => {
+    await writeFile(path.join(directory, "bad.ts"), "const value: any = 1;\n");
+    await runCli(["baseline", "create", "."], {
+      cwd: directory,
+      stderr: createWriter(),
+      stdout: createWriter(),
+    });
+    await writeFile(path.join(directory, "bad.ts"), "const value = ;\n");
+
+    const result = await checkPaths(["."], { cwd: directory });
+
+    assert.equal(result.findings.length, 0);
+    assert.equal(result.diagnostics.length, 1);
+  });
+});
+
+test("project cache invalidates when analyzer configuration changes", async () => {
+  await withFixture(async (directory) => {
+    await writeFile(path.join(directory, "bad.ts"), "const value: any = 1;\n");
+
+    const first = await checkPaths(["."], { cwd: directory, profile: true });
+    const warm = await checkPaths(["."], { cwd: directory, profile: true });
+    assert.equal(first.findings.length, 1);
+    assert.equal(warm.cache.hits, 1);
+
+    await writeFile(
+      path.join(directory, "coding-bible.config.mjs"),
+      'export default { rules: { "TS-001": "off" } };\n',
+    );
+    const changed = await checkPaths(["."], { cwd: directory, profile: true });
+
+    assert.equal(changed.cache.hits, 0);
+    assert.ok(changed.cache.misses > 0);
+    assert.equal(changed.findings.length, 0);
+    assert.equal(changed.ruleIdsChecked.includes("TS-001"), false);
+  });
+});
+
+test("--clear-cache removes warm results before analysis", async () => {
+  await withFixture(async (directory) => {
+    await writeFile(path.join(directory, "bad.ts"), "const value: any = 1;\n");
+    await checkPaths(["."], { cwd: directory, profile: true });
+    const stdout = createWriter();
+    const stderr = createWriter();
+
+    const exitCode = await runCli(
+      ["check", ".", "--clear-cache", "--profile"],
+      {
+        cwd: directory,
+        stderr,
+        stdout,
+      },
+    );
+
+    assert.equal(exitCode, 1);
+    assert.equal(stderr.value, "");
+    assert.match(stdout.value, /0 hits, 1 misses/);
+  });
+});
+
+test("config validates custom cache and baseline settings", async () => {
+  await withFixture(async (directory) => {
+    await writeFile(path.join(directory, "good.ts"), "const value = 1;\n");
+    await writeFile(
+      path.join(directory, "coding-bible.config.mjs"),
+      `export default {
+  cache: ".cache/coding-bible",
+  baseline: "config/bible-baseline.json",
+};\n`,
+    );
+
+    const stdout = createWriter();
+    const exitCode = await runCli(["config", "--json"], {
+      cwd: directory,
+      stderr: createWriter(),
+      stdout,
+    });
+    const config = JSON.parse(stdout.value);
+
+    assert.equal(exitCode, 0);
+    assert.equal(config.cache, ".cache/coding-bible");
+    assert.equal(config.baseline, "config/bible-baseline.json");
+  });
+});
