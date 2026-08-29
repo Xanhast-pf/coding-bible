@@ -60,7 +60,7 @@ test("checkPaths returns file-aware analyzer findings", async () => {
     assert.equal(result.findings.length, 1);
     assert.equal(result.findings[0]?.filePath, path.join("src", "bad.ts"));
     assert.equal(result.findings[0]?.ruleId, "TS-001");
-    assert.equal(result.ruleIdsChecked.length, 19);
+    assert.equal(result.ruleIdsChecked.length, 11);
   });
 });
 
@@ -80,7 +80,7 @@ test("runCli exits non-zero for findings and supports JSON output", async () => 
     assert.equal(exitCode, 1);
     assert.equal(stderr.value, "");
     assert.equal(result.findings[0].ruleId, "TS-001");
-    assert.equal(result.ruleIdsChecked.length, 19);
+    assert.equal(result.ruleIdsChecked.length, 11);
   });
 });
 
@@ -99,7 +99,38 @@ test("CLI clean summary states automated coverage instead of implying a full rev
 
     assert.equal(exitCode, 0);
     assert.equal(stderr.value, "");
-    assert.match(stdout.value, /19 automated rules/);
+    assert.match(stdout.value, /11 applicable automated rules/);
     assert.doesNotMatch(stdout.value, /found no issues/);
+  });
+});
+
+test("CLI reports syntax errors and exits non-zero before rule findings", async () => {
+  await withFixture(async (directory) => {
+    await writeFile(path.join(directory, "broken.tsx"), "const View = () => <div>\n");
+    const stdout = createWriter();
+    const stderr = createWriter();
+
+    const exitCode = await runCli(["check", "."], {
+      cwd: directory,
+      stderr,
+      stdout,
+    });
+
+    assert.equal(exitCode, 1);
+    assert.equal(stderr.value, "");
+    assert.match(stdout.value, /syntax issue/);
+    assert.match(stdout.value, /rule checks/i);
+  });
+});
+
+test("CLI reports the union of rules actually applicable to scanned languages", async () => {
+  await withFixture(async (directory) => {
+    await writeFile(path.join(directory, "logic.ts"), "const value = 1;\n");
+    await writeFile(path.join(directory, "view.tsx"), "export const View = () => <div />;\n");
+
+    const result = await checkPaths(["."], { cwd: directory });
+
+    assert.equal(result.ruleIdsChecked.length, 19);
+    assert.equal(result.diagnostics.length, 0);
   });
 });

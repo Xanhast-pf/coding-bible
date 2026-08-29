@@ -40,7 +40,7 @@ export const graphqlRules = [
     },
     good: {
       language: "ts",
-      code: "const document = gql`\n  query UserQuery($id: ID!) {\n    user(id: $id) { id name }\n  }\n`;\n\nuseQuery(document, { variables: { id: userId } });",
+      code: "const document = gql`\n  query UserQuery($id: ID!) {\n    user(id: $id) { id name }\n  }\n`;\n\nclient.query({ query: document, variables: { id: userId } });",
     },
     references: [{ label: "GraphQL — Queries", url: "https://graphql.org/learn/queries/" }],
     detection: { autoFixable: false, detectable: true, strategy: "ast" },

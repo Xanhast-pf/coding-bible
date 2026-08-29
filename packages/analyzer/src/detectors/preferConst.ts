@@ -1,7 +1,7 @@
 import ts from "typescript";
 
-import type { AnalyzerFinding, Detector } from "../types.ts";
-import { createFinding, visit } from "../utils.ts";
+import type { AnalyzerFinding, Detector, DetectorContext } from "../types.ts";
+import { createFinding, getReferences, getSymbol, nodesOfKind } from "../utils.ts";
 
 const assignmentOperators = new Set<ts.SyntaxKind>([
   ts.SyntaxKind.EqualsToken,
@@ -22,70 +22,73 @@ const assignmentOperators = new Set<ts.SyntaxKind>([
   ts.SyntaxKind.QuestionQuestionEqualsToken,
 ]);
 
-const collectAssignedNames = (sourceFile: ts.SourceFile) => {
-  const names = new Set<string>();
+const collectBindingIdentifiers = (name: ts.BindingName): ts.Identifier[] => {
+  if (ts.isIdentifier(name)) {
+    return [name];
+  }
 
-  const collectTargetNames = (target: ts.Node) => {
-    if (ts.isIdentifier(target)) {
-      names.add(target.text);
-      return;
-    }
+  return name.elements.flatMap((element) =>
+    ts.isBindingElement(element) ? collectBindingIdentifiers(element.name) : [],
+  );
+};
 
-    if (ts.isArrayBindingPattern(target) || ts.isArrayLiteralExpression(target)) {
-      for (const element of target.elements) {
-        if (ts.isBindingElement(element)) {
-          collectTargetNames(element.name);
-        } else if (ts.isExpression(element)) {
-          collectTargetNames(element);
-        }
-      }
-      return;
-    }
+const containsNode = (ancestor: ts.Node, candidate: ts.Node) =>
+  candidate.pos >= ancestor.pos && candidate.end <= ancestor.end;
 
-    if (ts.isObjectBindingPattern(target)) {
-      for (const element of target.elements) {
-        collectTargetNames(element.name);
-      }
-      return;
-    }
+const isWriteReference = (identifier: ts.Identifier) => {
+  let current: ts.Node = identifier;
 
-    if (ts.isObjectLiteralExpression(target)) {
-      for (const property of target.properties) {
-        if (ts.isShorthandPropertyAssignment(property)) {
-          names.add(property.name.text);
-        } else if (ts.isPropertyAssignment(property)) {
-          collectTargetNames(property.initializer);
-        } else if (ts.isSpreadAssignment(property)) {
-          collectTargetNames(property.expression);
-        }
-      }
-    }
-  };
+  while (current.parent) {
+    const parent = current.parent;
 
-  visit(sourceFile, (node) => {
-    if (ts.isBinaryExpression(node) && assignmentOperators.has(node.operatorToken.kind)) {
-      collectTargetNames(node.left);
-      return;
+    if (
+      ts.isBinaryExpression(parent) &&
+      assignmentOperators.has(parent.operatorToken.kind) &&
+      containsNode(parent.left, identifier)
+    ) {
+      return true;
     }
 
     if (
-      (ts.isPrefixUnaryExpression(node) || ts.isPostfixUnaryExpression(node)) &&
-      (node.operator === ts.SyntaxKind.PlusPlusToken ||
-        node.operator === ts.SyntaxKind.MinusMinusToken)
+      (ts.isPrefixUnaryExpression(parent) || ts.isPostfixUnaryExpression(parent)) &&
+      (parent.operator === ts.SyntaxKind.PlusPlusToken ||
+        parent.operator === ts.SyntaxKind.MinusMinusToken) &&
+      containsNode(parent.operand, identifier)
     ) {
-      collectTargetNames(node.operand);
-      return;
+      return true;
     }
 
     if (
-      (ts.isForInStatement(node) || ts.isForOfStatement(node)) &&
-      !ts.isVariableDeclarationList(node.initializer)
+      (ts.isForInStatement(parent) || ts.isForOfStatement(parent)) &&
+      !ts.isVariableDeclarationList(parent.initializer) &&
+      containsNode(parent.initializer, identifier)
     ) {
-      collectTargetNames(node.initializer);
+      return true;
     }
-  });
 
-  return names;
+    if (
+      ts.isStatement(parent) ||
+      ts.isVariableDeclaration(parent) ||
+      ts.isParameter(parent)
+    ) {
+      return false;
+    }
+
+    current = parent;
+  }
+
+  return false;
+};
+
+const isReassigned = (context: DetectorContext, identifier: ts.Identifier) => {
+  const symbol = getSymbol(context, identifier);
+  if (!symbol) {
+    return true;
+  }
+
+  return getReferences(context, identifier).some(
+    (reference) => reference !== identifier && isWriteReference(reference),
+  );
 };
 
 const isLoopInitializer = (node: ts.VariableDeclarationList) => {
@@ -101,36 +104,37 @@ export const preferConstDetector: Detector = {
   ruleId: "CORE-003",
   analyze: (context) => {
     const findings: AnalyzerFinding[] = [];
-    const assignedNames = collectAssignedNames(context.sourceFile);
 
-    visit(context.sourceFile, (node) => {
-      if (
-        !ts.isVariableDeclarationList(node) ||
-        !(node.flags & ts.NodeFlags.Let) ||
-        isLoopInitializer(node)
-      ) {
-        return;
+    for (const node of nodesOfKind<ts.VariableDeclarationList>(
+      context,
+      ts.SyntaxKind.VariableDeclarationList,
+    )) {
+      if (!(node.flags & ts.NodeFlags.Let) || isLoopInitializer(node)) {
+        continue;
       }
 
-      for (const declaration of node.declarations) {
-        if (
-          !declaration.initializer ||
-          !ts.isIdentifier(declaration.name) ||
-          assignedNames.has(declaration.name.text)
-        ) {
-          continue;
-        }
+      const initializedBindings = node.declarations.flatMap((declaration) =>
+        declaration.initializer ? collectBindingIdentifiers(declaration.name) : [],
+      );
 
+      if (
+        !initializedBindings.length ||
+        initializedBindings.some((identifier) => isReassigned(context, identifier))
+      ) {
+        continue;
+      }
+
+      for (const identifier of initializedBindings) {
         findings.push(
-          createFinding(context, declaration.name, {
+          createFinding(context, identifier, {
             detectorId: "prefer-const",
-            message: `\`${declaration.name.text}\` is declared with \`let\` but is never reassigned.`,
+            message: `\`${identifier.text}\` is declared with \`let\` but is never reassigned.`,
             ruleId: "CORE-003",
             suggestion: "Use `const` so the binding contract is explicit.",
           }),
         );
       }
-    });
+    }
 
     return findings;
   },

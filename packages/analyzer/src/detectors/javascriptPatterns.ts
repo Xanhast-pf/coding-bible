@@ -1,7 +1,14 @@
 import ts from "typescript";
 
 import type { AnalyzerFinding, Detector } from "../types.ts";
-import { createFinding, isExecutableFunction, visit } from "../utils.ts";
+import {
+  createFinding,
+  getSymbol,
+  isExecutableFunction,
+  nodesOfKind,
+  unwrapExpression,
+  visit,
+} from "../utils.ts";
 
 const flattenLogicalAnd = (expression: ts.Expression): ts.Expression[] => {
   if (
@@ -17,14 +24,29 @@ const flattenLogicalAnd = (expression: ts.Expression): ts.Expression[] => {
   return [expression];
 };
 
+const getStaticElementName = (expression: ts.ElementAccessExpression) => {
+  const argument = expression.argumentExpression;
+  return argument && (ts.isStringLiteral(argument) || ts.isNumericLiteral(argument))
+    ? argument.text
+    : null;
+};
+
 const getPropertyPath = (expression: ts.Expression): readonly string[] | null => {
-  if (ts.isIdentifier(expression)) {
-    return [expression.text];
+  const candidate = unwrapExpression(expression);
+
+  if (ts.isIdentifier(candidate)) {
+    return [candidate.text];
   }
 
-  if (ts.isPropertyAccessExpression(expression)) {
-    const parentPath = getPropertyPath(expression.expression);
-    return parentPath ? [...parentPath, expression.name.text] : null;
+  if (ts.isPropertyAccessExpression(candidate)) {
+    const parentPath = getPropertyPath(candidate.expression);
+    return parentPath ? [...parentPath, candidate.name.text] : null;
+  }
+
+  if (ts.isElementAccessExpression(candidate)) {
+    const parentPath = getPropertyPath(candidate.expression);
+    const elementName = getStaticElementName(candidate);
+    return parentPath && elementName !== null ? [...parentPath, elementName] : null;
   }
 
   return null;
@@ -39,19 +61,21 @@ export const optionalChainingDetector: Detector = {
   analyze: (context) => {
     const findings: AnalyzerFinding[] = [];
 
-    visit(context.sourceFile, (node) => {
+    for (const node of nodesOfKind<ts.BinaryExpression>(
+      context,
+      ts.SyntaxKind.BinaryExpression,
+    )) {
       if (
-        !ts.isBinaryExpression(node) ||
         node.operatorToken.kind !== ts.SyntaxKind.AmpersandAmpersandToken ||
         (ts.isBinaryExpression(node.parent) &&
           node.parent.operatorToken.kind === ts.SyntaxKind.AmpersandAmpersandToken)
       ) {
-        return;
+        continue;
       }
 
       const operands = flattenLogicalAnd(node);
       if (operands.length < 2) {
-        return;
+        continue;
       }
 
       const paths = operands.map(getPropertyPath);
@@ -62,7 +86,7 @@ export const optionalChainingDetector: Detector = {
           return Boolean(previous && path && isExtendingPath(previous, path));
         })
       ) {
-        return;
+        continue;
       }
 
       findings.push(
@@ -74,14 +98,46 @@ export const optionalChainingDetector: Detector = {
             "Use optional chaining when null/undefined are the values you intend to guard against.",
         }),
       );
-    });
+    }
 
     return findings;
   },
 };
 
+const typeContainsNull = (type: ts.TypeNode | undefined): boolean => {
+  if (!type) {
+    return false;
+  }
+
+  if (
+    type.kind === ts.SyntaxKind.NullKeyword ||
+    (ts.isLiteralTypeNode(type) && type.literal.kind === ts.SyntaxKind.NullKeyword)
+  ) {
+    return true;
+  }
+
+  return ts.isUnionTypeNode(type) && type.types.some(typeContainsNull);
+};
+
+const typeContainsUndefined = (type: ts.TypeNode | undefined): boolean => {
+  if (!type) {
+    return false;
+  }
+
+  if (type.kind === ts.SyntaxKind.UndefinedKeyword) {
+    return true;
+  }
+
+  return ts.isUnionTypeNode(type) && type.types.some(typeContainsUndefined);
+};
+
+const isUndefinedOnlyDefaultCandidate = (parameter: ts.ParameterDeclaration) =>
+  !typeContainsNull(parameter.type) &&
+  (Boolean(parameter.questionToken) || typeContainsUndefined(parameter.type));
+
 export const defaultParameterDetector: Detector = {
   id: "default-parameter-normalization",
+  languages: ["ts", "tsx"],
   ruleId: "JS-003",
   analyze: (context) => {
     const findings: AnalyzerFinding[] = [];
@@ -93,11 +149,13 @@ export const defaultParameterDetector: Detector = {
 
       const parameters = new Map(
         node.parameters
-          .filter((parameter) => ts.isIdentifier(parameter.name) && !parameter.initializer)
-          .map((parameter) => [
-            (parameter.name as ts.Identifier).text,
-            parameter,
-          ]),
+          .filter(
+            (parameter) =>
+              ts.isIdentifier(parameter.name) &&
+              !parameter.initializer &&
+              isUndefinedOnlyDefaultCandidate(parameter),
+          )
+          .map((parameter) => [(parameter.name as ts.Identifier).text, parameter]),
       );
 
       if (!parameters.size) {
@@ -142,42 +200,110 @@ const nonMutatingReplacementByMethod = new Map([
   ["reverse", "toReversed"],
 ]);
 
+const getReadableReceiver = (expression: ts.Expression) => {
+  const candidate = unwrapExpression(expression);
+  if (
+    ts.isIdentifier(candidate) ||
+    ts.isPropertyAccessExpression(candidate) ||
+    ts.isElementAccessExpression(candidate)
+  ) {
+    return candidate.getText();
+  }
+
+  return null;
+};
+
+const isFreshCollectionInitializer = (expression: ts.Expression): boolean => {
+  const candidate = unwrapExpression(expression);
+
+  if (ts.isArrayLiteralExpression(candidate)) {
+    return true;
+  }
+
+  if (!ts.isCallExpression(candidate)) {
+    return false;
+  }
+
+  if (
+    ts.isPropertyAccessExpression(candidate.expression) &&
+    ts.isIdentifier(candidate.expression.expression) &&
+    candidate.expression.expression.text === "Array" &&
+    candidate.expression.name.text === "from"
+  ) {
+    return true;
+  }
+
+  return (
+    ts.isPropertyAccessExpression(candidate.expression) &&
+    ["concat", "slice", "toReversed", "toSorted", "toSpliced"].includes(
+      candidate.expression.name.text,
+    )
+  );
+};
+
+const isFreshLocalCollection = (
+  context: Parameters<typeof getSymbol>[0],
+  expression: ts.Expression,
+) => {
+  const candidate = unwrapExpression(expression);
+  if (!ts.isIdentifier(candidate)) {
+    return false;
+  }
+
+  const symbol = getSymbol(context, candidate);
+  return Boolean(
+    symbol?.declarations?.some(
+      (declaration) =>
+        ts.isVariableDeclaration(declaration) &&
+        declaration.initializer &&
+        isFreshCollectionInitializer(declaration.initializer),
+    ),
+  );
+};
+
 export const nonMutatingCollectionDetector: Detector = {
   id: "non-mutating-collection-copy",
   ruleId: "JS-006",
   analyze: (context) => {
     const findings: AnalyzerFinding[] = [];
 
-    visit(context.sourceFile, (node) => {
+    for (const node of nodesOfKind<ts.VariableDeclaration>(
+      context,
+      ts.SyntaxKind.VariableDeclaration,
+    )) {
       if (
-        !ts.isVariableDeclaration(node) ||
         !ts.isIdentifier(node.name) ||
         !node.initializer ||
         !ts.isCallExpression(node.initializer) ||
-        !ts.isPropertyAccessExpression(node.initializer.expression) ||
-        !ts.isIdentifier(node.initializer.expression.expression)
+        !ts.isPropertyAccessExpression(node.initializer.expression)
       ) {
-        return;
+        continue;
       }
 
-      const receiver = node.initializer.expression.expression;
+      const receiverExpression = node.initializer.expression.expression;
       const method = node.initializer.expression.name.text;
       const replacement = nonMutatingReplacementByMethod.get(method);
+      const receiver = getReadableReceiver(receiverExpression);
 
-      if (!replacement || receiver.text === node.name.text) {
-        return;
+      if (
+        !replacement ||
+        !receiver ||
+        receiver === node.name.text ||
+        isFreshLocalCollection(context, receiverExpression)
+      ) {
+        continue;
       }
 
       findings.push(
         createFinding(context, node.initializer, {
           detectorId: "non-mutating-collection-copy",
           message:
-            `\`${receiver.text}.${method}()\` mutates \`${receiver.text}\` while its result is stored as a separate value.`,
+            `\`${receiver}.${method}()\` mutates \`${receiver}\` while its result is stored as a separate value.`,
           ruleId: "JS-006",
-          suggestion: `Use \`${receiver.text}.${replacement}(...)\` when the original collection should remain unchanged.`,
+          suggestion: `Use \`${receiver}.${replacement}(...)\` when the original collection should remain unchanged.`,
         }),
       );
-    });
+    }
 
     return findings;
   },

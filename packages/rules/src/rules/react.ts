@@ -279,11 +279,11 @@ export const reactRules = [
     tags: ["dependencies", "effects", "hooks", "react"],
     bad: {
       language: "tsx",
-      code: "useEffect(() => {\n  loadUser(userId);\n  // eslint-disable-next-line react-hooks/exhaustive-deps\n}, []);",
+      code: "const UserPanel = ({ userId }) => {\n  useEffect(() => {\n    loadUser(userId);\n    // eslint-disable-next-line react-hooks/exhaustive-deps\n  }, []);\n\n  return <section />;\n};",
     },
     good: {
       language: "tsx",
-      code: "useEffect(() => {\n  loadUser(userId);\n}, [userId]);",
+      code: "const UserPanel = ({ userId }) => {\n  useEffect(() => {\n    loadUser(userId);\n  }, [userId]);\n\n  return <section />;\n};",
     },
     references: [
       {

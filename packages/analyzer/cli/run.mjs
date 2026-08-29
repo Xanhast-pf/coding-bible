@@ -43,15 +43,27 @@ const formatFinding = (finding) => {
   ].join("\n");
 };
 
-const formatSummary = ({ filesScanned, findings, ruleIdsChecked }) => {
+const formatDiagnostic = (diagnostic) => {
+  const { column, line } = diagnostic.location;
+  return [
+    `${diagnostic.filePath}:${line}:${column}  syntax`,
+    `  ${diagnostic.message}`,
+  ].join("\n");
+};
+
+const formatSummary = ({ diagnostics, filesScanned, findings, ruleIdsChecked }) => {
   const fileLabel = filesScanned === 1 ? "file" : "files";
   const findingLabel = findings.length === 1 ? "finding" : "findings";
 
-  if (!findings.length) {
-    return `✓ No violations found among ${ruleIdsChecked.length} automated rules in ${filesScanned} ${fileLabel}.`;
+  if (diagnostics.length) {
+    return `✗ Coding Bible could not safely analyze ${diagnostics.length} syntax issue${diagnostics.length === 1 ? "" : "s"} in ${filesScanned} ${fileLabel}. Rule checks paused for malformed files.`;
   }
 
-  return `✗ Coding Bible found ${findings.length} ${findingLabel} across ${ruleIdsChecked.length} automated rules in ${filesScanned} ${fileLabel}.`;
+  if (!findings.length) {
+    return `✓ No violations found among ${ruleIdsChecked.length} applicable automated rules in ${filesScanned} ${fileLabel}.`;
+  }
+
+  return `✗ Coding Bible found ${findings.length} ${findingLabel} across ${ruleIdsChecked.length} applicable automated rules in ${filesScanned} ${fileLabel}.`;
 };
 
 export const runCli = async (
@@ -78,13 +90,18 @@ export const runCli = async (
     } else {
       writeLine(stdout, formatSummary(result));
 
+      if (result.diagnostics.length) {
+        writeLine(stdout);
+        writeLine(stdout, result.diagnostics.map(formatDiagnostic).join("\n\n"));
+      }
+
       if (result.findings.length) {
         writeLine(stdout);
         writeLine(stdout, result.findings.map(formatFinding).join("\n\n"));
       }
     }
 
-    return result.findings.length ? 1 : 0;
+    return result.diagnostics.length || result.findings.length ? 1 : 0;
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     writeLine(stderr, `Coding Bible could not analyze the requested path: ${message}`);

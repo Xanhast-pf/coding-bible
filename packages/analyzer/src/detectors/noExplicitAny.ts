@@ -5,6 +5,7 @@ import { createFinding, visit } from "../utils.ts";
 
 export const noExplicitAnyDetector: Detector = {
   id: "no-explicit-any",
+  languages: ["ts", "tsx"],
   ruleId: "TS-001",
   analyze: (context) => {
     const findings: AnalyzerFinding[] = [];

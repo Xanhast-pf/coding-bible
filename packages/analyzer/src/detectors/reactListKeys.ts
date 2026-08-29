@@ -1,7 +1,12 @@
 import ts from "typescript";
 
 import type { AnalyzerFinding, Detector, DetectorContext } from "../types.ts";
-import { createFinding, visit } from "../utils.ts";
+import {
+  createFinding,
+  getSymbol,
+  nodesOfKind,
+  visit,
+} from "../utils.ts";
 
 const getMapCallback = (node: ts.CallExpression) => {
   if (
@@ -17,32 +22,58 @@ const getMapCallback = (node: ts.CallExpression) => {
     : null;
 };
 
-const getReturnedJsx = (callback: ts.ArrowFunction | ts.FunctionExpression) => {
+const collectJsxRoots = (expression: ts.Expression): Array<ts.JsxElement | ts.JsxSelfClosingElement | ts.JsxFragment> => {
   if (
-    ts.isJsxElement(callback.body) ||
-    ts.isJsxSelfClosingElement(callback.body) ||
-    ts.isJsxFragment(callback.body)
+    ts.isJsxElement(expression) ||
+    ts.isJsxSelfClosingElement(expression) ||
+    ts.isJsxFragment(expression)
   ) {
-    return callback.body;
+    return [expression];
   }
 
+  if (ts.isParenthesizedExpression(expression)) {
+    return collectJsxRoots(expression.expression);
+  }
+
+  if (ts.isConditionalExpression(expression)) {
+    return [
+      ...collectJsxRoots(expression.whenTrue),
+      ...collectJsxRoots(expression.whenFalse),
+    ];
+  }
+
+  if (
+    ts.isBinaryExpression(expression) &&
+    expression.operatorToken.kind === ts.SyntaxKind.AmpersandAmpersandToken
+  ) {
+    return collectJsxRoots(expression.right);
+  }
+
+  return [];
+};
+
+const getReturnedJsx = (callback: ts.ArrowFunction | ts.FunctionExpression) => {
   if (!ts.isBlock(callback.body)) {
-    return null;
+    return collectJsxRoots(callback.body);
   }
 
-  for (const statement of callback.body.statements) {
-    if (
-      ts.isReturnStatement(statement) &&
-      statement.expression &&
-      (ts.isJsxElement(statement.expression) ||
-        ts.isJsxSelfClosingElement(statement.expression) ||
-        ts.isJsxFragment(statement.expression))
-    ) {
-      return statement.expression;
+  const jsxRoots: Array<ts.JsxElement | ts.JsxSelfClosingElement | ts.JsxFragment> = [];
+
+  const walk = (node: ts.Node) => {
+    if (node !== callback.body && (ts.isFunctionLike(node) || ts.isClassLike(node))) {
+      return;
     }
-  }
 
-  return null;
+    if (ts.isReturnStatement(node) && node.expression) {
+      jsxRoots.push(...collectJsxRoots(node.expression));
+      return;
+    }
+
+    node.forEachChild(walk);
+  };
+
+  callback.body.forEachChild(walk);
+  return jsxRoots;
 };
 
 const getKeyAttribute = (jsx: ts.JsxElement | ts.JsxSelfClosingElement) => {
@@ -61,63 +92,88 @@ const getAttributeExpression = (attribute: ts.JsxAttribute) =>
     ? attribute.initializer.expression
     : undefined;
 
-const isGeneratedKey = (expression: ts.Expression) => {
-  if (!ts.isCallExpression(expression) || !ts.isPropertyAccessExpression(expression.expression)) {
-    return false;
-  }
+const expressionContainsSymbol = (
+  context: DetectorContext,
+  expression: ts.Expression,
+  symbol: ts.Symbol,
+) => {
+  let found = false;
 
-  const owner = expression.expression.expression;
-  const method = expression.expression.name.text;
+  visit(expression, (node) => {
+    if (found || !ts.isIdentifier(node)) {
+      return;
+    }
 
-  return (
-    (ts.isIdentifier(owner) && owner.text === "Math" && method === "random") ||
-    (ts.isIdentifier(owner) && owner.text === "Date" && method === "now") ||
-    (ts.isIdentifier(owner) && owner.text === "crypto" && method === "randomUUID")
-  );
+    if (getSymbol(context, node) === symbol) {
+      found = true;
+    }
+  });
+
+  return found;
+};
+
+const containsGeneratedKey = (expression: ts.Expression) => {
+  let generated = false;
+
+  visit(expression, (node) => {
+    if (
+      generated ||
+      !ts.isCallExpression(node) ||
+      !ts.isPropertyAccessExpression(node.expression)
+    ) {
+      return;
+    }
+
+    const owner = node.expression.expression;
+    const method = node.expression.name.text;
+
+    generated =
+      (ts.isIdentifier(owner) && owner.text === "Math" && method === "random") ||
+      (ts.isIdentifier(owner) && owner.text === "Date" && method === "now") ||
+      (ts.isIdentifier(owner) && owner.text === "crypto" && method === "randomUUID");
+  });
+
+  return generated;
 };
 
 const findMissingKeys = (context: DetectorContext) => {
   const findings: AnalyzerFinding[] = [];
 
-  visit(context.sourceFile, (node) => {
-    if (!ts.isCallExpression(node)) {
-      return;
-    }
-
+  for (const node of nodesOfKind<ts.CallExpression>(
+    context,
+    ts.SyntaxKind.CallExpression,
+  )) {
     const callback = getMapCallback(node);
     if (!callback) {
-      return;
+      continue;
     }
 
-    const jsx = getReturnedJsx(callback);
-    if (!jsx) {
-      return;
-    }
+    for (const jsx of getReturnedJsx(callback)) {
+      if (ts.isJsxFragment(jsx)) {
+        findings.push(
+          createFinding(context, jsx, {
+            detectorId: "react-list-missing-key",
+            message: "JSX returned directly from `map()` needs a stable key.",
+            ruleId: "REACT-006",
+            suggestion:
+              "Use a keyed element or `<Fragment key={item.id}>` with identity from the data.",
+          }),
+        );
+        continue;
+      }
 
-    if (ts.isJsxFragment(jsx)) {
-      findings.push(
-        createFinding(context, jsx, {
-          detectorId: "react-list-missing-key",
-          message: "JSX returned directly from `map()` needs a stable key.",
-          ruleId: "REACT-006",
-          suggestion:
-            "Use a keyed element or `<Fragment key={item.id}>` with identity from the data.",
-        }),
-      );
-      return;
+      if (!getKeyAttribute(jsx)) {
+        findings.push(
+          createFinding(context, jsx, {
+            detectorId: "react-list-missing-key",
+            message: "JSX returned directly from `map()` is missing a key.",
+            ruleId: "REACT-006",
+            suggestion: "Add a stable key derived from the item's persistent identity.",
+          }),
+        );
+      }
     }
-
-    if (!getKeyAttribute(jsx)) {
-      findings.push(
-        createFinding(context, jsx, {
-          detectorId: "react-list-missing-key",
-          message: "JSX returned directly from `map()` is missing a key.",
-          ruleId: "REACT-006",
-          suggestion: "Add a stable key derived from the item's persistent identity.",
-        }),
-      );
-    }
-  });
+  }
 
   return findings;
 };
@@ -125,65 +181,71 @@ const findMissingKeys = (context: DetectorContext) => {
 const findUnstableKeys = (context: DetectorContext) => {
   const findings: AnalyzerFinding[] = [];
 
-  visit(context.sourceFile, (node) => {
-    if (!ts.isCallExpression(node)) {
-      return;
-    }
-
+  for (const node of nodesOfKind<ts.CallExpression>(
+    context,
+    ts.SyntaxKind.CallExpression,
+  )) {
     const callback = getMapCallback(node);
     if (!callback) {
-      return;
-    }
-
-    const jsx = getReturnedJsx(callback);
-    if (!jsx || ts.isJsxFragment(jsx)) {
-      return;
-    }
-
-    const keyAttribute = getKeyAttribute(jsx);
-    if (!keyAttribute) {
-      return;
-    }
-
-    const keyExpression = getAttributeExpression(keyAttribute);
-    if (!keyExpression) {
-      return;
+      continue;
     }
 
     const indexParameter = callback.parameters[1]?.name;
-    const usesIndex =
-      indexParameter &&
-      ts.isIdentifier(indexParameter) &&
-      ts.isIdentifier(keyExpression) &&
-      keyExpression.text === indexParameter.text;
+    const indexSymbol =
+      indexParameter && ts.isIdentifier(indexParameter)
+        ? getSymbol(context, indexParameter)
+        : null;
 
-    if (!usesIndex && !isGeneratedKey(keyExpression)) {
-      return;
+    for (const jsx of getReturnedJsx(callback)) {
+      if (ts.isJsxFragment(jsx)) {
+        continue;
+      }
+
+      const keyAttribute = getKeyAttribute(jsx);
+      if (!keyAttribute) {
+        continue;
+      }
+
+      const keyExpression = getAttributeExpression(keyAttribute);
+      if (!keyExpression) {
+        continue;
+      }
+
+      const usesIndex = Boolean(
+        indexSymbol && expressionContainsSymbol(context, keyExpression, indexSymbol),
+      );
+      const generated = containsGeneratedKey(keyExpression);
+
+      if (!usesIndex && !generated) {
+        continue;
+      }
+
+      findings.push(
+        createFinding(context, keyExpression, {
+          detectorId: "react-list-unstable-key",
+          message: usesIndex
+            ? "Array position contributes to this React key."
+            : "This React key is generated during render and changes between renders.",
+          ruleId: "REACT-006",
+          suggestion: "Use a stable identifier that belongs to the underlying item.",
+        }),
+      );
     }
-
-    findings.push(
-      createFinding(context, keyExpression, {
-        detectorId: "react-list-unstable-key",
-        message: usesIndex
-          ? "Array position is being used as a React key."
-          : "This React key is generated during render and changes between renders.",
-        ruleId: "REACT-006",
-        suggestion: "Use a stable identifier that belongs to the underlying item.",
-      }),
-    );
-  });
+  }
 
   return findings;
 };
 
 export const missingReactListKeyDetector: Detector = {
   id: "react-list-missing-key",
+  languages: ["jsx", "tsx"],
   ruleId: "REACT-006",
   analyze: findMissingKeys,
 };
 
 export const unstableReactListKeyDetector: Detector = {
   id: "react-list-unstable-key",
+  languages: ["jsx", "tsx"],
   ruleId: "REACT-006",
   analyze: findUnstableKeys,
 };
