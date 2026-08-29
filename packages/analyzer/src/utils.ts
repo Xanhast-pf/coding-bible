@@ -1,10 +1,54 @@
 import ts from "typescript";
 
-import type { AnalyzerFinding, DetectorContext } from "./types.ts";
+import type {
+  AnalyzerFinding,
+  DetectorContext,
+  ImportBinding,
+} from "./types.ts";
 
 export const visit = (node: ts.Node, visitor: (node: ts.Node) => void) => {
   visitor(node);
   node.forEachChild((child) => visit(child, visitor));
+};
+
+export const nodesOfKind = <T extends ts.Node>(
+  context: DetectorContext,
+  kind: ts.SyntaxKind,
+): readonly T[] => (context.nodesByKind.get(kind) ?? []) as readonly T[];
+
+export const getSymbol = (
+  context: DetectorContext,
+  identifier: ts.Identifier,
+) => context.checker.getSymbolAtLocation(identifier) ?? null;
+
+export const getReferences = (
+  context: DetectorContext,
+  identifier: ts.Identifier,
+) => {
+  const symbol = getSymbol(context, identifier);
+  return symbol ? (context.referencesBySymbol.get(symbol) ?? []) : [];
+};
+
+export const getImportBinding = (
+  context: DetectorContext,
+  identifier: ts.Identifier,
+): ImportBinding | null => {
+  const symbol = getSymbol(context, identifier);
+  return symbol ? (context.importsBySymbol.get(symbol) ?? null) : null;
+};
+
+export const isImportedBinding = (
+  context: DetectorContext,
+  identifier: ts.Identifier,
+  moduleName: string,
+  importedNames?: readonly string[],
+) => {
+  const binding = getImportBinding(context, identifier);
+  return Boolean(
+    binding &&
+      binding.moduleName === moduleName &&
+      (!importedNames || importedNames.includes(binding.importedName)),
+  );
 };
 
 export const createFinding = (
@@ -79,7 +123,8 @@ export const unwrapExpression = (expression: ts.Expression): ts.Expression => {
   while (
     ts.isParenthesizedExpression(current) ||
     ts.isAwaitExpression(current) ||
-    ts.isNonNullExpression(current)
+    ts.isNonNullExpression(current) ||
+    ts.isSatisfiesExpression(current)
   ) {
     current = current.expression;
   }

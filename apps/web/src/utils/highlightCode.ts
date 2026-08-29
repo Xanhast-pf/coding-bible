@@ -11,6 +11,7 @@ export type HighlightTokenKind =
 
 export interface HighlightToken {
   kind: HighlightTokenKind;
+  start: number;
   text: string;
 }
 
@@ -130,12 +131,14 @@ export const highlightCodeLine = (line: string): readonly HighlightToken[] => {
     if (index > cursor) {
       tokens.push({
         kind: "plain",
+        start: cursor,
         text: line.slice(cursor, index),
       });
     }
 
     tokens.push({
       kind: getTokenKind(text),
+      start: index,
       text,
     });
 
@@ -145,6 +148,7 @@ export const highlightCodeLine = (line: string): readonly HighlightToken[] => {
   if (cursor < line.length) {
     tokens.push({
       kind: "plain",
+      start: cursor,
       text: line.slice(cursor),
     });
   }

@@ -31,3 +31,21 @@ PERF-002
 TEST-005
 AI-003
 ```
+
+
+## Analyzer changes
+
+Analyzer changes must improve evidence, not merely increase the number of
+findings. Keep detector coverage conservative and deterministic.
+
+For every detector change:
+
+1. Preserve lexical scope and symbol identity; do not rely on identifier names
+   when the TypeScript checker can resolve the binding.
+2. Add both a positive regression and the closest realistic negative case.
+3. Prefer no finding over a suggestion that could change program semantics.
+4. Keep the rule registry contract green: each automated DON'T must trigger its
+   rule and each automated DO must parse with zero applicable findings.
+5. Run the analyzer against Coding Bible itself before merging. Do not weaken a
+   detector solely to make dogfooding green; fix the code or document a genuine
+   exception.

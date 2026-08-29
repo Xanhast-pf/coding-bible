@@ -1,7 +1,7 @@
 import { readdir, readFile, stat } from "node:fs/promises";
 import path from "node:path";
 
-import { analyze, detectors } from "../src/index.ts";
+import { analyzeMany } from "../src/index.ts";
 
 const languageByExtension = new Map([
   [".js", "js"],
@@ -9,8 +9,6 @@ const languageByExtension = new Map([
   [".ts", "ts"],
   [".tsx", "tsx"],
 ]);
-
-const ruleIdsChecked = [...new Set(detectors.map((detector) => detector.ruleId))].sort();
 
 const ignoredDirectoryNames = new Set([
   ".git",
@@ -79,41 +77,60 @@ export const collectSourceFiles = async (targets, { cwd = process.cwd() } = {}) 
 
 export const checkPaths = async (targets, { cwd = process.cwd() } = {}) => {
   const filePaths = await collectSourceFiles(targets, { cwd });
+  const inputs = await Promise.all(
+    filePaths.map(async (filePath) => {
+      const language = languageByExtension.get(path.extname(filePath));
+      if (!language) {
+        return null;
+      }
+
+      return {
+        fileName: toRelativePath(cwd, filePath),
+        language,
+        source: await readFile(filePath, "utf8"),
+      };
+    }),
+  );
+  const supportedInputs = inputs.filter(Boolean);
+  const results = analyzeMany(supportedInputs);
   const findings = [];
+  const diagnostics = [];
+  const ruleIdsChecked = new Set();
   let checksRun = 0;
 
-  for (const filePath of filePaths) {
-    const source = await readFile(filePath, "utf8");
-    const language = languageByExtension.get(path.extname(filePath));
-
-    if (!language) {
-      continue;
+  results.forEach((result, index) => {
+    const input = supportedInputs[index];
+    if (!input) {
+      return;
     }
 
-    const relativePath = toRelativePath(cwd, filePath);
-    const result = analyze({ fileName: relativePath, language, source });
     checksRun += result.checksRun;
+    result.ruleIdsChecked.forEach((ruleId) => ruleIdsChecked.add(ruleId));
+
+    for (const diagnostic of result.diagnostics) {
+      diagnostics.push({ ...diagnostic, filePath: input.fileName });
+    }
 
     for (const finding of result.findings) {
-      findings.push({
-        ...finding,
-        filePath: relativePath,
-      });
+      findings.push({ ...finding, filePath: input.fileName });
     }
-  }
+  });
+
+  const byLocation = (left, right) =>
+    left.filePath.localeCompare(right.filePath) ||
+    left.location.line - right.location.line ||
+    left.location.column - right.location.column;
 
   findings.sort(
-    (left, right) =>
-      left.filePath.localeCompare(right.filePath) ||
-      left.location.line - right.location.line ||
-      left.location.column - right.location.column ||
-      left.ruleId.localeCompare(right.ruleId),
+    (left, right) => byLocation(left, right) || left.ruleId.localeCompare(right.ruleId),
   );
+  diagnostics.sort(byLocation);
 
   return {
     checksRun,
-    filesScanned: filePaths.length,
+    diagnostics,
+    filesScanned: supportedInputs.length,
     findings,
-    ruleIdsChecked,
+    ruleIdsChecked: [...ruleIdsChecked].sort(),
   };
 };

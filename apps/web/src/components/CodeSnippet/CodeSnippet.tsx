@@ -13,7 +13,14 @@ interface CodeSnippetProps {
 }
 
 const CodeSnippetComponent = ({ code, language, tone }: CodeSnippetProps) => {
-  const lines = code.split("\n");
+  let lineNumber = 0;
+  let lineStart = 0;
+  const lines = code.split("\n").map((text) => {
+    lineNumber += 1;
+    const line = { number: lineNumber, start: lineStart, text };
+    lineStart += text.length + 1;
+    return line;
+  });
 
   return (
     <div className={styles.snippet} data-tone={tone}>
@@ -26,16 +33,16 @@ const CodeSnippetComponent = ({ code, language, tone }: CodeSnippetProps) => {
 
       <pre className={styles.pre}>
         <code>
-          {lines.map((line, lineIndex) => (
-            <span className={styles.line} key={`${lineIndex}-${line}`}>
+          {lines.map((line) => (
+            <span className={styles.line} key={line.start}>
               <span aria-hidden="true" className={styles.lineNumber}>
-                {lineIndex + 1}
+                {line.number}
               </span>
               <span className={styles.lineCode}>
-                {highlightCodeLine(line).map((token, tokenIndex) => (
+                {highlightCodeLine(line.text).map((token) => (
                   <span
                     className={styles[token.kind]}
-                    key={`${tokenIndex}-${token.text}`}
+                    key={token.start}
                   >
                     {token.text}
                   </span>

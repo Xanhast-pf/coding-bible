@@ -107,8 +107,9 @@ The Coding Bible follows its own applicable `stable` rules.
 
 The rule registry validates itself at runtime without an additional dependency,
 and pure behavior is covered with Node's built-in test runner. The analyzer is a
-separate AST-backed package with regression tests for every supported detector,
-while semantic rules remain a human-review responsibility.
+separate AST-backed, symbol-aware package with regression tests, paired clean /
+violation fixtures, syntax diagnostics, and rule-example contracts for every
+supported detector. Semantic rules remain a human-review responsibility.
 
 A self-violation is treated as useful feedback: either the implementation is
 wrong or the rule needs better scope, severity, or exceptions.

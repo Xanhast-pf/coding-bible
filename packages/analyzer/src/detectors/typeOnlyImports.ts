@@ -1,7 +1,7 @@
 import ts from "typescript";
 
-import type { Detector } from "../types.ts";
-import { createFinding, visit } from "../utils.ts";
+import type { AnalyzerFinding, Detector } from "../types.ts";
+import { createFinding, getReferences, nodesOfKind } from "../utils.ts";
 
 const isTypeOnlyUsage = (identifier: ts.Identifier) => {
   let current: ts.Node = identifier.parent;
@@ -27,17 +27,18 @@ const isTypeOnlyUsage = (identifier: ts.Identifier) => {
 
 export const typeOnlyImportsDetector: Detector = {
   id: "type-only-imports",
+  languages: ["ts", "tsx"],
   ruleId: "TS-003",
   analyze: (context) => {
-    const findings = [];
+    const findings: AnalyzerFinding[] = [];
 
-    for (const statement of context.sourceFile.statements) {
-      if (!ts.isImportDeclaration(statement) || !statement.importClause) {
-        continue;
-      }
-
+    for (const statement of nodesOfKind<ts.ImportDeclaration>(
+      context,
+      ts.SyntaxKind.ImportDeclaration,
+    )) {
       const { importClause } = statement;
       if (
+        !importClause ||
         importClause.isTypeOnly ||
         !importClause.namedBindings ||
         !ts.isNamedImports(importClause.namedBindings)
@@ -50,19 +51,10 @@ export const typeOnlyImportsDetector: Detector = {
           continue;
         }
 
-        const localName = specifier.name.text;
-        const usages: ts.Identifier[] = [];
-
-        visit(context.sourceFile, (node) => {
-          if (
-            ts.isIdentifier(node) &&
-            node.text === localName &&
-            node !== specifier.name &&
-            node !== specifier.propertyName
-          ) {
-            usages.push(node);
-          }
-        });
+        const usages = getReferences(context, specifier.name).filter(
+          (identifier) =>
+            identifier !== specifier.name && identifier !== specifier.propertyName,
+        );
 
         if (!usages.length || !usages.every(isTypeOnlyUsage)) {
           continue;
@@ -71,10 +63,10 @@ export const typeOnlyImportsDetector: Detector = {
         findings.push(
           createFinding(context, specifier, {
             detectorId: "type-only-imports",
-            message: `\`${localName}\` is used only as a type.`,
+            message: `\`${specifier.name.text}\` is used only as a type.`,
             ruleId: "TS-003",
             suggestion:
-              `Mark it as type-only: \`import { type ${localName} } ...\` or use \`import type\`.`,
+              `Mark it as type-only: \`import { type ${specifier.name.text} } ...\` or use \`import type\`.`,
           }),
         );
       }

@@ -1,5 +1,6 @@
 import type {
   AnalyzeResult,
+  AnalyzerDiagnostic,
   AnalyzerFinding,
   AnalyzerLanguage,
 } from "@coding-bible/analyzer";
@@ -38,6 +39,31 @@ const rulesById = new Map(rules.map((rule) => [rule.id, rule]));
 
 const isAnalyzerLanguage = (value: string): value is AnalyzerLanguage =>
   languageOptions.some(([language]) => language === value);
+
+
+const DiagnosticCard = ({ diagnostic }: { diagnostic: AnalyzerDiagnostic }) => (
+  <article className={`${styles.finding} ${styles.diagnostic}`}>
+    <div className={styles.findingMeta}>
+      <span className={styles.diagnosticLabel}>Syntax</span>
+      <span className={styles.location}>
+        line {diagnostic.location.line}:{diagnostic.location.column}
+      </span>
+    </div>
+    <h3 className={styles.findingTitle}>Fix syntax before rule analysis</h3>
+    <p className={styles.message}>{diagnostic.message}</p>
+    <pre className={styles.excerpt}>
+      <code>
+        <span aria-hidden="true" className={styles.excerptLineNumber}>
+          {diagnostic.location.line}
+        </span>
+        <span>{diagnostic.excerpt}</span>
+      </code>
+    </pre>
+    <p className={styles.suggestion}>
+      Coding Bible pauses rule detectors on malformed syntax to avoid misleading findings.
+    </p>
+  </article>
+);
 
 const FindingCard = ({ finding }: { finding: AnalyzerFinding }) => {
   const rule = rulesById.get(finding.ruleId);
@@ -216,19 +242,42 @@ export const AnalyzeView = () => {
             <>
               <div className={styles.resultSummary}>
                 <div>
-                  <strong>{result.findings.length}</strong>
-                  <span>{result.findings.length === 1 ? " finding" : " findings"}</span>
+                  <strong>{result.diagnostics.length || result.findings.length}</strong>
+                  <span>
+                    {result.diagnostics.length
+                      ? result.diagnostics.length === 1
+                        ? " syntax issue"
+                        : " syntax issues"
+                      : result.findings.length === 1
+                        ? " finding"
+                        : " findings"}
+                  </span>
                 </div>
                 <span>
-                  {result.checksRun} checks · {result.ruleIdsChecked.length} rules
+                  {result.diagnostics.length
+                    ? "rule checks paused"
+                    : `${result.checksRun} checks · ${result.ruleIdsChecked.length} rules`}
                 </span>
               </div>
 
-              {!result.findings.length ? (
+              {result.diagnostics.length ? (
+                <div className={styles.findings}>
+                  {result.diagnostics.map((diagnostic) => (
+                    <DiagnosticCard
+                      diagnostic={diagnostic}
+                      key={[
+                        diagnostic.location.line,
+                        diagnostic.location.column,
+                        diagnostic.message,
+                      ].join("-")}
+                    />
+                  ))}
+                </div>
+              ) : !result.findings.length ? (
                 <div className={styles.cleanState}>
                   <h3>No supported violations found.</h3>
                   <p>
-                    Clean for {result.ruleIdsChecked.length} automated rules out of{" "}
+                    Clean for {result.ruleIdsChecked.length} applicable automated rules out of{" "}
                     {rules.length}. The rest still requires the Bible—or a code review.
                   </p>
                 </div>

@@ -16,7 +16,9 @@ test("highlightCodeLine classifies common syntax roles", () => {
   const tokens = highlightCodeLine('const user = buildUser("Ada");');
 
   assert.deepEqual(
-    tokens.filter(({ kind }) => kind !== "plain"),
+    tokens
+      .filter(({ kind }) => kind !== "plain")
+      .map(({ kind, text }) => ({ kind, text })),
     [
       { kind: "keyword", text: "const" },
       { kind: "operator", text: "=" },

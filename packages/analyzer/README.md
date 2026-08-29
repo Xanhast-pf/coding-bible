@@ -28,7 +28,7 @@ repository-wide context:
 - `JS-006` mutating sort/reverse results stored as separate values
 - `TS-001` explicit `any`
 - `TS-003` value imports used only in type positions
-- `TS-004` assertions directly over external runtime reads
+- `TS-004` unsafe assertions over external runtime data, including local aliases
 - `A11Y-001` clickable generic elements without native semantics
 - `A11Y-002` custom buttons without equivalent keyboard handling
 - `A11Y-004` buttons without a detectable accessible name
@@ -42,14 +42,25 @@ repository-wide context:
 - `REACT-011` mutation of values received through component inputs
 - `REACT-012` exhaustive-deps suppressions
 
-`AnalyzeResult.ruleIdsChecked` reports the exact automated rule set used for a
-run. A clean result therefore means "clean for the automated subset," not
-"clean for all Coding Bible rules."
+`AnalyzeResult.ruleIdsChecked` reports the exact automated rule set that was
+applicable to the analyzed language. A clean result therefore means "clean for
+the applicable automated subset," not "clean for all Coding Bible rules."
+Malformed source is reported through `AnalyzeResult.diagnostics`; rule checks
+pause until the source parses cleanly so syntax errors can never look like a
+successful zero-finding run.
+
+Detection is scope-aware within each source file. The analyzer builds a
+TypeScript program and shared symbol/import/reference indexes once, then reuses
+that evidence across applicable detectors. `analyzeMany` batches multiple files
+through one program so the CLI does not rebuild the compiler context for every
+file.
 
 Every automated rule is contract-tested against the rule registry: its exact
-DON'T example must produce that rule, and its exact DO example must not produce
-that rule. Detector-specific regression tests cover additional positive and
-negative cases.
+DON'T example must parse and produce that rule, while its exact DO example must
+parse and produce zero findings across every applicable detector. A paired
+all-violations/all-clean fixture guards the complete 19-rule integration path,
+and detector-specific regressions cover shadowing, aliases, control flow, and
+other precision cases.
 
 The package intentionally does not guess at architecture, naming quality,
 business logic, or other rules that require repository or human context.

@@ -43,6 +43,7 @@ test("every automated rule catches its own DON'T example", () => {
     assert.ok(language, `${ruleId} DON'T example must use an analyzer-supported language`);
 
     const result = analyze({ language, source: rule.bad.code });
+    assert.equal(result.diagnostics.length, 0, `${ruleId} DON'T example must parse cleanly`);
     assert.ok(
       result.findings.some((finding) => finding.ruleId === ruleId),
       `${ruleId} did not flag its own DON'T example`,
@@ -52,9 +53,11 @@ test("every automated rule catches its own DON'T example", () => {
     const goodLanguage = analyzerLanguageByExampleLanguage.get(rule.good.language);
     assert.ok(goodLanguage, `${ruleId} DO example must use an analyzer-supported language`);
     const goodResult = analyze({ language: goodLanguage, source: rule.good.code });
-    assert.ok(
-      !goodResult.findings.some((finding) => finding.ruleId === ruleId),
-      `${ruleId} incorrectly flagged its own DO example`,
+    assert.equal(goodResult.diagnostics.length, 0, `${ruleId} DO example must parse cleanly`);
+    assert.deepEqual(
+      goodResult.findings,
+      [],
+      `${ruleId} DO example must remain clean across every applicable automated rule`,
     );
   }
 });

@@ -1,7 +1,7 @@
 import ts from "typescript";
 
 import type { AnalyzerFinding, Detector } from "../types.ts";
-import { createFinding, visit } from "../utils.ts";
+import { createFinding, nodesOfKind } from "../utils.ts";
 
 type JsxWithAttributes = ts.JsxOpeningElement | ts.JsxSelfClosingElement;
 
@@ -28,40 +28,70 @@ const getStringAttribute = (node: JsxWithAttributes, name: string) => {
     : null;
 };
 
-const genericTags = new Set(["div", "span"]);
-const nativeInteractiveTags = new Set(["a", "button", "input", "select", "summary", "textarea"]);
+const intrinsicallyInteractiveTags = new Set([
+  "button",
+  "input",
+  "select",
+  "summary",
+  "textarea",
+]);
+const nonInteractiveIntrinsicTags = new Set([
+  "article",
+  "aside",
+  "div",
+  "footer",
+  "header",
+  "li",
+  "main",
+  "p",
+  "section",
+  "span",
+]);
+
+const isNativeInteractive = (node: JsxWithAttributes) => {
+  const tagName = getTagName(node);
+  if (!tagName) {
+    return false;
+  }
+
+  if (intrinsicallyInteractiveTags.has(tagName)) {
+    return true;
+  }
+
+  return tagName === "a" && hasAttribute(node, "href");
+};
 
 export const semanticInteractiveElementDetector: Detector = {
   id: "semantic-interactive-element",
+  languages: ["jsx", "tsx"],
   ruleId: "A11Y-001",
   analyze: (context) => {
     const findings: AnalyzerFinding[] = [];
+    const openings = [
+      ...nodesOfKind<ts.JsxOpeningElement>(context, ts.SyntaxKind.JsxOpeningElement),
+      ...nodesOfKind<ts.JsxSelfClosingElement>(context, ts.SyntaxKind.JsxSelfClosingElement),
+    ];
 
-    visit(context.sourceFile, (node) => {
-      if (!ts.isJsxOpeningElement(node) && !ts.isJsxSelfClosingElement(node)) {
-        return;
-      }
-
+    for (const node of openings) {
       const tagName = getTagName(node);
       if (
         !tagName ||
-        !genericTags.has(tagName) ||
+        !nonInteractiveIntrinsicTags.has(tagName) ||
         hasSpreadAttribute(node) ||
-        !hasAttribute(node, "onClick") ||
-        hasAttribute(node, "role")
+        !hasAttribute(node, "onClick")
       ) {
-        return;
+        continue;
       }
 
       findings.push(
         createFinding(context, node.tagName, {
           detectorId: "semantic-interactive-element",
-          message: `A clickable <${tagName}> recreates native interactive behavior without native semantics.`,
+          message: `A clickable <${tagName}> recreates native interactive behavior instead of using native semantics.`,
           ruleId: "A11Y-001",
           suggestion: "Use the native interactive element that matches the action, usually `<button>` or `<a>`.",
         }),
       );
-    });
+    }
 
     return findings;
   },
@@ -69,115 +99,124 @@ export const semanticInteractiveElementDetector: Detector = {
 
 export const keyboardInteractionDetector: Detector = {
   id: "keyboard-interaction",
+  languages: ["jsx", "tsx"],
   ruleId: "A11Y-002",
   analyze: (context) => {
     const findings: AnalyzerFinding[] = [];
+    const openings = [
+      ...nodesOfKind<ts.JsxOpeningElement>(context, ts.SyntaxKind.JsxOpeningElement),
+      ...nodesOfKind<ts.JsxSelfClosingElement>(context, ts.SyntaxKind.JsxSelfClosingElement),
+    ];
 
-    visit(context.sourceFile, (node) => {
-      if (!ts.isJsxOpeningElement(node) && !ts.isJsxSelfClosingElement(node)) {
-        return;
-      }
-
+    for (const node of openings) {
       const tagName = getTagName(node);
       if (
         !tagName ||
-        nativeInteractiveTags.has(tagName) ||
+        isNativeInteractive(node) ||
         hasSpreadAttribute(node) ||
         getStringAttribute(node, "role") !== "button" ||
-        !hasAttribute(node, "onClick") ||
+        !hasAttribute(node, "onClick")
+      ) {
+        continue;
+      }
+
+      const hasKeyboardHandler =
         hasAttribute(node, "onKeyDown") ||
         hasAttribute(node, "onKeyUp") ||
-        hasAttribute(node, "onKeyPress")
-      ) {
-        return;
+        hasAttribute(node, "onKeyPress");
+      const focusable = hasAttribute(node, "tabIndex");
+
+      if (hasKeyboardHandler && focusable) {
+        continue;
       }
 
       findings.push(
         createFinding(context, node.tagName, {
           detectorId: "keyboard-interaction",
-          message: `This custom ${tagName} button handles pointer input without an equivalent keyboard handler.`,
+          message: `This custom ${tagName} button is not fully keyboard-operable${focusable ? "" : " or focusable"}.`,
           ruleId: "A11Y-002",
-          suggestion: "Prefer a native `<button>` so keyboard behavior is provided by the platform.",
+          suggestion: "Prefer a native `<button>` so focus and keyboard activation are provided by the platform.",
         }),
       );
-    });
+    }
 
     return findings;
   },
 };
 
-const hasPotentialTextContent = (node: ts.JsxElement) => {
-  let found = false;
+const expressionMayNameControl = (expression: ts.Expression): boolean => {
+  if (
+    ts.isStringLiteral(expression) ||
+    ts.isNoSubstitutionTemplateLiteral(expression) ||
+    ts.isNumericLiteral(expression)
+  ) {
+    return Boolean(expression.text.trim());
+  }
 
-  const walk = (child: ts.Node) => {
-    if (found) {
-      return;
-    }
+  if (ts.isJsxElement(expression) || ts.isJsxSelfClosingElement(expression)) {
+    const opening = ts.isJsxElement(expression) ? expression.openingElement : expression;
+    const tagName = getTagName(opening);
+    return Boolean(tagName && !tagName.endsWith("Icon"));
+  }
 
-    if (ts.isJsxText(child) && child.text.trim()) {
-      found = true;
-      return;
-    }
+  if (ts.isConditionalExpression(expression)) {
+    return expressionMayNameControl(expression.whenTrue) || expressionMayNameControl(expression.whenFalse);
+  }
 
-    if (ts.isJsxExpression(child) && child.expression) {
-      found = true;
-      return;
-    }
-
-    if (ts.isJsxSelfClosingElement(child)) {
-      const tagName = getTagName(child);
-      if (tagName === "img") {
-        const alt = getStringAttribute(child, "alt");
-        if (alt?.trim()) {
-          found = true;
-        }
-        return;
-      }
-
-      if (tagName && /^[A-Z]/.test(tagName) && !tagName.endsWith("Icon")) {
-        found = true;
-      }
-      return;
-    }
-
-    child.forEachChild(walk);
-  };
-
-  node.children.forEach(walk);
-  return found;
+  return true;
 };
+
+const childMayNameControl = (child: ts.JsxChild): boolean => {
+  if (ts.isJsxText(child)) {
+    return Boolean(child.text.trim());
+  }
+
+  if (ts.isJsxExpression(child)) {
+    return Boolean(child.expression && expressionMayNameControl(child.expression));
+  }
+
+  if (ts.isJsxElement(child)) {
+    return child.children.some(childMayNameControl);
+  }
+
+  if (ts.isJsxSelfClosingElement(child)) {
+    const tagName = getTagName(child);
+    if (tagName === "img") {
+      return Boolean(getStringAttribute(child, "alt")?.trim());
+    }
+
+    return Boolean(tagName && /^[A-Z]/.test(tagName) && !tagName.endsWith("Icon"));
+  }
+
+  return false;
+};
+
+const hasPotentialTextContent = (node: ts.JsxElement) =>
+  node.children.some(childMayNameControl);
 
 export const accessibleControlNameDetector: Detector = {
   id: "accessible-control-name",
+  languages: ["jsx", "tsx"],
   ruleId: "A11Y-004",
   analyze: (context) => {
     const findings: AnalyzerFinding[] = [];
+    const buttons = nodesOfKind<ts.JsxElement>(context, ts.SyntaxKind.JsxElement);
+    const selfClosingButtons = nodesOfKind<ts.JsxSelfClosingElement>(
+      context,
+      ts.SyntaxKind.JsxSelfClosingElement,
+    );
 
-    visit(context.sourceFile, (node) => {
-      const opening = ts.isJsxElement(node)
-        ? node.openingElement
-        : ts.isJsxSelfClosingElement(node)
-          ? node
-          : null;
-
+    for (const node of [...buttons, ...selfClosingButtons]) {
+      const opening = ts.isJsxElement(node) ? node.openingElement : node;
       if (
-        !opening ||
         getTagName(opening) !== "button" ||
-        hasSpreadAttribute(opening)
-      ) {
-        return;
-      }
-
-      if (
+        hasSpreadAttribute(opening) ||
         hasAttribute(opening, "aria-label") ||
         hasAttribute(opening, "aria-labelledby") ||
-        hasAttribute(opening, "title")
+        hasAttribute(opening, "title") ||
+        (ts.isJsxElement(node) && hasPotentialTextContent(node))
       ) {
-        return;
-      }
-
-      if (ts.isJsxElement(node) && hasPotentialTextContent(node)) {
-        return;
+        continue;
       }
 
       findings.push(
@@ -188,7 +227,7 @@ export const accessibleControlNameDetector: Detector = {
           suggestion: "Provide visible text or an accessible name such as `aria-label`.",
         }),
       );
-    });
+    }
 
     return findings;
   },
