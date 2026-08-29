@@ -14,7 +14,7 @@ export const architectureRules = [
     tags: ["architecture", "separation-of-concerns"],
     bad: {
       language: "ts",
-      code: "export const loadOrders = async () => {\n  const response = await fetch(\"/api/orders\");\n  const orders = await response.json();\n  localStorage.setItem(\"orders\", JSON.stringify(orders));\n  document.querySelector(\"#total\")!.textContent = summarizeOrders(orders);\n};",
+      code: 'export const loadOrders = async () => {\n  const response = await fetch("/api/orders");\n  const orders = await response.json();\n  localStorage.setItem("orders", JSON.stringify(orders));\n  document.querySelector("#total")!.textContent = summarizeOrders(orders);\n};',
     },
     good: {
       language: "ts",
@@ -39,11 +39,11 @@ export const architectureRules = [
     tags: ["architecture", "dependencies"],
     bad: {
       language: "ts",
-      code: "export const completeCheckout = (order: Order) => {\n  app.services.analytics.track(\"checkout_completed\", order.id);\n};",
+      code: 'export const completeCheckout = (order: Order) => {\n  app.services.analytics.track("checkout_completed", order.id);\n};',
     },
     good: {
       language: "ts",
-      code: "export const completeCheckout = (\n  order: Order,\n  analytics: Analytics,\n) => {\n  analytics.track(\"checkout_completed\", order.id);\n};",
+      code: 'export const completeCheckout = (\n  order: Order,\n  analytics: Analytics,\n) => {\n  analytics.track("checkout_completed", order.id);\n};',
     },
     detection: {
       autoFixable: false,
@@ -64,7 +64,7 @@ export const architectureRules = [
     tags: ["abstraction", "architecture", "dry"],
     bad: {
       language: "ts",
-      code: "saveEntity(\"article\", article, { draft: true, audit: false });\nsaveEntity(\"invoice\", invoice, { draft: false, audit: true });",
+      code: 'saveEntity("article", article, { draft: true, audit: false });\nsaveEntity("invoice", invoice, { draft: false, audit: true });',
     },
     good: {
       language: "ts",
@@ -88,7 +88,7 @@ export const architectureRules = [
     tags: ["architecture", "side-effects", "testability"],
     bad: {
       language: "ts",
-      code: "export const calculateCartTotal = () => {\n  const cart = JSON.parse(localStorage.getItem(\"cart\") ?? \"[]\");\n  return cart.reduce((sum, item) => sum + item.price, 0);\n};",
+      code: 'export const calculateCartTotal = () => {\n  const cart = JSON.parse(localStorage.getItem("cart") ?? "[]");\n  return cart.reduce((sum, item) => sum + item.price, 0);\n};',
     },
     good: {
       language: "ts",
@@ -138,11 +138,11 @@ export const architectureRules = [
     tags: ["abstraction", "architecture", "indirection"],
     bad: {
       language: "ts",
-      code: "class HttpClient {\n  get(url: string) {\n    return fetch(url);\n  }\n}\n\nawait httpClient.get(\"/api/users\");",
+      code: 'class HttpClient {\n  get(url: string) {\n    return fetch(url);\n  }\n}\n\nawait httpClient.get("/api/users");',
     },
     good: {
       language: "ts",
-      code: "await fetch(\"/api/users\");",
+      code: 'await fetch("/api/users");',
     },
     exceptions: [
       "A deliberate compatibility boundary or public facade may justify forwarding when it protects consumers from an unstable implementation.",

@@ -29,7 +29,9 @@ const rules = [
   ...typescriptRules,
 ];
 const rulesById = new Map(rules.map((rule) => [rule.id, rule]));
-const automatedRuleIds = [...new Set(detectors.map((detector) => detector.ruleId))].sort();
+const automatedRuleIds = [
+  ...new Set(detectors.map((detector) => detector.ruleId)),
+].sort();
 
 test("every automated rule catches its own DON'T example", () => {
   assert.equal(automatedRuleIds.length, 19);
@@ -40,20 +42,39 @@ test("every automated rule catches its own DON'T example", () => {
     assert.ok(rule.bad, `${ruleId} must have a DON'T example`);
 
     const language = analyzerLanguageByExampleLanguage.get(rule.bad.language);
-    assert.ok(language, `${ruleId} DON'T example must use an analyzer-supported language`);
+    assert.ok(
+      language,
+      `${ruleId} DON'T example must use an analyzer-supported language`,
+    );
 
     const result = analyze({ language, source: rule.bad.code });
-    assert.equal(result.diagnostics.length, 0, `${ruleId} DON'T example must parse cleanly`);
+    assert.equal(
+      result.diagnostics.length,
+      0,
+      `${ruleId} DON'T example must parse cleanly`,
+    );
     assert.ok(
       result.findings.some((finding) => finding.ruleId === ruleId),
       `${ruleId} did not flag its own DON'T example`,
     );
 
     assert.ok(rule.good, `${ruleId} must have a DO example`);
-    const goodLanguage = analyzerLanguageByExampleLanguage.get(rule.good.language);
-    assert.ok(goodLanguage, `${ruleId} DO example must use an analyzer-supported language`);
-    const goodResult = analyze({ language: goodLanguage, source: rule.good.code });
-    assert.equal(goodResult.diagnostics.length, 0, `${ruleId} DO example must parse cleanly`);
+    const goodLanguage = analyzerLanguageByExampleLanguage.get(
+      rule.good.language,
+    );
+    assert.ok(
+      goodLanguage,
+      `${ruleId} DO example must use an analyzer-supported language`,
+    );
+    const goodResult = analyze({
+      language: goodLanguage,
+      source: rule.good.code,
+    });
+    assert.equal(
+      goodResult.diagnostics.length,
+      0,
+      `${ruleId} DO example must parse cleanly`,
+    );
     assert.deepEqual(
       goodResult.findings,
       [],

@@ -37,8 +37,7 @@ export const legacyBuiltinsDetector: Detector = {
         findings.push(
           createFinding(context, node.expression, {
             detectorId: "namespace-safe-builtins",
-            message:
-              `Legacy global \`${node.expression.text}\` is ambiguous and may coerce values unexpectedly.`,
+            message: `Legacy global \`${node.expression.text}\` is ambiguous and may coerce values unexpectedly.`,
             ruleId: "JS-004",
             suggestion: `Use \`${replacement}\` instead.`,
           }),

@@ -11,7 +11,10 @@ import {
 const isExternalDataRead = (expression: ts.Expression) => {
   const candidate = unwrapExpression(expression);
 
-  if (!ts.isCallExpression(candidate) || !ts.isPropertyAccessExpression(candidate.expression)) {
+  if (
+    !ts.isCallExpression(candidate) ||
+    !ts.isPropertyAccessExpression(candidate.expression)
+  ) {
     return false;
   }
 
@@ -46,7 +49,10 @@ const getRootIdentifier = (expression: ts.Expression): ts.Identifier | null => {
     return candidate;
   }
 
-  if (ts.isPropertyAccessExpression(candidate) || ts.isElementAccessExpression(candidate)) {
+  if (
+    ts.isPropertyAccessExpression(candidate) ||
+    ts.isElementAccessExpression(candidate)
+  ) {
     return getRootIdentifier(candidate.expression);
   }
 
@@ -115,7 +121,10 @@ export const untrustedAssertionsDetector: Detector = {
     const taintedSymbols = collectTaintedSymbols(context);
     const assertions = [
       ...nodesOfKind<ts.AsExpression>(context, ts.SyntaxKind.AsExpression),
-      ...nodesOfKind<ts.TypeAssertion>(context, ts.SyntaxKind.TypeAssertionExpression),
+      ...nodesOfKind<ts.TypeAssertion>(
+        context,
+        ts.SyntaxKind.TypeAssertionExpression,
+      ),
     ];
 
     for (const node of assertions) {
@@ -129,7 +138,8 @@ export const untrustedAssertionsDetector: Detector = {
       findings.push(
         createFinding(context, node, {
           detectorId: "untrusted-data-assertion",
-          message: "External runtime data is being trusted through a type assertion.",
+          message:
+            "External runtime data is being trusted through a type assertion.",
           ruleId: "TS-004",
           suggestion:
             "Keep the value `unknown`, validate it at the boundary, then return the validated domain type.",

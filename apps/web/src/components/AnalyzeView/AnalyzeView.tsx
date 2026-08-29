@@ -40,7 +40,6 @@ const rulesById = new Map(rules.map((rule) => [rule.id, rule]));
 const isAnalyzerLanguage = (value: string): value is AnalyzerLanguage =>
   languageOptions.some(([language]) => language === value);
 
-
 const DiagnosticCard = ({ diagnostic }: { diagnostic: AnalyzerDiagnostic }) => (
   <article className={`${styles.finding} ${styles.diagnostic}`}>
     <div className={styles.findingMeta}>
@@ -60,7 +59,8 @@ const DiagnosticCard = ({ diagnostic }: { diagnostic: AnalyzerDiagnostic }) => (
       </code>
     </pre>
     <p className={styles.suggestion}>
-      Coding Bible pauses rule detectors on malformed syntax to avoid misleading findings.
+      Coding Bible pauses rule detectors on malformed syntax to avoid misleading
+      findings.
     </p>
   </article>
 );
@@ -151,7 +151,11 @@ export const AnalyzeView = () => {
             source stays on this page and is not uploaded anywhere.
           </p>
         </div>
-        <button className={styles.sampleButton} onClick={loadExample} type="button">
+        <button
+          className={styles.sampleButton}
+          onClick={loadExample}
+          type="button"
+        >
           Load example
         </button>
       </div>
@@ -242,7 +246,9 @@ export const AnalyzeView = () => {
             <>
               <div className={styles.resultSummary}>
                 <div>
-                  <strong>{result.diagnostics.length || result.findings.length}</strong>
+                  <strong>
+                    {result.diagnostics.length || result.findings.length}
+                  </strong>
                   <span>
                     {result.diagnostics.length
                       ? result.diagnostics.length === 1
@@ -277,8 +283,9 @@ export const AnalyzeView = () => {
                 <div className={styles.cleanState}>
                   <h3>No supported violations found.</h3>
                   <p>
-                    Clean for {result.ruleIdsChecked.length} applicable automated rules out of{" "}
-                    {rules.length}. The rest still requires the Bible—or a code review.
+                    Clean for {result.ruleIdsChecked.length} applicable
+                    automated rules out of {rules.length}. The rest still
+                    requires the Bible—or a code review.
                   </p>
                 </div>
               ) : (

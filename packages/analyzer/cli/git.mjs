@@ -13,7 +13,11 @@ const runGit = async (cwd, args) => {
   return stdout.trim();
 };
 
-const lines = (value) => value.split(/\r?\n/u).map((line) => line.trim()).filter(Boolean);
+const lines = (value) =>
+  value
+    .split(/\r?\n/u)
+    .map((line) => line.trim())
+    .filter(Boolean);
 
 const getGitRoot = async (cwd) => {
   try {
@@ -29,7 +33,13 @@ const getUntrackedFiles = async (root) =>
 const getWorkingTreeFiles = async (root) => {
   try {
     return lines(
-      await runGit(root, ["diff", "--name-only", "--diff-filter=ACMR", "HEAD", "--"]),
+      await runGit(root, [
+        "diff",
+        "--name-only",
+        "--diff-filter=ACMR",
+        "HEAD",
+        "--",
+      ]),
     );
   } catch {
     return lines(await runGit(root, ["ls-files", "--cached"]));
@@ -46,7 +56,13 @@ export const getGitScopedFiles = async ({ cwd, mode, ref }) => {
 
   if (mode === "staged") {
     relativeFiles = lines(
-      await runGit(root, ["diff", "--cached", "--name-only", "--diff-filter=ACMR", "--"]),
+      await runGit(root, [
+        "diff",
+        "--cached",
+        "--name-only",
+        "--diff-filter=ACMR",
+        "--",
+      ]),
     );
   } else if (mode === "changed") {
     relativeFiles = [
@@ -55,7 +71,9 @@ export const getGitScopedFiles = async ({ cwd, mode, ref }) => {
     ];
   } else if (mode === "since") {
     if (!ref) {
-      throw new Error("--since requires a Git ref, for example --since origin/main.");
+      throw new Error(
+        "--since requires a Git ref, for example --since origin/main.",
+      );
     }
 
     relativeFiles = [

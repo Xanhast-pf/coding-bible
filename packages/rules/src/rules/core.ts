@@ -25,7 +25,8 @@ export const coreRules = [
   {
     id: "CORE-002",
     title: "Use descriptive names",
-    summary: "Names should communicate the role of a value, function, or module.",
+    summary:
+      "Names should communicate the role of a value, function, or module.",
     rationale:
       "Descriptive names reduce the surrounding code a reader must inspect to understand behavior.",
     level: "must",

@@ -89,11 +89,7 @@ const getTokenKind = (token: string): HighlightTokenKind => {
     return "comment";
   }
 
-  if (
-    token.startsWith('"') ||
-    token.startsWith("'") ||
-    token.startsWith("`")
-  ) {
+  if (token.startsWith('"') || token.startsWith("'") || token.startsWith("`")) {
     return "string";
   }
 

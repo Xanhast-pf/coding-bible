@@ -1,12 +1,7 @@
 import ts from "typescript";
 
 import type { AnalyzerFinding, Detector, DetectorContext } from "../types.ts";
-import {
-  createFinding,
-  getSymbol,
-  nodesOfKind,
-  visit,
-} from "../utils.ts";
+import { createFinding, getSymbol, nodesOfKind, visit } from "../utils.ts";
 
 const getMapCallback = (node: ts.CallExpression) => {
   if (
@@ -17,12 +12,15 @@ const getMapCallback = (node: ts.CallExpression) => {
   }
 
   const callback = node.arguments[0];
-  return callback && (ts.isArrowFunction(callback) || ts.isFunctionExpression(callback))
+  return callback &&
+    (ts.isArrowFunction(callback) || ts.isFunctionExpression(callback))
     ? callback
     : null;
 };
 
-const collectJsxRoots = (expression: ts.Expression): Array<ts.JsxElement | ts.JsxSelfClosingElement | ts.JsxFragment> => {
+const collectJsxRoots = (
+  expression: ts.Expression,
+): Array<ts.JsxElement | ts.JsxSelfClosingElement | ts.JsxFragment> => {
   if (
     ts.isJsxElement(expression) ||
     ts.isJsxSelfClosingElement(expression) ||
@@ -57,10 +55,15 @@ const getReturnedJsx = (callback: ts.ArrowFunction | ts.FunctionExpression) => {
     return collectJsxRoots(callback.body);
   }
 
-  const jsxRoots: Array<ts.JsxElement | ts.JsxSelfClosingElement | ts.JsxFragment> = [];
+  const jsxRoots: Array<
+    ts.JsxElement | ts.JsxSelfClosingElement | ts.JsxFragment
+  > = [];
 
   const walk = (node: ts.Node) => {
-    if (node !== callback.body && (ts.isFunctionLike(node) || ts.isClassLike(node))) {
+    if (
+      node !== callback.body &&
+      (ts.isFunctionLike(node) || ts.isClassLike(node))
+    ) {
       return;
     }
 
@@ -128,9 +131,13 @@ const containsGeneratedKey = (expression: ts.Expression) => {
     const method = node.expression.name.text;
 
     generated =
-      (ts.isIdentifier(owner) && owner.text === "Math" && method === "random") ||
+      (ts.isIdentifier(owner) &&
+        owner.text === "Math" &&
+        method === "random") ||
       (ts.isIdentifier(owner) && owner.text === "Date" && method === "now") ||
-      (ts.isIdentifier(owner) && owner.text === "crypto" && method === "randomUUID");
+      (ts.isIdentifier(owner) &&
+        owner.text === "crypto" &&
+        method === "randomUUID");
   });
 
   return generated;
@@ -168,7 +175,8 @@ const findMissingKeys = (context: DetectorContext) => {
             detectorId: "react-list-missing-key",
             message: "JSX returned directly from `map()` is missing a key.",
             ruleId: "REACT-006",
-            suggestion: "Add a stable key derived from the item's persistent identity.",
+            suggestion:
+              "Add a stable key derived from the item's persistent identity.",
           }),
         );
       }
@@ -212,7 +220,8 @@ const findUnstableKeys = (context: DetectorContext) => {
       }
 
       const usesIndex = Boolean(
-        indexSymbol && expressionContainsSymbol(context, keyExpression, indexSymbol),
+        indexSymbol &&
+        expressionContainsSymbol(context, keyExpression, indexSymbol),
       );
       const generated = containsGeneratedKey(keyExpression);
 
@@ -227,7 +236,8 @@ const findUnstableKeys = (context: DetectorContext) => {
             ? "Array position contributes to this React key."
             : "This React key is generated during render and changes between renders.",
           ruleId: "REACT-006",
-          suggestion: "Use a stable identifier that belongs to the underlying item.",
+          suggestion:
+            "Use a stable identifier that belongs to the underlying item.",
         }),
       );
     }

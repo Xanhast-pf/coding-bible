@@ -19,7 +19,8 @@ const getReactHookName = (
   if (ts.isIdentifier(expression)) {
     const binding = getImportBinding(context, expression);
     if (binding?.moduleName === "react" && binding.kind === "named") {
-      return binding.importedName === "use" || hookNamePattern.test(binding.importedName)
+      return binding.importedName === "use" ||
+        hookNamePattern.test(binding.importedName)
         ? binding.importedName
         : null;
     }
@@ -29,7 +30,10 @@ const getReactHookName = (
       : null;
   }
 
-  if (!ts.isPropertyAccessExpression(expression) || !ts.isIdentifier(expression.expression)) {
+  if (
+    !ts.isPropertyAccessExpression(expression) ||
+    !ts.isIdentifier(expression.expression)
+  ) {
     return null;
   }
 
@@ -37,7 +41,8 @@ const getReactHookName = (
   if (
     binding?.moduleName === "react" &&
     (binding.kind === "default" || binding.kind === "namespace") &&
-    (expression.name.text === "use" || hookNamePattern.test(expression.name.text))
+    (expression.name.text === "use" ||
+      hookNamePattern.test(expression.name.text))
   ) {
     return expression.name.text;
   }
@@ -71,7 +76,8 @@ const hasForbiddenControlFlow = (
   let current = node.parent;
 
   while (current && current !== boundary) {
-    const isTryBoundary = ts.isTryStatement(current) || ts.isCatchClause(current);
+    const isTryBoundary =
+      ts.isTryStatement(current) || ts.isCatchClause(current);
     const isConditionalBoundary =
       ts.isIfStatement(current) ||
       ts.isConditionalExpression(current) ||
@@ -116,7 +122,10 @@ const statementContainsFunctionExit = (statement: ts.Statement) => {
   return exits;
 };
 
-const isAfterPotentialEarlyExit = (node: ts.Node, boundary: ExecutableFunction) => {
+const isAfterPotentialEarlyExit = (
+  node: ts.Node,
+  boundary: ExecutableFunction,
+) => {
   if (!boundary.body || !ts.isBlock(boundary.body)) {
     return false;
   }
@@ -137,7 +146,11 @@ const isAfterPotentialEarlyExit = (node: ts.Node, boundary: ExecutableFunction) 
 };
 
 const isAsyncFunction = (node: ExecutableFunction) =>
-  Boolean(node.modifiers?.some((modifier) => modifier.kind === ts.SyntaxKind.AsyncKeyword));
+  Boolean(
+    node.modifiers?.some(
+      (modifier) => modifier.kind === ts.SyntaxKind.AsyncKeyword,
+    ),
+  );
 
 export const reactHookPlacementDetector: Detector = {
   id: "react-hook-placement",
@@ -174,7 +187,8 @@ export const reactHookPlacementDetector: Detector = {
             detectorId: "react-hook-placement",
             message: `\`${hookName}\` is called from an async component or custom Hook.`,
             ruleId: "REACT-009",
-            suggestion: "Hooks must run from a synchronous component or custom Hook call path.",
+            suggestion:
+              "Hooks must run from a synchronous component or custom Hook call path.",
           }),
         );
         continue;

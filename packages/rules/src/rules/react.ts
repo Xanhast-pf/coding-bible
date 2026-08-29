@@ -87,7 +87,7 @@ export const reactRules = [
     tags: ["data-flow", "react", "state"],
     bad: {
       language: "tsx",
-      code: "const [fullName, setFullName] = useState(\"\");\nuseEffect(() => setFullName(`${first} ${last}`), [first, last]);",
+      code: 'const [fullName, setFullName] = useState("");\nuseEffect(() => setFullName(`${first} ${last}`), [first, last]);',
     },
     good: {
       language: "tsx",
@@ -159,11 +159,11 @@ export const reactRules = [
     tags: ["purity", "react", "rendering"],
     bad: {
       language: "tsx",
-      code: "const UserCard = ({ user }) => {\n  analytics.track(\"UserCard rendered\", { userId: user.id });\n  return <h2>{user.name}</h2>;\n};",
+      code: 'const UserCard = ({ user }) => {\n  analytics.track("UserCard rendered", { userId: user.id });\n  return <h2>{user.name}</h2>;\n};',
     },
     good: {
       language: "tsx",
-      code: "const UserCard = ({ user }) => {\n  useEffect(() => {\n    analytics.track(\"UserCard viewed\", { userId: user.id });\n  }, [user.id]);\n\n  return <h2>{user.name}</h2>;\n};",
+      code: 'const UserCard = ({ user }) => {\n  useEffect(() => {\n    analytics.track("UserCard viewed", { userId: user.id });\n  }, [user.id]);\n\n  return <h2>{user.name}</h2>;\n};',
     },
     detection: { autoFixable: false, detectable: true, strategy: "semantic" },
   },
@@ -180,11 +180,11 @@ export const reactRules = [
     tags: ["components", "performance", "react"],
     bad: {
       language: "tsx",
-      code: "const CountrySelect = () => {\n  const options = [\"Canada\", \"France\", \"Japan\"];\n  return <Select options={options} />;\n};",
+      code: 'const CountrySelect = () => {\n  const options = ["Canada", "France", "Japan"];\n  return <Select options={options} />;\n};',
     },
     good: {
       language: "tsx",
-      code: "const countryOptions = [\"Canada\", \"France\", \"Japan\"];\n\nconst CountrySelect = () => <Select options={countryOptions} />;",
+      code: 'const countryOptions = ["Canada", "France", "Japan"];\n\nconst CountrySelect = () => <Select options={countryOptions} />;',
     },
     detection: { autoFixable: false, detectable: true, strategy: "ast" },
   },
@@ -230,7 +230,10 @@ export const reactRules = [
       language: "tsx",
       code: "const UserCard = ({ user }) => <strong>{user.name}</strong>;\nconst content = UserCard({ user });",
     },
-    good: { language: "tsx", code: "const content = <UserCard user={user} />;" },
+    good: {
+      language: "tsx",
+      code: "const content = <UserCard user={user} />;",
+    },
     references: [
       {
         label: "React — Rules of React",

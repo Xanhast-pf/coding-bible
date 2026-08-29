@@ -46,8 +46,8 @@ export const isImportedBinding = (
   const binding = getImportBinding(context, identifier);
   return Boolean(
     binding &&
-      binding.moduleName === moduleName &&
-      (!importedNames || importedNames.includes(binding.importedName)),
+    binding.moduleName === moduleName &&
+    (!importedNames || importedNames.includes(binding.importedName)),
   );
 };
 
@@ -81,7 +81,8 @@ export const createFinding = (
   };
 };
 
-export const isPascalCaseName = (value: string) => /^[A-Z][A-Za-z0-9]*$/.test(value);
+export const isPascalCaseName = (value: string) =>
+  /^[A-Z][A-Za-z0-9]*$/.test(value);
 
 export type ExecutableFunction =
   | ts.ArrowFunction
@@ -92,7 +93,9 @@ export type ExecutableFunction =
   | ts.MethodDeclaration
   | ts.SetAccessorDeclaration;
 
-export const isExecutableFunction = (node: ts.Node): node is ExecutableFunction =>
+export const isExecutableFunction = (
+  node: ts.Node,
+): node is ExecutableFunction =>
   ts.isArrowFunction(node) ||
   ts.isConstructorDeclaration(node) ||
   ts.isFunctionDeclaration(node) ||

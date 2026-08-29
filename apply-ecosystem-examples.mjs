@@ -28,11 +28,11 @@ const examplesByFile = {
     "REACT-002": {
       bad: {
         language: "tsx",
-        code: `const fullName = useMemo(() => \`${'${firstName}'} ${'${lastName}'}\`, [firstName, lastName]);`,
+        code: `const fullName = useMemo(() => \`${"${firstName}"} ${"${lastName}"}\`, [firstName, lastName]);`,
       },
       good: {
         language: "tsx",
-        code: `const fullName = \`${'${firstName}'} ${'${lastName}'}\`;`,
+        code: `const fullName = \`${"${firstName}"} ${"${lastName}"}\`;`,
       },
     },
     "REACT-003": {
@@ -101,7 +101,7 @@ const CountrySelect = () => <Select options={countryOptions} />;`,
         language: "tsx",
         code: `if (isEnabled) {
   const [count, setCount] = useState(0);
-}`, 
+}`,
       },
       good: {
         language: "tsx",
@@ -267,7 +267,7 @@ return <Badge>{unread}</Badge>;`,
         language: "ts",
         code: `markUpdated(state) {
   state.lastUpdated = Date.now();
-}`, 
+}`,
       },
       good: {
         language: "ts",
@@ -440,7 +440,7 @@ export const settingsStore = configureStore({ reducer: settingsReducer });`,
         language: "ts",
         code: `const document = gql\`
   query UserQuery {
-    user(id: "${'${userId}'}") { id name }
+    user(id: "${"${userId}"}") { id name }
   }
 \`;`,
       },
@@ -739,7 +739,7 @@ const UsersPage = () => {
 
 export default function Dashboard() {
   return <LargeDashboardWithOneInteractiveButton />;
-}`, 
+}`,
       },
       good: {
         language: "tsx",
@@ -756,7 +756,7 @@ export default function Dashboard() {
       bad: {
         language: "tsx",
         code: `// Server Component
-const formatPrice = (value: number) => \`$${'${value}'}\`;
+const formatPrice = (value: number) => \`$${"${value}"}\`;
 return <ClientPrice amount={12} formatPrice={formatPrice} />;`,
       },
       good: {
@@ -786,14 +786,14 @@ export const getUsers = () => db.user.findMany();`,
   const response = await fetch("https://my-app.test/api/users");
   const users = await response.json();
   return <Users users={users} />;
-}`, 
+}`,
       },
       good: {
         language: "tsx",
         code: `export default async function UsersPage() {
   const users = await getUsers();
   return <Users users={users} />;
-}`, 
+}`,
       },
     },
     "NEXT-006": {
@@ -836,8 +836,14 @@ const insertExamples = (source, ruleId, examples) => {
     throw new Error(`Could not find ${ruleId}`);
   }
 
-  const nextRule = source.indexOf('\n  {\n    id: "', ruleStart + marker.length);
-  const arrayEnd = source.indexOf("\n] satisfies readonly CodingRule[];", ruleStart);
+  const nextRule = source.indexOf(
+    '\n  {\n    id: "',
+    ruleStart + marker.length,
+  );
+  const arrayEnd = source.indexOf(
+    "\n] satisfies readonly CodingRule[];",
+    ruleStart,
+  );
   const ruleEnd = nextRule === -1 ? arrayEnd : nextRule;
 
   if (ruleEnd === -1) {
@@ -853,7 +859,7 @@ const insertExamples = (source, ruleId, examples) => {
     throw new Error(`${ruleId} has only one side of the example pair`);
   }
 
-  const tagsMatch = block.match(/\n    tags: \[[^\n]+\],/);
+  const tagsMatch = block.match(/\n {4}tags: \[[^\n]+\],/);
   if (!tagsMatch || tagsMatch.index === undefined) {
     throw new Error(`Could not find the tags line for ${ruleId}`);
   }
@@ -867,7 +873,9 @@ const insertExamples = (source, ruleId, examples) => {
   };
 };
 
-const rootArg = process.argv.slice(2).find((argument) => !argument.startsWith("--"));
+const rootArg = process.argv
+  .slice(2)
+  .find((argument) => !argument.startsWith("--"));
 const root = resolve(rootArg ?? process.cwd());
 const shouldFormat = !process.argv.includes("--no-format");
 const changedFiles = [];
@@ -878,7 +886,9 @@ for (const [relativePath, examples] of Object.entries(examplesByFile)) {
   const absolutePath = resolve(root, relativePath);
 
   if (!existsSync(absolutePath)) {
-    throw new Error(`Missing ${relativePath}. Run this script from the coding-bible repo root.`);
+    throw new Error(
+      `Missing ${relativePath}. Run this script from the coding-bible repo root.`,
+    );
   }
 
   let source = readFileSync(absolutePath, "utf8");
@@ -894,7 +904,9 @@ for (const [relativePath, examples] of Object.entries(examplesByFile)) {
   changedFiles.push(relativePath);
 }
 
-console.log(`Added ${addedPairs} DON’T / DO pairs; skipped ${skippedPairs} rules that already had both examples.`);
+console.log(
+  `Added ${addedPairs} DON’T / DO pairs; skipped ${skippedPairs} rules that already had both examples.`,
+);
 console.log(`Touched ${changedFiles.length} ecosystem rule files.`);
 
 if (shouldFormat && changedFiles.length > 0) {
@@ -910,6 +922,8 @@ if (shouldFormat && changedFiles.length > 0) {
   );
 
   if (result.error || result.status !== 0) {
-    console.warn("Biome formatting did not complete. Run `pnpm check --write` (or the repo's Biome write command) before committing.");
+    console.warn(
+      "Biome formatting did not complete. Run `pnpm check --write` (or the repo's Biome write command) before committing.",
+    );
   }
 }

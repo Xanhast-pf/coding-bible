@@ -14,7 +14,7 @@ export const workflowRules = [
     tags: ["ci", "quality", "workflow"],
     bad: {
       language: "bash",
-      code: "git commit -am \"Ship feature\"\ngit push",
+      code: 'git commit -am "Ship feature"\ngit push',
     },
     good: {
       language: "bash",
@@ -60,7 +60,7 @@ export const workflowRules = [
     },
     good: {
       language: "bash",
-      code: "rg \"legacyParser|parseLegacy\" src tests config\n# Inspect dynamic imports and generated/config wiring too.\nrm src/legacyParser.ts",
+      code: 'rg "legacyParser|parseLegacy" src tests config\n# Inspect dynamic imports and generated/config wiring too.\nrm src/legacyParser.ts',
     },
     detection: { autoFixable: false, detectable: true, strategy: "semantic" },
   },

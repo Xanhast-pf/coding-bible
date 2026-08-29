@@ -40,10 +40,7 @@ const CodeSnippetComponent = ({ code, language, tone }: CodeSnippetProps) => {
               </span>
               <span className={styles.lineCode}>
                 {highlightCodeLine(line.text).map((token) => (
-                  <span
-                    className={styles[token.kind]}
-                    key={token.start}
-                  >
+                  <span className={styles[token.kind]} key={token.start}>
                     {token.text}
                   </span>
                 ))}

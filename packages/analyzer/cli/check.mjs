@@ -167,12 +167,15 @@ export const checkPaths = async (
     left.location.column - right.location.column;
 
   findings.sort(
-    (left, right) => byLocation(left, right) || left.ruleId.localeCompare(right.ruleId),
+    (left, right) =>
+      byLocation(left, right) || left.ruleId.localeCompare(right.ruleId),
   );
   diagnostics.sort(byLocation);
 
   const errors = findings.filter(({ severity }) => severity === "error").length;
-  const warnings = findings.filter(({ severity }) => severity === "warning").length;
+  const warnings = findings.filter(
+    ({ severity }) => severity === "warning",
+  ).length;
   const result = {
     checksRun,
     configPath: loadedConfig.configPath

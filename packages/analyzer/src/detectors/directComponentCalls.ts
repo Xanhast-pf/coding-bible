@@ -50,7 +50,12 @@ export const directComponentCallsDetector: Detector = {
       context,
       ts.SyntaxKind.FunctionDeclaration,
     )) {
-      if (!node.body || !node.name || !isPascalCaseName(node.name.text) || !containsJsx(node.body)) {
+      if (
+        !node.body ||
+        !node.name ||
+        !isPascalCaseName(node.name.text) ||
+        !containsJsx(node.body)
+      ) {
         continue;
       }
 
@@ -62,7 +67,10 @@ export const directComponentCallsDetector: Detector = {
 
     for (const node of [
       ...nodesOfKind<ts.ArrowFunction>(context, ts.SyntaxKind.ArrowFunction),
-      ...nodesOfKind<ts.FunctionExpression>(context, ts.SyntaxKind.FunctionExpression),
+      ...nodesOfKind<ts.FunctionExpression>(
+        context,
+        ts.SyntaxKind.FunctionExpression,
+      ),
     ]) {
       if (!isExecutableFunction(node) || !node.body) {
         continue;
@@ -106,8 +114,7 @@ export const directComponentCallsDetector: Detector = {
       findings.push(
         createFinding(context, node, {
           detectorId: "react-direct-component-call",
-          message:
-            `\`${node.expression.text}\` is a local React component being invoked like a regular function.`,
+          message: `\`${node.expression.text}\` is a local React component being invoked like a regular function.`,
           ruleId: "REACT-010",
           suggestion: `Render it through JSX instead: \`<${node.expression.text} ... />\`.`,
         }),

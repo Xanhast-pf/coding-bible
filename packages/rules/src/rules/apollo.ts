@@ -18,7 +18,7 @@ export const apolloRules = [
     },
     good: {
       language: "ts",
-      code: "const cache = new InMemoryCache({\n  typePolicies: {\n    Product: { keyFields: [\"sku\"] },\n  },\n});",
+      code: 'const cache = new InMemoryCache({\n  typePolicies: {\n    Product: { keyFields: ["sku"] },\n  },\n});',
     },
     references: [
       {
@@ -41,11 +41,11 @@ export const apolloRules = [
     tags: ["apollo", "cache", "fetch-policy", "queries"],
     bad: {
       language: "ts",
-      code: "const client = new ApolloClient({\n  cache,\n  defaultOptions: {\n    watchQuery: { fetchPolicy: \"network-only\" },\n  },\n});",
+      code: 'const client = new ApolloClient({\n  cache,\n  defaultOptions: {\n    watchQuery: { fetchPolicy: "network-only" },\n  },\n});',
     },
     good: {
       language: "tsx",
-      code: "useQuery(GET_PROFILE, {\n  fetchPolicy: \"cache-and-network\",\n  nextFetchPolicy: \"cache-first\",\n});",
+      code: 'useQuery(GET_PROFILE, {\n  fetchPolicy: "cache-and-network",\n  nextFetchPolicy: "cache-first",\n});',
       note: "Choose a policy per freshness requirement; this is one example, not a universal default.",
     },
     references: [
@@ -154,11 +154,11 @@ export const apolloRules = [
     tags: ["apollo", "errors", "graphql", "partial-data"],
     bad: {
       language: "tsx",
-      code: "const { data } = useQuery(DASHBOARD_QUERY, {\n  errorPolicy: \"ignore\",\n});",
+      code: 'const { data } = useQuery(DASHBOARD_QUERY, {\n  errorPolicy: "ignore",\n});',
     },
     good: {
       language: "tsx",
-      code: "const { data, error } = useQuery(DASHBOARD_QUERY, {\n  errorPolicy: \"all\",\n});\n\nif (error && !data) return <ErrorState />;\nreturn <Dashboard data={data} warning={error?.message} />;",
+      code: 'const { data, error } = useQuery(DASHBOARD_QUERY, {\n  errorPolicy: "all",\n});\n\nif (error && !data) return <ErrorState />;\nreturn <Dashboard data={data} warning={error?.message} />;',
     },
     references: [
       {

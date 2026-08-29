@@ -30,7 +30,9 @@ export interface ResolvedAnalyzeInput {
 }
 
 const buildProgram = (inputs: readonly ResolvedAnalyzeInput[]) => {
-  const inputsByFileName = new Map(inputs.map((input) => [input.fileName, input]));
+  const inputsByFileName = new Map(
+    inputs.map((input) => [input.fileName, input]),
+  );
   const sourceFiles = new Map(
     inputs.map((input) => [
       input.fileName,
@@ -71,7 +73,10 @@ const getImportBinding = (
 
   if (ts.isImportSpecifier(parent) && parent.name === node) {
     const declaration = parent.parent.parent.parent;
-    if (!ts.isImportDeclaration(declaration) || !ts.isStringLiteral(declaration.moduleSpecifier)) {
+    if (
+      !ts.isImportDeclaration(declaration) ||
+      !ts.isStringLiteral(declaration.moduleSpecifier)
+    ) {
       return null;
     }
 
@@ -87,7 +92,10 @@ const getImportBinding = (
 
   if (ts.isNamespaceImport(parent) && parent.name === node) {
     const declaration = parent.parent.parent;
-    if (!ts.isImportDeclaration(declaration) || !ts.isStringLiteral(declaration.moduleSpecifier)) {
+    if (
+      !ts.isImportDeclaration(declaration) ||
+      !ts.isStringLiteral(declaration.moduleSpecifier)
+    ) {
       return null;
     }
 
@@ -103,7 +111,10 @@ const getImportBinding = (
 
   if (ts.isImportClause(parent) && parent.name === node) {
     const declaration = parent.parent;
-    if (!ts.isImportDeclaration(declaration) || !ts.isStringLiteral(declaration.moduleSpecifier)) {
+    if (
+      !ts.isImportDeclaration(declaration) ||
+      !ts.isStringLiteral(declaration.moduleSpecifier)
+    ) {
       return null;
     }
 
@@ -201,7 +212,9 @@ export const createDetectorContexts = (
 export const createDetectorContext = (input: ResolvedAnalyzeInput) => {
   const context = createDetectorContexts([input])[0];
   if (!context) {
-    throw new Error(`Analyzer could not create a context for ${input.fileName}.`);
+    throw new Error(
+      `Analyzer could not create a context for ${input.fileName}.`,
+    );
   }
   return context;
 };

@@ -134,7 +134,10 @@ const analyzeContext = (
   };
 };
 
-const resolveInput = (input: AnalyzeInput, index = 0): ResolvedAnalyzeInput => ({
+const resolveInput = (
+  input: AnalyzeInput,
+  index = 0,
+): ResolvedAnalyzeInput => ({
   fileName:
     input.fileName ??
     (index === 0
@@ -149,7 +152,11 @@ const emptyResult = (
   fileName: string,
   options: AnalyzeOptions,
 ): AnalyzeResult => {
-  const applicableDetectors = getApplicableDetectors(language, fileName, options);
+  const applicableDetectors = getApplicableDetectors(
+    language,
+    fileName,
+    options,
+  );
 
   return {
     checksRun: applicableDetectors.length,
@@ -177,7 +184,11 @@ export const analyzeMany = (
     const resolved = resolveInput(input, index);
 
     if (!input.source.trim()) {
-      results[index] = emptyResult(resolved.language, resolved.fileName, options);
+      results[index] = emptyResult(
+        resolved.language,
+        resolved.fileName,
+        options,
+      );
       return;
     }
 
@@ -211,7 +222,9 @@ export const analyzeProgram = (
   const resolvedInputs = inputs.map((input): ResolvedAnalyzeInput => {
     const sourceFile = program.getSourceFile(input.fileName);
     if (!sourceFile) {
-      throw new Error(`Analyzer could not find ${input.fileName} in the TypeScript project.`);
+      throw new Error(
+        `Analyzer could not find ${input.fileName} in the TypeScript project.`,
+      );
     }
 
     return {
@@ -221,10 +234,12 @@ export const analyzeProgram = (
     };
   });
 
-  return createDetectorContextsFromProgram(resolvedInputs, program).map((context) => {
-    options.signal?.throwIfAborted();
-    return analyzeContext(context, options);
-  });
+  return createDetectorContextsFromProgram(resolvedInputs, program).map(
+    (context) => {
+      options.signal?.throwIfAborted();
+      return analyzeContext(context, options);
+    },
+  );
 };
 
 export const analyze = (

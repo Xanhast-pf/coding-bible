@@ -1,0 +1,10 @@
+node_modules/
+dist/
+coverage/
+.vite/
+.cache/
+pnpm-lock.yaml
+packages/analyzer/test/fixtures/
+docs/
+README.md
+CONTRIBUTING.md

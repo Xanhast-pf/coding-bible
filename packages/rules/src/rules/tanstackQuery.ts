@@ -14,11 +14,11 @@ export const tanstackQueryRules = [
     tags: ["cache", "query-keys", "tanstack-query"],
     bad: {
       language: "tsx",
-      code: "useQuery({\n  queryKey: [\"todo\"],\n  queryFn: () => fetchTodo(todoId),\n});",
+      code: 'useQuery({\n  queryKey: ["todo"],\n  queryFn: () => fetchTodo(todoId),\n});',
     },
     good: {
       language: "tsx",
-      code: "useQuery({\n  queryKey: [\"todo\", todoId],\n  queryFn: () => fetchTodo(todoId),\n});",
+      code: 'useQuery({\n  queryKey: ["todo", todoId],\n  queryFn: () => fetchTodo(todoId),\n});',
     },
     references: [
       {
@@ -41,11 +41,11 @@ export const tanstackQueryRules = [
     tags: ["cache", "query-keys", "serialization", "tanstack-query"],
     bad: {
       language: "ts",
-      code: "const queryKey = [\"todos\", () => status];",
+      code: 'const queryKey = ["todos", () => status];',
     },
     good: {
       language: "ts",
-      code: "const queryKey = [\"todos\", { page, status }];",
+      code: 'const queryKey = ["todos", { page, status }];',
     },
     references: [
       {
@@ -72,7 +72,7 @@ export const tanstackQueryRules = [
     },
     good: {
       language: "tsx",
-      code: "const catalogStaleTimeMs = 5 * 60 * 1000;\n\nuseQuery({\n  queryKey: [\"catalog\"],\n  queryFn: fetchCatalog,\n  staleTime: catalogStaleTimeMs,\n});",
+      code: 'const catalogStaleTimeMs = 5 * 60 * 1000;\n\nuseQuery({\n  queryKey: ["catalog"],\n  queryFn: fetchCatalog,\n  staleTime: catalogStaleTimeMs,\n});',
     },
     references: [
       {
@@ -99,7 +99,7 @@ export const tanstackQueryRules = [
     },
     good: {
       language: "tsx",
-      code: "useMutation({\n  mutationFn: addTodo,\n  onSuccess: () =>\n    queryClient.invalidateQueries({ queryKey: [\"todos\"] }),\n});",
+      code: 'useMutation({\n  mutationFn: addTodo,\n  onSuccess: () =>\n    queryClient.invalidateQueries({ queryKey: ["todos"] }),\n});',
     },
     references: [
       {
@@ -122,11 +122,11 @@ export const tanstackQueryRules = [
     tags: ["errors", "query-functions", "tanstack-query"],
     bad: {
       language: "ts",
-      code: "const fetchTodos = async () => {\n  const response = await fetch(\"/api/todos\");\n  return response.json();\n};",
+      code: 'const fetchTodos = async () => {\n  const response = await fetch("/api/todos");\n  return response.json();\n};',
     },
     good: {
       language: "ts",
-      code: "const fetchTodos = async () => {\n  const response = await fetch(\"/api/todos\");\n  if (!response.ok) throw new Error(\"Failed to load todos\");\n  return response.json();\n};",
+      code: 'const fetchTodos = async () => {\n  const response = await fetch("/api/todos");\n  if (!response.ok) throw new Error("Failed to load todos");\n  return response.json();\n};',
     },
     references: [
       {

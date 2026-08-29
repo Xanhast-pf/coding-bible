@@ -50,7 +50,8 @@
 .statusDot {
   background: var(--snippetAccent);
   border-radius: 50%;
-  box-shadow: 0 0 0.55rem color-mix(in srgb, var(--snippetAccent) 55%, transparent);
+  box-shadow: 0 0 0.55rem
+    color-mix(in srgb, var(--snippetAccent) 55%, transparent);
   block-size: 0.375rem;
   inline-size: 0.375rem;
 }

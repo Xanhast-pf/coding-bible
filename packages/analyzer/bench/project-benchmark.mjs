@@ -4,7 +4,10 @@ import path from "node:path";
 
 import { checkPaths } from "../cli/check.mjs";
 
-const fileCount = Number.parseInt(process.env.CODING_BIBLE_BENCH_FILES ?? "1000", 10);
+const fileCount = Number.parseInt(
+  process.env.CODING_BIBLE_BENCH_FILES ?? "1000",
+  10,
+);
 if (!Number.isInteger(fileCount) || fileCount < 1) {
   throw new Error("CODING_BIBLE_BENCH_FILES must be a positive integer.");
 }
@@ -60,10 +63,14 @@ try {
   console.log(`  rss         ${result.profile.rssMb.toFixed(1)} MB`);
 
   if (maxMs !== null && result.profile.totalMs > maxMs) {
-    throw new Error(`Benchmark exceeded ${maxMs} ms (${result.profile.totalMs.toFixed(1)} ms).`);
+    throw new Error(
+      `Benchmark exceeded ${maxMs} ms (${result.profile.totalMs.toFixed(1)} ms).`,
+    );
   }
   if (maxRssMb !== null && result.profile.rssMb > maxRssMb) {
-    throw new Error(`Benchmark exceeded ${maxRssMb} MB RSS (${result.profile.rssMb.toFixed(1)} MB).`);
+    throw new Error(
+      `Benchmark exceeded ${maxRssMb} MB RSS (${result.profile.rssMb.toFixed(1)} MB).`,
+    );
   }
 } finally {
   await rm(directory, { force: true, recursive: true });

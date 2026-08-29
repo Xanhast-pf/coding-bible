@@ -15,7 +15,15 @@ const configFileNames = [
 ];
 
 const validRuleSettings = new Set(["error", "warning", "off"]);
-const validConfigKeys = new Set(["include", "ignore", "ignoreDefaults", "overrides", "packs", "rules", "tsconfig"]);
+const validConfigKeys = new Set([
+  "include",
+  "ignore",
+  "ignoreDefaults",
+  "overrides",
+  "packs",
+  "rules",
+  "tsconfig",
+]);
 const validOverrideKeys = new Set(["files", "packs", "rules"]);
 const validPacks = new Set(analyzerPacks);
 
@@ -47,7 +55,10 @@ const assertStringArray = (value, name) => {
     return;
   }
 
-  if (!Array.isArray(value) || value.some((item) => typeof item !== "string" || !item.trim())) {
+  if (
+    !Array.isArray(value) ||
+    value.some((item) => typeof item !== "string" || !item.trim())
+  ) {
     throw new Error(`${name} must be an array of non-empty strings.`);
   }
 };
@@ -87,13 +98,20 @@ const validateConfig = (config) => {
 
   assertStringArray(config.include, "include");
   assertStringArray(config.ignore, "ignore");
-  if (config.ignoreDefaults !== undefined && typeof config.ignoreDefaults !== "boolean") {
+  if (
+    config.ignoreDefaults !== undefined &&
+    typeof config.ignoreDefaults !== "boolean"
+  ) {
     throw new Error("ignoreDefaults must be a boolean.");
   }
   assertSettings(config.packs, "packs", { validatePacks: true });
   assertSettings(config.rules, "rules");
 
-  if (config.tsconfig !== undefined && config.tsconfig !== false && typeof config.tsconfig !== "string") {
+  if (
+    config.tsconfig !== undefined &&
+    config.tsconfig !== false &&
+    typeof config.tsconfig !== "string"
+  ) {
     throw new Error("tsconfig must be a path string or false.");
   }
 
@@ -103,7 +121,11 @@ const validateConfig = (config) => {
     }
 
     config.overrides.forEach((override, index) => {
-      if (!override || typeof override !== "object" || Array.isArray(override)) {
+      if (
+        !override ||
+        typeof override !== "object" ||
+        Array.isArray(override)
+      ) {
         throw new Error(`overrides[${index}] must be an object.`);
       }
       for (const key of Object.keys(override)) {
@@ -113,9 +135,13 @@ const validateConfig = (config) => {
       }
       assertStringArray(override.files, `overrides[${index}].files`);
       if (!override.files?.length) {
-        throw new Error(`overrides[${index}].files must contain at least one glob.`);
+        throw new Error(
+          `overrides[${index}].files must contain at least one glob.`,
+        );
       }
-      assertSettings(override.packs, `overrides[${index}].packs`, { validatePacks: true });
+      assertSettings(override.packs, `overrides[${index}].packs`, {
+        validatePacks: true,
+      });
       assertSettings(override.rules, `overrides[${index}].rules`);
     });
   }
@@ -170,7 +196,8 @@ const packByRulePrefix = new Map([
   ["TS", "typescript"],
 ]);
 
-export const getAnalyzerPack = (ruleId) => packByRulePrefix.get(ruleId.split("-")[0]) ?? null;
+export const getAnalyzerPack = (ruleId) =>
+  packByRulePrefix.get(ruleId.split("-")[0]) ?? null;
 
 const applySettings = (current, next) => (next === undefined ? current : next);
 
@@ -201,14 +228,20 @@ export const createConfigResolver = (config, cwd) => {
 
   return {
     getRuleSetting,
-    isRuleEnabled: (ruleId, filePath) => getRuleSetting(ruleId, filePath) !== "off",
+    isRuleEnabled: (ruleId, filePath) =>
+      getRuleSetting(ruleId, filePath) !== "off",
   };
 };
 
-export const loadAnalyzerConfig = async ({ cwd = process.cwd(), configPath } = {}) => {
+export const loadAnalyzerConfig = async ({
+  cwd = process.cwd(),
+  configPath,
+} = {}) => {
   const startedAt = performance.now();
   const resolvedPath = await findConfigPath(cwd, configPath);
-  const loaded = resolvedPath ? validateConfig(await loadConfigModule(resolvedPath)) : {};
+  const loaded = resolvedPath
+    ? validateConfig(await loadConfigModule(resolvedPath))
+    : {};
   const config = {
     ...loaded,
     include: loaded.include ?? ["**/*"],

@@ -41,11 +41,11 @@ export const legendStateRules = [
     tags: ["legend-state", "peek", "reactivity", "tracking"],
     bad: {
       language: "ts",
-      code: "const userId = session$.userId.get();\nanalytics.track(\"checkout\", { userId });",
+      code: 'const userId = session$.userId.get();\nanalytics.track("checkout", { userId });',
     },
     good: {
       language: "ts",
-      code: "const userId = session$.userId.peek();\nanalytics.track(\"checkout\", { userId });",
+      code: 'const userId = session$.userId.peek();\nanalytics.track("checkout", { userId });',
       note: "peek() makes the intentional non-reactive read explicit.",
     },
     references: [
@@ -69,11 +69,11 @@ export const legendStateRules = [
     tags: ["legend-state", "mutation", "reactivity"],
     bad: {
       language: "ts",
-      code: "const profile = store$.profile.peek();\nprofile.name = \"Ada\";\nstore$.profile.set(profile);",
+      code: 'const profile = store$.profile.peek();\nprofile.name = "Ada";\nstore$.profile.set(profile);',
     },
     good: {
       language: "ts",
-      code: "store$.profile.name.set(\"Ada\");",
+      code: 'store$.profile.name.set("Ada");',
     },
     references: [
       {

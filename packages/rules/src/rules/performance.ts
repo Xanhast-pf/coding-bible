@@ -14,11 +14,11 @@ export const performanceRules = [
     tags: ["iteration", "performance"],
     bad: {
       language: "ts",
-      code: "let settingsItem: MenuItem | undefined;\nfor (let index = 0; index < menuItems.length; index += 1) {\n  if (menuItems[index]?.id === \"settings\") {\n    settingsItem = menuItems[index];\n    break;\n  }\n}",
+      code: 'let settingsItem: MenuItem | undefined;\nfor (let index = 0; index < menuItems.length; index += 1) {\n  if (menuItems[index]?.id === "settings") {\n    settingsItem = menuItems[index];\n    break;\n  }\n}',
     },
     good: {
       language: "ts",
-      code: "const settingsItem = menuItems.find(\n  (item) => item.id === \"settings\",\n);",
+      code: 'const settingsItem = menuItems.find(\n  (item) => item.id === "settings",\n);',
     },
     detection: { autoFixable: false, detectable: true, strategy: "semantic" },
   },
@@ -35,11 +35,11 @@ export const performanceRules = [
     tags: ["measurement", "performance", "profiling"],
     bad: {
       language: "ts",
-      code: "// \"This looks slow.\"\nconst cachedNormalizeUsers = memoize(normalizeUsers);",
+      code: '// "This looks slow."\nconst cachedNormalizeUsers = memoize(normalizeUsers);',
     },
     good: {
       language: "ts",
-      code: "performance.mark(\"normalize:start\");\nconst users = normalizeUsers(payload);\nperformance.mark(\"normalize:end\");\nperformance.measure(\n  \"normalizeUsers\",\n  \"normalize:start\",\n  \"normalize:end\",\n);",
+      code: 'performance.mark("normalize:start");\nconst users = normalizeUsers(payload);\nperformance.mark("normalize:end");\nperformance.measure(\n  "normalizeUsers",\n  "normalize:start",\n  "normalize:end",\n);',
     },
     detection: { autoFixable: false, detectable: false },
   },

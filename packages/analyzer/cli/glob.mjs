@@ -1,6 +1,7 @@
 import path from "node:path";
 
-export const normalizePath = (value) => value.split(path.sep).join("/").replace(/^\.\//, "");
+export const normalizePath = (value) =>
+  value.split(path.sep).join("/").replace(/^\.\//, "");
 
 export const expandBraces = (pattern) => {
   const match = /\{([^{}]+)\}/.exec(pattern);
@@ -11,9 +12,7 @@ export const expandBraces = (pattern) => {
   const [token, body] = match;
   const parts = body.split(",");
 
-  return parts.flatMap((part) =>
-    expandBraces(pattern.replace(token, part)),
-  );
+  return parts.flatMap((part) => expandBraces(pattern.replace(token, part)));
 };
 
 const escapeRegex = (character) =>

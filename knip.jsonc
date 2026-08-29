@@ -1,0 +1,41 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema-jsonc.json",
+  "workspaces": {
+    ".": {
+      "entry": [
+        "eslint.config.mjs",
+        "lint-staged.config.mjs",
+        "scripts/*.mjs",
+        "scripts/test/*.test.mjs",
+      ],
+      "project": [
+        "eslint.config.mjs",
+        "lint-staged.config.mjs",
+        "scripts/**/*.mjs",
+      ],
+    },
+    "apps/web": {
+      "entry": ["src/main.tsx", "vite.config.ts", "test/*.test.mjs"],
+      "project": ["src/**/*.{ts,tsx}", "vite.config.ts", "test/*.test.mjs"],
+    },
+    "packages/analyzer": {
+      "entry": [
+        "src/index.ts",
+        "bin/coding-bible.mjs",
+        "bench/*.mjs",
+        "test/*.test.mjs",
+      ],
+      "project": [
+        "src/**/*.ts",
+        "cli/*.mjs",
+        "bin/*.mjs",
+        "bench/*.mjs",
+        "test/*.test.mjs",
+      ],
+    },
+    "packages/rules": {
+      "entry": ["src/index.ts", "test/*.test.mjs"],
+      "project": ["src/**/*.ts", "test/*.test.mjs"],
+    },
+  },
+}

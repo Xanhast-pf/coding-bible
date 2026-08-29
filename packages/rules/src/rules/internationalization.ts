@@ -14,11 +14,11 @@ export const internationalizationRules = [
     tags: ["i18n", "strings", "ui"],
     bad: {
       language: "tsx",
-      code: "<button type=\"button\">Save changes</button>",
+      code: '<button type="button">Save changes</button>',
     },
     good: {
       language: "tsx",
-      code: "<button type=\"button\">\n  {t(\"actions.saveChanges\")}\n</button>",
+      code: '<button type="button">\n  {t("actions.saveChanges")}\n</button>',
     },
     detection: { autoFixable: false, detectable: true, strategy: "semantic" },
   },
@@ -35,11 +35,11 @@ export const internationalizationRules = [
     tags: ["i18n", "messages", "plurals"],
     bad: {
       language: "ts",
-      code: "const message = \"You have \" + count + (count === 1 ? \" item\" : \" items\");",
+      code: 'const message = "You have " + count + (count === 1 ? " item" : " items");',
     },
     good: {
       language: "ts",
-      code: "const message = t(\"cart.itemCount\", { count });\n\n// cart.itemCount:\n// \"You have {count, plural, one {# item} other {# items}}\"",
+      code: 'const message = t("cart.itemCount", { count });\n\n// cart.itemCount:\n// "You have {count, plural, one {# item} other {# items}}"',
     },
     detection: { autoFixable: false, detectable: true, strategy: "semantic" },
   },
@@ -60,7 +60,7 @@ export const internationalizationRules = [
     },
     good: {
       language: "ts",
-      code: "const label = new Intl.DateTimeFormat(locale, {\n  dateStyle: \"medium\",\n}).format(date);",
+      code: 'const label = new Intl.DateTimeFormat(locale, {\n  dateStyle: "medium",\n}).format(date);',
     },
     detection: { autoFixable: false, detectable: true, strategy: "semantic" },
   },

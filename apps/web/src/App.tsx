@@ -34,12 +34,7 @@ const LearnView = () => {
     setQuery,
   } = useRuleBrowserState();
 
-  const visibleRules = filterRules(
-    rules,
-    query,
-    selectedPack,
-    selectedLevel,
-  );
+  const visibleRules = filterRules(rules, query, selectedPack, selectedLevel);
   const canonicalBibleUrl = createCanonicalBibleUrl(window.location.href);
   return (
     <>
@@ -75,7 +70,8 @@ const LearnView = () => {
         <section aria-label="Rules">
           <div className={styles.resultsRow}>
             <p aria-live="polite" className={styles.results}>
-              {visibleRules.length} {visibleRules.length === 1 ? "rule" : "rules"}
+              {visibleRules.length}{" "}
+              {visibleRules.length === 1 ? "rule" : "rules"}
             </p>
 
             {visibleRules.length ? (

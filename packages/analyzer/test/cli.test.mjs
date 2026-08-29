@@ -32,7 +32,6 @@ const createWriter = () => {
   };
 };
 
-
 test("config globs support recursive matches and brace expansion", () => {
   const globs = compileGlobs(["**/*.test.{ts,tsx}", "src/generated/**"]);
 
@@ -45,13 +44,30 @@ test("config globs support recursive matches and brace expansion", () => {
 test("collectSourceFiles walks supported source files and ignores generated directories", async () => {
   await withFixture(async (directory) => {
     await mkdir(path.join(directory, "src"), { recursive: true });
-    await mkdir(path.join(directory, "node_modules", "dependency"), { recursive: true });
-    await writeFile(path.join(directory, "src", "good.ts"), "const value = 1;\n");
-    await writeFile(path.join(directory, "src", "view.tsx"), "export const View = () => <div />;\n");
-    await writeFile(path.join(directory, "src", "script.mjs"), "export const script = 1;\n");
-    await writeFile(path.join(directory, "src", "module.mts"), "export const moduleValue = 1;\n");
+    await mkdir(path.join(directory, "node_modules", "dependency"), {
+      recursive: true,
+    });
+    await writeFile(
+      path.join(directory, "src", "good.ts"),
+      "const value = 1;\n",
+    );
+    await writeFile(
+      path.join(directory, "src", "view.tsx"),
+      "export const View = () => <div />;\n",
+    );
+    await writeFile(
+      path.join(directory, "src", "script.mjs"),
+      "export const script = 1;\n",
+    );
+    await writeFile(
+      path.join(directory, "src", "module.mts"),
+      "export const moduleValue = 1;\n",
+    );
     await writeFile(path.join(directory, "src", "notes.md"), "ignore me\n");
-    await writeFile(path.join(directory, "node_modules", "dependency", "bad.ts"), "const value: any = 1;\n");
+    await writeFile(
+      path.join(directory, "node_modules", "dependency", "bad.ts"),
+      "const value: any = 1;\n",
+    );
 
     const files = await collectSourceFiles(["."], { cwd: directory });
 
@@ -70,7 +86,10 @@ test("collectSourceFiles walks supported source files and ignores generated dire
 test("checkPaths returns file-aware analyzer findings", async () => {
   await withFixture(async (directory) => {
     await mkdir(path.join(directory, "src"), { recursive: true });
-    await writeFile(path.join(directory, "src", "bad.ts"), "const value: any = 1;\n");
+    await writeFile(
+      path.join(directory, "src", "bad.ts"),
+      "const value: any = 1;\n",
+    );
 
     const result = await checkPaths(["src"], { cwd: directory });
 
@@ -102,7 +121,6 @@ test("runCli exits non-zero for findings and supports JSON output", async () => 
   });
 });
 
-
 test("CLI clean summary states automated coverage instead of implying a full review", async () => {
   await withFixture(async (directory) => {
     await writeFile(path.join(directory, "good.ts"), "const value = 1;\n");
@@ -124,7 +142,10 @@ test("CLI clean summary states automated coverage instead of implying a full rev
 
 test("CLI reports syntax errors and exits non-zero before rule findings", async () => {
   await withFixture(async (directory) => {
-    await writeFile(path.join(directory, "broken.tsx"), "const View = () => <div>\n");
+    await writeFile(
+      path.join(directory, "broken.tsx"),
+      "const View = () => <div>\n",
+    );
     const stdout = createWriter();
     const stderr = createWriter();
 
@@ -144,7 +165,10 @@ test("CLI reports syntax errors and exits non-zero before rule findings", async 
 test("CLI reports the union of rules actually applicable to scanned languages", async () => {
   await withFixture(async (directory) => {
     await writeFile(path.join(directory, "logic.ts"), "const value = 1;\n");
-    await writeFile(path.join(directory, "view.tsx"), "export const View = () => <div />;\n");
+    await writeFile(
+      path.join(directory, "view.tsx"),
+      "export const View = () => <div />;\n",
+    );
 
     const result = await checkPaths(["."], { cwd: directory });
 
@@ -157,10 +181,22 @@ test("config controls includes, ignores, severities, packs, rules, and overrides
   await withFixture(async (directory) => {
     await mkdir(path.join(directory, "src", "ignored"), { recursive: true });
     await mkdir(path.join(directory, "src", "strict"), { recursive: true });
-    await writeFile(path.join(directory, "src", "warning.ts"), "const value: any = 1;\n");
-    await writeFile(path.join(directory, "src", "strict", "error.ts"), "const value: any = 1;\n");
-    await writeFile(path.join(directory, "src", "ignored", "bad.ts"), "const value: any = 1;\n");
-    await writeFile(path.join(directory, "outside.ts"), "const value: any = 1;\n");
+    await writeFile(
+      path.join(directory, "src", "warning.ts"),
+      "const value: any = 1;\n",
+    );
+    await writeFile(
+      path.join(directory, "src", "strict", "error.ts"),
+      "const value: any = 1;\n",
+    );
+    await writeFile(
+      path.join(directory, "src", "ignored", "bad.ts"),
+      "const value: any = 1;\n",
+    );
+    await writeFile(
+      path.join(directory, "outside.ts"),
+      "const value: any = 1;\n",
+    );
     await writeFile(
       path.join(directory, "coding-bible.config.ts"),
       `export default {
@@ -253,11 +289,17 @@ test("--changed scans only working-tree and untracked source files", async () =>
     await run(["config", "user.email", "test@example.com"]);
     await run(["config", "user.name", "Test"]);
     await writeFile(path.join(directory, "tracked.ts"), "const tracked = 1;\n");
-    await writeFile(path.join(directory, "untouched.ts"), "const untouched = 1;\n");
+    await writeFile(
+      path.join(directory, "untouched.ts"),
+      "const untouched = 1;\n",
+    );
     await run(["add", "."]);
     await run(["commit", "-qm", "baseline"]);
 
-    await writeFile(path.join(directory, "tracked.ts"), "const tracked: any = 1;\n");
+    await writeFile(
+      path.join(directory, "tracked.ts"),
+      "const tracked: any = 1;\n",
+    );
     await writeFile(path.join(directory, "new.ts"), "const added: any = 1;\n");
 
     const result = await checkPaths(["."], {
@@ -288,12 +330,21 @@ test("--staged scans only staged source files", async () => {
     await run(["config", "user.email", "test@example.com"]);
     await run(["config", "user.name", "Test"]);
     await writeFile(path.join(directory, "staged.ts"), "const staged = 1;\n");
-    await writeFile(path.join(directory, "unstaged.ts"), "const unstaged = 1;\n");
+    await writeFile(
+      path.join(directory, "unstaged.ts"),
+      "const unstaged = 1;\n",
+    );
     await run(["add", "."]);
     await run(["commit", "-qm", "baseline"]);
 
-    await writeFile(path.join(directory, "staged.ts"), "const staged: any = 1;\n");
-    await writeFile(path.join(directory, "unstaged.ts"), "const unstaged: any = 1;\n");
+    await writeFile(
+      path.join(directory, "staged.ts"),
+      "const staged: any = 1;\n",
+    );
+    await writeFile(
+      path.join(directory, "unstaged.ts"),
+      "const unstaged: any = 1;\n",
+    );
     await run(["add", "staged.ts"]);
 
     const result = await checkPaths(["."], {
@@ -336,16 +387,25 @@ test("--since includes committed branch changes and current worktree changes", a
     await run(["init", "-q"]);
     await run(["config", "user.email", "test@example.com"]);
     await run(["config", "user.name", "Test"]);
-    await writeFile(path.join(directory, "committed.ts"), "const committed = 1;\n");
+    await writeFile(
+      path.join(directory, "committed.ts"),
+      "const committed = 1;\n",
+    );
     await writeFile(path.join(directory, "working.ts"), "const working = 1;\n");
     await run(["add", "."]);
     await run(["commit", "-qm", "baseline"]);
     const base = await run(["rev-parse", "HEAD"]);
 
-    await writeFile(path.join(directory, "committed.ts"), "const committed: any = 1;\n");
+    await writeFile(
+      path.join(directory, "committed.ts"),
+      "const committed: any = 1;\n",
+    );
     await run(["add", "committed.ts"]);
     await run(["commit", "-qm", "branch change"]);
-    await writeFile(path.join(directory, "working.ts"), "const working: any = 1;\n");
+    await writeFile(
+      path.join(directory, "working.ts"),
+      "const working: any = 1;\n",
+    );
 
     const result = await checkPaths(["."], {
       cwd: directory,
@@ -380,7 +440,9 @@ test("config command exposes the resolved configuration", async () => {
     assert.equal(stderr.value, "");
     assert.deepEqual(config.include, ["src/**/*"]);
     assert.equal(config.rules["TS-001"], "warning");
-    assert.ok(config.ignore.some((pattern) => pattern.includes("node_modules")));
+    assert.ok(
+      config.ignore.some((pattern) => pattern.includes("node_modules")),
+    );
   });
 });
 
@@ -408,7 +470,9 @@ test("invalid config fails as a tool error with exit code 2", async () => {
 
 test("config discovery walks upward and treats the config directory as project root", async () => {
   await withFixture(async (directory) => {
-    await mkdir(path.join(directory, "apps", "web", "src"), { recursive: true });
+    await mkdir(path.join(directory, "apps", "web", "src"), {
+      recursive: true,
+    });
     await writeFile(
       path.join(directory, "coding-bible.config.mjs"),
       `export default { include: ["apps/**/*"], rules: { "TS-001": "warning" } };\n`,
@@ -423,7 +487,10 @@ test("config discovery walks upward and treats the config directory as project r
     });
 
     assert.equal(result.filesScanned, 1);
-    assert.equal(result.findings[0]?.filePath, path.join("apps", "web", "src", "bad.ts"));
+    assert.equal(
+      result.findings[0]?.filePath,
+      path.join("apps", "web", "src", "bad.ts"),
+    );
     assert.equal(result.findings[0]?.severity, "warning");
     assert.equal(result.configPath, "coding-bible.config.mjs");
   });
@@ -458,15 +525,24 @@ test("diff scope reports changed files while retaining their full tsconfig proje
       path.join(directory, "tsconfig.json"),
       JSON.stringify({ compilerOptions: { strict: true }, include: ["src"] }),
     );
-    await writeFile(path.join(directory, "src", "changed.ts"), "export const changed = 1;\n");
-    await writeFile(path.join(directory, "src", "context.ts"), "export const context = 1;\n");
+    await writeFile(
+      path.join(directory, "src", "changed.ts"),
+      "export const changed = 1;\n",
+    );
+    await writeFile(
+      path.join(directory, "src", "context.ts"),
+      "export const context = 1;\n",
+    );
     await run(["init", "-q"]);
     await run(["config", "user.email", "test@example.com"]);
     await run(["config", "user.name", "Test"]);
     await run(["add", "."]);
     await run(["commit", "-qm", "baseline"]);
 
-    await writeFile(path.join(directory, "src", "changed.ts"), "export const changed: any = 1;\n");
+    await writeFile(
+      path.join(directory, "src", "changed.ts"),
+      "export const changed: any = 1;\n",
+    );
 
     const result = await checkPaths(["src"], {
       cwd: directory,
@@ -491,8 +567,14 @@ test("--changed works before the repository has its first commit", async () => {
       });
 
     await run(["init", "-q"]);
-    await writeFile(path.join(directory, "staged.ts"), "const staged: any = 1;\n");
-    await writeFile(path.join(directory, "untracked.ts"), "const untracked: any = 1;\n");
+    await writeFile(
+      path.join(directory, "staged.ts"),
+      "const staged: any = 1;\n",
+    );
+    await writeFile(
+      path.join(directory, "untracked.ts"),
+      "const untracked: any = 1;\n",
+    );
     await run(["add", "staged.ts"]);
 
     const result = await checkPaths(["."], {

@@ -1,7 +1,12 @@
 import ts from "typescript";
 
 import type { AnalyzerFinding, Detector, DetectorContext } from "../types.ts";
-import { createFinding, getReferences, getSymbol, nodesOfKind } from "../utils.ts";
+import {
+  createFinding,
+  getReferences,
+  getSymbol,
+  nodesOfKind,
+} from "../utils.ts";
 
 const assignmentOperators = new Set<ts.SyntaxKind>([
   ts.SyntaxKind.EqualsToken,
@@ -50,7 +55,8 @@ const isWriteReference = (identifier: ts.Identifier) => {
     }
 
     if (
-      (ts.isPrefixUnaryExpression(parent) || ts.isPostfixUnaryExpression(parent)) &&
+      (ts.isPrefixUnaryExpression(parent) ||
+        ts.isPostfixUnaryExpression(parent)) &&
       (parent.operator === ts.SyntaxKind.PlusPlusToken ||
         parent.operator === ts.SyntaxKind.MinusMinusToken) &&
       containsNode(parent.operand, identifier)
@@ -95,7 +101,8 @@ const isLoopInitializer = (node: ts.VariableDeclarationList) => {
   const parent = node.parent;
   return (
     (ts.isForStatement(parent) && parent.initializer === node) ||
-    ((ts.isForInStatement(parent) || ts.isForOfStatement(parent)) && parent.initializer === node)
+    ((ts.isForInStatement(parent) || ts.isForOfStatement(parent)) &&
+      parent.initializer === node)
   );
 };
 
@@ -114,12 +121,16 @@ export const preferConstDetector: Detector = {
       }
 
       const initializedBindings = node.declarations.flatMap((declaration) =>
-        declaration.initializer ? collectBindingIdentifiers(declaration.name) : [],
+        declaration.initializer
+          ? collectBindingIdentifiers(declaration.name)
+          : [],
       );
 
       if (
         !initializedBindings.length ||
-        initializedBindings.some((identifier) => isReassigned(context, identifier))
+        initializedBindings.some((identifier) =>
+          isReassigned(context, identifier),
+        )
       ) {
         continue;
       }

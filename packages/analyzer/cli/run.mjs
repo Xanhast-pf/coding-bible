@@ -166,20 +166,25 @@ const formatSummary = ({
   return `${marker} Coding Bible found ${errors} error${errors === 1 ? "" : "s"} and ${warnings} warning${warnings === 1 ? "" : "s"} across ${ruleIdsChecked.length} applicable automated rules in ${filesScanned} ${fileLabel} (${formatScope(scope)}).`;
 };
 
-const formatProfile = (profile) => [
-  "Profile",
-  `  config     ${profile.configMs.toFixed(1)} ms`,
-  `  discovery  ${profile.discoveryMs.toFixed(1)} ms`,
-  `  program    ${profile.programMs.toFixed(1)} ms`,
-  `  analysis   ${profile.analysisMs.toFixed(1)} ms`,
-  `  total      ${profile.totalMs.toFixed(1)} ms`,
-  `  rss        ${profile.rssMb.toFixed(1)} MB`,
-].join("\n");
+const formatProfile = (profile) =>
+  [
+    "Profile",
+    `  config     ${profile.configMs.toFixed(1)} ms`,
+    `  discovery  ${profile.discoveryMs.toFixed(1)} ms`,
+    `  program    ${profile.programMs.toFixed(1)} ms`,
+    `  analysis   ${profile.analysisMs.toFixed(1)} ms`,
+    `  total      ${profile.totalMs.toFixed(1)} ms`,
+    `  rss        ${profile.rssMb.toFixed(1)} MB`,
+  ].join("\n");
 
 const printConfig = async (options, { cwd, stdout }) => {
-  const loaded = await loadAnalyzerConfig({ cwd, configPath: options.configPath });
+  const loaded = await loadAnalyzerConfig({
+    cwd,
+    configPath: options.configPath,
+  });
   const displayPath = loaded.configPath
-    ? path.relative(loaded.rootDir, loaded.configPath) || path.basename(loaded.configPath)
+    ? path.relative(loaded.rootDir, loaded.configPath) ||
+      path.basename(loaded.configPath)
     : null;
   const value = {
     configPath: displayPath,
@@ -193,9 +198,18 @@ const printConfig = async (options, { cwd, stdout }) => {
     writeLine(stdout, `  source   ${displayPath ?? "defaults"}`);
     writeLine(stdout, `  include  ${loaded.config.include.join(", ")}`);
     writeLine(stdout, `  ignore   ${loaded.config.ignore.length} patterns`);
-    writeLine(stdout, `  tsconfig ${loaded.config.tsconfig === false ? "disabled" : loaded.config.tsconfig ?? "auto"}`);
-    writeLine(stdout, `  rules    ${Object.keys(loaded.config.rules ?? {}).length} overrides`);
-    writeLine(stdout, `  packs    ${Object.keys(loaded.config.packs ?? {}).length} overrides`);
+    writeLine(
+      stdout,
+      `  tsconfig ${loaded.config.tsconfig === false ? "disabled" : (loaded.config.tsconfig ?? "auto")}`,
+    );
+    writeLine(
+      stdout,
+      `  rules    ${Object.keys(loaded.config.rules ?? {}).length} overrides`,
+    );
+    writeLine(
+      stdout,
+      `  packs    ${Object.keys(loaded.config.packs ?? {}).length} overrides`,
+    );
   }
 
   return 0;
@@ -203,7 +217,11 @@ const printConfig = async (options, { cwd, stdout }) => {
 
 export const runCli = async (
   args,
-  { cwd = process.cwd(), stderr = process.stderr, stdout = process.stdout } = {},
+  {
+    cwd = process.cwd(),
+    stderr = process.stderr,
+    stdout = process.stdout,
+  } = {},
 ) => {
   let options;
   try {
@@ -243,7 +261,10 @@ export const runCli = async (
 
       if (result.diagnostics.length) {
         writeLine(stdout);
-        writeLine(stdout, result.diagnostics.map(formatDiagnostic).join("\n\n"));
+        writeLine(
+          stdout,
+          result.diagnostics.map(formatDiagnostic).join("\n\n"),
+        );
       }
 
       if (result.findings.length) {
@@ -260,7 +281,10 @@ export const runCli = async (
     return result.diagnostics.length || result.errors ? 1 : 0;
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    writeLine(stderr, `Coding Bible could not analyze the requested project: ${message}`);
+    writeLine(
+      stderr,
+      `Coding Bible could not analyze the requested project: ${message}`,
+    );
     return 2;
   }
 };

@@ -10,7 +10,6 @@ import {
   isExecutableFunction,
   isPascalCaseName,
   type ExecutableFunction,
-  nodesOfKind,
   unwrapExpression,
   visit,
 } from "../utils.ts";
@@ -79,7 +78,8 @@ const isStaticExpression = (expression: ts.Expression): boolean => {
   if (ts.isObjectLiteralExpression(candidate)) {
     return candidate.properties.every(
       (property) =>
-        ts.isPropertyAssignment(property) && isStaticExpression(property.initializer),
+        ts.isPropertyAssignment(property) &&
+        isStaticExpression(property.initializer),
     );
   }
 
@@ -137,7 +137,8 @@ const identifierIsMutated = (
       }
 
       if (
-        (ts.isPrefixUnaryExpression(owner) || ts.isPostfixUnaryExpression(owner)) &&
+        (ts.isPrefixUnaryExpression(owner) ||
+          ts.isPostfixUnaryExpression(owner)) &&
         (owner.operator === ts.SyntaxKind.PlusPlusToken ||
           owner.operator === ts.SyntaxKind.MinusMinusToken)
       ) {
@@ -159,7 +160,11 @@ export const staticComponentValueDetector: Detector = {
     const findings: AnalyzerFinding[] = [];
 
     visit(context.sourceFile, (node) => {
-      if (!isComponentFunction(node) || !isExecutableFunction(node) || !node.body) {
+      if (
+        !isComponentFunction(node) ||
+        !isExecutableFunction(node) ||
+        !node.body
+      ) {
         return;
       }
 
@@ -173,7 +178,9 @@ export const staticComponentValueDetector: Detector = {
           ts.isIdentifier(child.name) &&
           child.initializer &&
           (ts.isArrayLiteralExpression(unwrapExpression(child.initializer)) ||
-            ts.isObjectLiteralExpression(unwrapExpression(child.initializer))) &&
+            ts.isObjectLiteralExpression(
+              unwrapExpression(child.initializer),
+            )) &&
           isStaticExpression(child.initializer) &&
           !identifierIsMutated(context, child.name)
         ) {
@@ -214,7 +221,10 @@ const getRootIdentifier = (expression: ts.Expression): ts.Identifier | null => {
     return candidate;
   }
 
-  if (ts.isPropertyAccessExpression(candidate) || ts.isElementAccessExpression(candidate)) {
+  if (
+    ts.isPropertyAccessExpression(candidate) ||
+    ts.isElementAccessExpression(candidate)
+  ) {
     return getRootIdentifier(candidate.expression);
   }
 
@@ -227,22 +237,31 @@ const isReactStateHook = (
 ) => {
   if (ts.isIdentifier(expression)) {
     const binding = getImportBinding(context, expression);
-    return Boolean(
-      binding?.moduleName === "react" &&
+    return (
+      Boolean(
+        binding?.moduleName === "react" &&
         binding.kind === "named" &&
-        (binding.importedName === "useState" || binding.importedName === "useReducer"),
-    ) || expression.text === "useState" || expression.text === "useReducer";
+        (binding.importedName === "useState" ||
+          binding.importedName === "useReducer"),
+      ) ||
+      expression.text === "useState" ||
+      expression.text === "useReducer"
+    );
   }
 
-  if (!ts.isPropertyAccessExpression(expression) || !ts.isIdentifier(expression.expression)) {
+  if (
+    !ts.isPropertyAccessExpression(expression) ||
+    !ts.isIdentifier(expression.expression)
+  ) {
     return false;
   }
 
   const binding = getImportBinding(context, expression.expression);
   return Boolean(
     binding?.moduleName === "react" &&
-      (binding.kind === "default" || binding.kind === "namespace") &&
-      (expression.name.text === "useState" || expression.name.text === "useReducer"),
+    (binding.kind === "default" || binding.kind === "namespace") &&
+    (expression.name.text === "useState" ||
+      expression.name.text === "useReducer"),
   );
 };
 
@@ -343,7 +362,11 @@ export const reactInputMutationDetector: Detector = {
     const findings: AnalyzerFinding[] = [];
 
     visit(context.sourceFile, (node) => {
-      if (!isComponentFunction(node) || !isExecutableFunction(node) || !node.body) {
+      if (
+        !isComponentFunction(node) ||
+        !isExecutableFunction(node) ||
+        !node.body
+      ) {
         return;
       }
 
@@ -365,7 +388,8 @@ export const reactInputMutationDetector: Detector = {
               detectorId: "react-input-mutation",
               message: `\`${root.text}\` aliases React input/state and is mutated directly.`,
               ruleId: "REACT-011",
-              suggestion: "Derive a new value or use the state setter instead of mutating React-owned snapshots.",
+              suggestion:
+                "Derive a new value or use the state setter instead of mutating React-owned snapshots.",
             }),
           );
         };
@@ -373,13 +397,15 @@ export const reactInputMutationDetector: Detector = {
         if (
           ts.isBinaryExpression(child) &&
           assignmentOperatorKinds.has(child.operatorToken.kind) &&
-          (ts.isPropertyAccessExpression(child.left) || ts.isElementAccessExpression(child.left))
+          (ts.isPropertyAccessExpression(child.left) ||
+            ts.isElementAccessExpression(child.left))
         ) {
           report(child.left);
         }
 
         if (
-          (ts.isPrefixUnaryExpression(child) || ts.isPostfixUnaryExpression(child)) &&
+          (ts.isPrefixUnaryExpression(child) ||
+            ts.isPostfixUnaryExpression(child)) &&
           (child.operator === ts.SyntaxKind.PlusPlusToken ||
             child.operator === ts.SyntaxKind.MinusMinusToken) &&
           (ts.isPropertyAccessExpression(child.operand) ||

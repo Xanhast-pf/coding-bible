@@ -16,7 +16,8 @@ const getAttribute = (node: JsxWithAttributes, name: string) =>
       ts.isJsxAttribute(attribute) && attribute.name.getText() === name,
   );
 
-const hasAttribute = (node: JsxWithAttributes, name: string) => Boolean(getAttribute(node, name));
+const hasAttribute = (node: JsxWithAttributes, name: string) =>
+  Boolean(getAttribute(node, name));
 
 const hasSpreadAttribute = (node: JsxWithAttributes) =>
   getAttributes(node).some(ts.isJsxSpreadAttribute);
@@ -68,8 +69,14 @@ export const semanticInteractiveElementDetector: Detector = {
   analyze: (context) => {
     const findings: AnalyzerFinding[] = [];
     const openings = [
-      ...nodesOfKind<ts.JsxOpeningElement>(context, ts.SyntaxKind.JsxOpeningElement),
-      ...nodesOfKind<ts.JsxSelfClosingElement>(context, ts.SyntaxKind.JsxSelfClosingElement),
+      ...nodesOfKind<ts.JsxOpeningElement>(
+        context,
+        ts.SyntaxKind.JsxOpeningElement,
+      ),
+      ...nodesOfKind<ts.JsxSelfClosingElement>(
+        context,
+        ts.SyntaxKind.JsxSelfClosingElement,
+      ),
     ];
 
     for (const node of openings) {
@@ -88,7 +95,8 @@ export const semanticInteractiveElementDetector: Detector = {
           detectorId: "semantic-interactive-element",
           message: `A clickable <${tagName}> recreates native interactive behavior instead of using native semantics.`,
           ruleId: "A11Y-001",
-          suggestion: "Use the native interactive element that matches the action, usually `<button>` or `<a>`.",
+          suggestion:
+            "Use the native interactive element that matches the action, usually `<button>` or `<a>`.",
         }),
       );
     }
@@ -104,8 +112,14 @@ export const keyboardInteractionDetector: Detector = {
   analyze: (context) => {
     const findings: AnalyzerFinding[] = [];
     const openings = [
-      ...nodesOfKind<ts.JsxOpeningElement>(context, ts.SyntaxKind.JsxOpeningElement),
-      ...nodesOfKind<ts.JsxSelfClosingElement>(context, ts.SyntaxKind.JsxSelfClosingElement),
+      ...nodesOfKind<ts.JsxOpeningElement>(
+        context,
+        ts.SyntaxKind.JsxOpeningElement,
+      ),
+      ...nodesOfKind<ts.JsxSelfClosingElement>(
+        context,
+        ts.SyntaxKind.JsxSelfClosingElement,
+      ),
     ];
 
     for (const node of openings) {
@@ -135,7 +149,8 @@ export const keyboardInteractionDetector: Detector = {
           detectorId: "keyboard-interaction",
           message: `This custom ${tagName} button is not fully keyboard-operable${focusable ? "" : " or focusable"}.`,
           ruleId: "A11Y-002",
-          suggestion: "Prefer a native `<button>` so focus and keyboard activation are provided by the platform.",
+          suggestion:
+            "Prefer a native `<button>` so focus and keyboard activation are provided by the platform.",
         }),
       );
     }
@@ -154,13 +169,18 @@ const expressionMayNameControl = (expression: ts.Expression): boolean => {
   }
 
   if (ts.isJsxElement(expression) || ts.isJsxSelfClosingElement(expression)) {
-    const opening = ts.isJsxElement(expression) ? expression.openingElement : expression;
+    const opening = ts.isJsxElement(expression)
+      ? expression.openingElement
+      : expression;
     const tagName = getTagName(opening);
     return Boolean(tagName && !tagName.endsWith("Icon"));
   }
 
   if (ts.isConditionalExpression(expression)) {
-    return expressionMayNameControl(expression.whenTrue) || expressionMayNameControl(expression.whenFalse);
+    return (
+      expressionMayNameControl(expression.whenTrue) ||
+      expressionMayNameControl(expression.whenFalse)
+    );
   }
 
   return true;
@@ -172,7 +192,9 @@ const childMayNameControl = (child: ts.JsxChild): boolean => {
   }
 
   if (ts.isJsxExpression(child)) {
-    return Boolean(child.expression && expressionMayNameControl(child.expression));
+    return Boolean(
+      child.expression && expressionMayNameControl(child.expression),
+    );
   }
 
   if (ts.isJsxElement(child)) {
@@ -185,7 +207,9 @@ const childMayNameControl = (child: ts.JsxChild): boolean => {
       return Boolean(getStringAttribute(child, "alt")?.trim());
     }
 
-    return Boolean(tagName && /^[A-Z]/.test(tagName) && !tagName.endsWith("Icon"));
+    return Boolean(
+      tagName && /^[A-Z]/.test(tagName) && !tagName.endsWith("Icon"),
+    );
   }
 
   return false;
@@ -200,7 +224,10 @@ export const accessibleControlNameDetector: Detector = {
   ruleId: "A11Y-004",
   analyze: (context) => {
     const findings: AnalyzerFinding[] = [];
-    const buttons = nodesOfKind<ts.JsxElement>(context, ts.SyntaxKind.JsxElement);
+    const buttons = nodesOfKind<ts.JsxElement>(
+      context,
+      ts.SyntaxKind.JsxElement,
+    );
     const selfClosingButtons = nodesOfKind<ts.JsxSelfClosingElement>(
       context,
       ts.SyntaxKind.JsxSelfClosingElement,
@@ -224,7 +251,8 @@ export const accessibleControlNameDetector: Detector = {
           detectorId: "accessible-control-name",
           message: "This button has no detectable accessible name.",
           ruleId: "A11Y-004",
-          suggestion: "Provide visible text or an accessible name such as `aria-label`.",
+          suggestion:
+            "Provide visible text or an accessible name such as `aria-label`.",
         }),
       );
     }
