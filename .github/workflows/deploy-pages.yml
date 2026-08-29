@@ -69,13 +69,31 @@ jobs:
           scope: changed
           fail-on: error
 
+  released-action:
+    name: Released Action dogfood · v0.25.0
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Review with published Coding Bible v0.25.0
+        uses: Xanhast-pf/coding-bible@v0.25.0
+        with:
+          scope: project
+          fail-on: error
+
   deploy:
     name: Deploy Pages
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    needs: [build, action-smoke]
+    needs: [build, action-smoke, released-action]
     permissions:
       pages: write
       id-token: write
