@@ -3,10 +3,49 @@ import type ts from "typescript";
 export const analyzerLanguages = ["tsx", "ts", "jsx", "js"] as const;
 export type AnalyzerLanguage = (typeof analyzerLanguages)[number];
 
+export const analyzerPacks = [
+  "accessibility",
+  "core",
+  "graphql",
+  "javascript",
+  "legend-state",
+  "react",
+  "typescript",
+] as const;
+export type AnalyzerPack = (typeof analyzerPacks)[number];
+
+export type AnalyzerRuleSetting = "error" | "warning" | "off";
+
+export interface AnalyzerConfigOverride {
+  files: readonly string[];
+  packs?: Partial<Record<AnalyzerPack, AnalyzerRuleSetting>>;
+  rules?: Readonly<Record<string, AnalyzerRuleSetting>>;
+}
+
+export interface AnalyzerConfig {
+  include?: readonly string[];
+  ignore?: readonly string[];
+  ignoreDefaults?: boolean;
+  packs?: Partial<Record<AnalyzerPack, AnalyzerRuleSetting>>;
+  rules?: Readonly<Record<string, AnalyzerRuleSetting>>;
+  overrides?: readonly AnalyzerConfigOverride[];
+  tsconfig?: string | false;
+}
+
 export interface AnalyzeInput {
   source: string;
   language: AnalyzerLanguage;
   fileName?: string;
+}
+
+export interface ProgramAnalyzeInput {
+  fileName: string;
+  language: AnalyzerLanguage;
+}
+
+export interface AnalyzeOptions {
+  isRuleEnabled?: (ruleId: string, fileName: string) => boolean;
+  signal?: AbortSignal;
 }
 
 export interface SourceLocation {
