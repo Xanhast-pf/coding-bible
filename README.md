@@ -17,6 +17,7 @@ That single source can eventually power:
 - AI context files
 - the browser code analyzer
 - a project-aware CLI / CI scanner
+- a local MCP server for coding agents
 - editor integrations
 - PR review tooling
 - framework-specific rule packs
@@ -29,6 +30,7 @@ apps/
 
 packages/
   analyzer/             AST-backed source analyzer
+  mcp/                  Read-only local MCP server
   rules/                Canonical rule schema + rule content
 
 docs/
@@ -96,6 +98,29 @@ pnpm agent:check
 The Learn view's `tldr;` action remains the interactive filtered export for any
 current search/pack/level combination, while the generated `agents/<pack>.txt`
 files provide stable pack-level prompts for external tooling.
+
+## MCP server
+
+Coding Bible also exposes a local stdio MCP server for coding agents:
+
+```bash
+pnpm mcp --root /absolute/path/to/project
+```
+
+It provides four read-only tools:
+
+- `check_code` — deterministic analysis for an in-memory JS/TS snippet.
+- `check_files` — project-aware CLI analysis for files/directories under the
+  configured root. MCP scans force `--no-cache` so tool calls do not write the
+  analyzer cache.
+- `get_rule` — canonical rule data and the corresponding agent prompt.
+- `get_project_guidance` — stable foundation/quality rules plus ecosystem packs
+  detected from local package manifests.
+
+`check_code` and `check_files` report only deterministic analyzer coverage; a
+clean result is not a claim that semantic rules were reviewed. The configured
+root is a path boundary for tool inputs, not an operating-system sandbox. See
+`packages/mcp/README.md` and ADR-011 for the server contract.
 
 ## GitHub Pages
 

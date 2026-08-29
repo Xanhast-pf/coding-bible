@@ -80,6 +80,23 @@ pnpm agent:check
 Backward-incompatible `rules.json` changes require a deliberate `formatVersion`
 bump, schema updates, and regression coverage.
 
+## MCP changes
+
+The MCP server is a read-only consumer of `packages/rules` and
+`packages/analyzer`; it must not redefine rule content or detector behavior.
+
+When changing MCP tools:
+
+1. Keep tool contracts small, explicit, and covered by regression tests.
+2. Reuse the in-process analyzer for snippets and the existing project-aware CLI
+   for filesystem scans rather than duplicating analyzer behavior.
+3. Preserve the configured root boundary for caller-supplied filesystem paths.
+4. Keep `check_files` free of analyzer cache writes so read-only tool annotations
+   remain honest.
+5. Keep protocol traffic on stdout and diagnostics/runtime logging on stderr.
+6. State deterministic analyzer coverage precisely; semantic review is not
+   implied by a clean scan.
+
 ## Commit quality gates
 
 Do not bypass the entire Git hook for routine development. The pre-commit hook

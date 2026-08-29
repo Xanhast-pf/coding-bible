@@ -20,6 +20,7 @@
     "knip:fast": "knip --dependencies --use-tsconfig-files",
     "lint": "eslint . --cache --cache-location .cache/eslint --max-warnings=0",
     "lint:fix": "eslint . --cache --cache-location .cache/eslint --fix --max-warnings=0",
+    "mcp": "node packages/mcp/bin/coding-bible-mcp.mjs",
     "prepare": "husky",
     "precommit": "lint-staged && node scripts/run-precommit.mjs",
     "prepush": "pnpm check",

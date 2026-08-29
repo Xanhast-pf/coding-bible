@@ -1,6 +1,7 @@
 const ALL_TARGETS = [
   "@coding-bible/rules",
   "@coding-bible/analyzer",
+  "@coding-bible/mcp",
   "@coding-bible/web",
 ];
 
@@ -31,13 +32,20 @@ export function planAffectedTests(files) {
   for (const file of normalized) {
     if (file.startsWith("packages/rules/")) {
       targets.add("@coding-bible/rules");
+      targets.add("@coding-bible/mcp");
       targets.add("@coding-bible/web");
       continue;
     }
 
     if (file.startsWith("packages/analyzer/")) {
       targets.add("@coding-bible/analyzer");
+      targets.add("@coding-bible/mcp");
       targets.add("@coding-bible/web");
+      continue;
+    }
+
+    if (file.startsWith("packages/mcp/")) {
+      targets.add("@coding-bible/mcp");
       continue;
     }
 
