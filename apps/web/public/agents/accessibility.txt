@@ -1,0 +1,38 @@
+# Coding Bible agent context
+
+Canonical source: https://xanhast-pf.github.io/coding-bible/
+Rules included: 6
+
+Use the following Coding Bible rules as engineering constraints when they are relevant to the code you review, plan, generate, or modify. Apply them by intent, not by blindly matching wording. Do not invent exceptions. If project-specific requirements conflict with a rule, call out the conflict and explain the tradeoff.
+
+- A11Y-001 [MUST] Prefer semantic HTML
+  Rule: Use the native element whose semantics match the interaction or content before recreating that behavior with generic elements.
+  Why: Native semantics provide keyboard behavior, accessibility information, and browser interoperability with less custom code.
+  Source: [A11Y-001](https://xanhast-pf.github.io/coding-bible/#A11Y-001)
+
+- A11Y-002 [MUST] Keyboard access is mandatory
+  Rule: Every interactive operation available with a pointer must also be operable from the keyboard when the platform interaction supports it.
+  Why: Pointer-only controls exclude keyboard and many assistive-technology users and usually indicate missing native semantics.
+  Source: [A11Y-002](https://xanhast-pf.github.io/coding-bible/#A11Y-002)
+
+- A11Y-003 [MUST] Keep focus visible
+  Rule: Interactive elements must expose a clear visible state when they receive keyboard focus.
+  Why: Keyboard users need a persistent visual indicator of where the next interaction will occur.
+  Source: [A11Y-003](https://xanhast-pf.github.io/coding-bible/#A11Y-003)
+
+- A11Y-004 [MUST] Controls need accessible names
+  Rule: Inputs and interactive controls must expose a meaningful programmatic name through visible text, a label, or appropriate accessible naming.
+  Why: A control that is visually recognizable but unnamed programmatically is ambiguous or unusable to assistive technology.
+  Source: [A11Y-004](https://xanhast-pf.github.io/coding-bible/#A11Y-004)
+
+- A11Y-005 [MUST] Do not communicate with color alone
+  Rule: When color carries status or meaning, provide another perceivable cue such as text, iconography, shape, or position.
+  Why: Color perception varies and may be unavailable entirely. Redundant cues make meaning robust for more users and environments.
+  Source: [A11Y-005](https://xanhast-pf.github.io/coding-bible/#A11Y-005)
+
+- A11Y-006 [MUST] Respect reduced motion preferences
+  Rule: Non-essential animation and smooth motion should adapt when the user requests reduced motion.
+  Why: Motion can cause discomfort or make interfaces harder to use, and operating systems expose a preference specifically for this need.
+  Source: [A11Y-006](https://xanhast-pf.github.io/coding-bible/#A11Y-006)
+
+When reporting violations, cite the rule ID and its canonical source URL.

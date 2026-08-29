@@ -64,12 +64,28 @@ For every detector change:
 11. Keep report fingerprints independent of line numbers so baselines, agents,
     and PR tooling can recognize a finding after unrelated lines move.
 
+## Agent interface changes
+
+The public agent files under `apps/web/public` are generated from the canonical
+registry. Do not edit `llms.txt`, `llms-full.txt`, `rules.json`,
+`rules.schema.json`, or `agents/*.txt` by hand.
+
+After changing rules or the agent export contract, run:
+
+```bash
+pnpm agent:generate
+pnpm agent:check
+```
+
+Backward-incompatible `rules.json` changes require a deliberate `formatVersion`
+bump, schema updates, and regression coverage.
 
 ## Commit quality gates
 
 Do not bypass the entire Git hook for routine development. The pre-commit hook
 auto-fixes staged lint/format issues first, then runs affected tests, typecheck,
-a fast Knip dependency pass, and Coding Bible as the final staged-code gate.
+the agent-interface drift check, a fast Knip dependency pass, and Coding Bible as
+the final staged-code gate.
 
 If affected tests are temporarily disruptive, prefer the narrow bypass:
 
@@ -77,7 +93,7 @@ If affected tests are temporarily disruptive, prefer the narrow bypass:
 SKIP_AFFECTED_TESTS=1 git commit -m "message"
 ```
 
-`SKIP_TYPECHECK`, `SKIP_KNIP`, and `SKIP_BIBLE` exist for exceptional local
-work, but the full `pnpm check` gate must pass before code is pushed or merged.
-Pre-push and CI intentionally run the complete suite rather than inheriting
-pre-commit bypasses.
+`SKIP_TYPECHECK`, `SKIP_AGENT_INTERFACE`, `SKIP_KNIP`, and `SKIP_BIBLE`
+exist for exceptional local work, but the full `pnpm check` gate must pass before
+code is pushed or merged. Pre-push and CI intentionally run the complete suite
+rather than inheriting pre-commit bypasses.

@@ -70,6 +70,33 @@ This separation matters: different state libraries can legitimately have
 different invariants. The Bible documents the model rather than forcing one
 library's assumptions onto another.
 
+## Agent interface
+
+Coding Bible publishes static, generated machine-facing resources from the same
+canonical rule registry used by the website and analyzer:
+
+```text
+/coding-bible/llms.txt
+/coding-bible/llms-full.txt
+/coding-bible/rules.json
+/coding-bible/rules.schema.json
+/coding-bible/agents/all.txt
+/coding-bible/agents/<pack>.txt
+```
+
+`rules.json` is a versioned public contract. Backward-incompatible schema changes
+require a `formatVersion` bump. The generated files are committed for GitHub
+Pages but must not be edited manually:
+
+```bash
+pnpm agent:generate
+pnpm agent:check
+```
+
+The Learn view's `tldr;` action remains the interactive filtered export for any
+current search/pack/level combination, while the generated `agents/<pack>.txt`
+files provide stable pack-level prompts for external tooling.
+
 ## GitHub Pages
 
 The production site is configured for:
@@ -163,6 +190,7 @@ Targeted escape hatches also exist for exceptional local work:
 
 ```text
 SKIP_TYPECHECK=1
+SKIP_AGENT_INTERFACE=1
 SKIP_KNIP=1
 SKIP_BIBLE=1
 ```

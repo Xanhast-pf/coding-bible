@@ -1,0 +1,38 @@
+# Coding Bible agent context
+
+Canonical source: https://xanhast-pf.github.io/coding-bible/
+Rules included: 6
+
+Use the following Coding Bible rules as engineering constraints when they are relevant to the code you review, plan, generate, or modify. Apply them by intent, not by blindly matching wording. Do not invent exceptions. If project-specific requirements conflict with a rule, call out the conflict and explain the tradeoff.
+
+- TEST-001 [MUST] Test observable behavior
+  Rule: Tests should verify a unit's public responsibility rather than reproduce its internal implementation.
+  Why: Behavior-focused tests survive safe refactors and fail when user-visible or contract-visible behavior actually changes.
+  Source: [TEST-001](https://xanhast-pf.github.io/coding-bible/#TEST-001)
+
+- TEST-002 [SHOULD] Test realistic states
+  Rule: Edge cases should come from real contracts and failure modes rather than impossible values invented only to increase coverage.
+  Why: Tests for impossible states add maintenance cost while distracting from failures the system can actually encounter.
+  Source: [TEST-002](https://xanhast-pf.github.io/coding-bible/#TEST-002)
+
+- TEST-003 [SHOULD] Mock the boundary, not its implementation
+  Rule: Replace external collaborators with the smallest useful test double instead of recreating the library or service inside the test.
+  Why: Complex mocks duplicate behavior, drift from reality, and can make tests pass against a fake system that production never runs.
+  Source: [TEST-003](https://xanhast-pf.github.io/coding-bible/#TEST-003)
+
+- TEST-004 [SHOULD] Test pure logic directly
+  Rule: When transformation or decision logic has its own responsibility, test it at that boundary rather than only through a distant UI or controller.
+  Why: Direct tests are faster, clearer about failures, and avoid coupling business assertions to unrelated rendering or infrastructure.
+  Source: [TEST-004](https://xanhast-pf.github.io/coding-bible/#TEST-004)
+
+- TEST-005 [PREFER] Use snapshots selectively
+  Rule: Prefer focused assertions when the behavior can be expressed directly; use snapshots when a meaningful structured output is expensive to assert piecemeal.
+  Why: Large snapshots are easy to approve mechanically and often obscure which behavior was intended to change.
+  Source: [TEST-005](https://xanhast-pf.github.io/coding-bible/#TEST-005)
+
+- TEST-006 [SHOULD] Protect fixed bugs with regression tests
+  Rule: When a bug can be reproduced deterministically, add a test that fails before the fix and passes after it.
+  Why: A regression test preserves the newly learned system constraint and prevents the same defect from silently returning.
+  Source: [TEST-006](https://xanhast-pf.github.io/coding-bible/#TEST-006)
+
+When reporting violations, cite the rule ID and its canonical source URL.

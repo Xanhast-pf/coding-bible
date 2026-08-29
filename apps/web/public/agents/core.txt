@@ -1,0 +1,63 @@
+# Coding Bible agent context
+
+Canonical source: https://xanhast-pf.github.io/coding-bible/
+Rules included: 11
+
+Use the following Coding Bible rules as engineering constraints when they are relevant to the code you review, plan, generate, or modify. Apply them by intent, not by blindly matching wording. Do not invent exceptions. If project-specific requirements conflict with a rule, call out the conflict and explain the tradeoff.
+
+- CORE-001 [MUST] Optimize for understanding
+  Rule: Prefer code that communicates intent without requiring reconstruction by the reader.
+  Why: Code is maintained and reviewed far more often than it is initially written. Readability lowers review cost, defect risk, and onboarding time.
+  Source: [CORE-001](https://xanhast-pf.github.io/coding-bible/#CORE-001)
+
+- CORE-002 [MUST] Use descriptive names
+  Rule: Names should communicate the role of a value, function, or module.
+  Why: Descriptive names reduce the surrounding code a reader must inspect to understand behavior. Exceptions: Established mathematical notation in a clearly mathematical scope.; Conventional short names whose meaning is unambiguous in the immediate context.
+  Source: [CORE-002](https://xanhast-pf.github.io/coding-bible/#CORE-002)
+
+- CORE-003 [MUST] Prefer const
+  Rule: Declare bindings with const unless reassignment is required.
+  Why: Stable bindings reduce the number of state transitions a reader must track and prevent accidental reassignment.
+  Source: [CORE-003](https://xanhast-pf.github.io/coding-bible/#CORE-003)
+
+- CORE-004 [SHOULD] Comments explain why
+  Rule: Do not narrate obvious code. Document decisions, constraints, and workarounds.
+  Why: Narrative comments duplicate code and become stale. Decision comments preserve context the implementation cannot express.
+  Source: [CORE-004](https://xanhast-pf.github.io/coding-bible/#CORE-004)
+
+- CORE-005 [MUST] Delete dead code
+  Rule: Remove unused functions, imports, exports, files, branches, and dependencies when their last real use disappears.
+  Why: Dead code expands the surface maintainers must understand, obscures what is still supported, and creates false confidence that obsolete paths are tested.
+  Source: [CORE-005](https://xanhast-pf.github.io/coding-bible/#CORE-005)
+
+- CORE-006 [SHOULD] Name meaningful constants
+  Rule: Give unexplained values a name when their meaning, policy, or unit is not obvious from local context.
+  Why: A named value communicates why a number or string exists and makes policy changes less error-prone. Exceptions: Values whose meaning is inherent to the operation, such as 0 when checking an array length.
+  Source: [CORE-006](https://xanhast-pf.github.io/coding-bible/#CORE-006)
+
+- CORE-007 [SHOULD] Keep cohesive code together
+  Rule: Place closely related logic together instead of scattering tiny pieces across unnecessary files.
+  Why: Excessive fragmentation forces readers to jump between files to understand one behavior and can be as harmful as oversized modules.
+  Source: [CORE-007](https://xanhast-pf.github.io/coding-bible/#CORE-007)
+
+- CORE-008 [PREFER] Reduce nesting when it improves clarity
+  Rule: Prefer guard clauses and early exits when they make the main control flow easier to follow.
+  Why: Deep nesting increases the amount of state a reader must hold in mind. Early exits can make the successful path visually obvious. Exceptions: Do not introduce multiple early exits when they make cleanup or transactional behavior harder to reason about.
+  Source: [CORE-008](https://xanhast-pf.github.io/coding-bible/#CORE-008)
+
+- CORE-009 [MUST] Preserve non-obvious context during refactors
+  Rule: When moving code, preserve explanations and constraints that remain relevant to the behavior.
+  Why: Refactors should change structure without silently deleting historical context that future maintainers still need.
+  Source: [CORE-009](https://xanhast-pf.github.io/coding-bible/#CORE-009)
+
+- CORE-010 [SHOULD] Keep the public surface minimal
+  Rule: Do not export functions, types, modules, or abstractions that have no external consumer.
+  Why: Every export becomes a dependency point that constrains future refactoring and increases the surface maintainers must understand.
+  Source: [CORE-010](https://xanhast-pf.github.io/coding-bible/#CORE-010)
+
+- CORE-011 [PREFER] Hoist context-free helpers
+  Rule: If a helper does not depend on its parent function's local values, define it in a stable outer scope.
+  Why: Hoisting communicates independence, avoids needless recreation, and makes the helper easier to test or reuse locally.
+  Source: [CORE-011](https://xanhast-pf.github.io/coding-bible/#CORE-011)
+
+When reporting violations, cite the rule ID and its canonical source URL.

@@ -1,0 +1,73 @@
+# Coding Bible agent context
+
+Canonical source: https://xanhast-pf.github.io/coding-bible/
+Rules included: 13
+
+Use the following Coding Bible rules as engineering constraints when they are relevant to the code you review, plan, generate, or modify. Apply them by intent, not by blindly matching wording. Do not invent exceptions. If project-specific requirements conflict with a rule, call out the conflict and explain the tradeoff.
+
+- REACT-001 [SHOULD] Keep components focused on presentation
+  Rule: Move substantial transformation, orchestration, and business logic out of component markup.
+  Why: Separating presentation from behavior keeps components readable and makes logic independently testable.
+  Source: [REACT-001](https://xanhast-pf.github.io/coding-bible/#REACT-001)
+
+- REACT-002 [PREFER] Do not memoize by reflex
+  Rule: Use memoization when identity matters or profiling demonstrates a meaningful benefit.
+  Why: Unnecessary memoization adds dependency management and cognitive overhead without guaranteed benefit.
+  Source: [REACT-002](https://xanhast-pf.github.io/coding-bible/#REACT-002)
+
+- REACT-003 [PREFER] Keep state as local as practical
+  Rule: Use explicit props and local state until multiple consumers genuinely require shared ownership.
+  Why: Global state hides dependencies. Local state and explicit data flow make ownership easier to understand.
+  Source: [REACT-003](https://xanhast-pf.github.io/coding-bible/#REACT-003)
+
+- REACT-004 [MUST] Do not store derived state
+  Rule: If a value can be calculated from current props or state during render, derive it instead of synchronizing another state variable.
+  Why: Duplicated state creates synchronization paths and can briefly or permanently disagree with its source values.
+  Source: [REACT-004](https://xanhast-pf.github.io/coding-bible/#REACT-004)
+
+- REACT-005 [SHOULD] Use effects to synchronize external systems
+  Rule: Do not reach for useEffect for synchronous derivation or event handling that can happen directly.
+  Why: Effects run after render and introduce a second execution phase. Keeping synchronous logic in render or event handlers reduces timing bugs.
+  Source: [REACT-005](https://xanhast-pf.github.io/coding-bible/#REACT-005)
+
+- REACT-006 [MUST] Use stable list keys
+  Rule: Keys should identify the same logical item across inserts, deletes, sorting, and re-rendering.
+  Why: Unstable keys can preserve state on the wrong item or force unnecessary unmounts and remounts. Exceptions: An index key is acceptable for a truly static list whose ordering and membership can never change.
+  Source: [REACT-006](https://xanhast-pf.github.io/coding-bible/#REACT-006)
+
+- REACT-007 [MUST] Keep render pure
+  Rule: Rendering should calculate UI from current inputs without mutating external state or causing observable side effects.
+  Why: React may render more than once, interrupt rendering, or discard work. Render-time side effects become unpredictable under those semantics.
+  Source: [REACT-007](https://xanhast-pf.github.io/coding-bible/#REACT-007)
+
+- REACT-008 [PREFER] Move static values out of components
+  Rule: Constants and configuration that never depend on props or state should live at module scope.
+  Why: Module-scope values communicate that they are invariant and avoid recreating objects or arrays on every render.
+  Source: [REACT-008](https://xanhast-pf.github.io/coding-bible/#REACT-008)
+
+- REACT-009 [MUST] Follow the Rules of Hooks
+  Rule: Call Hooks only at the top level of React components or custom Hooks, never inside loops, conditions, nested functions, or try/catch blocks.
+  Why: React relies on stable Hook call order to associate state and effects with the correct component instance.
+  Source: [REACT-009](https://xanhast-pf.github.io/coding-bible/#REACT-009)
+
+- REACT-010 [MUST] Let React call components
+  Rule: Render components through JSX instead of invoking component functions directly.
+  Why: React must control component invocation to preserve Hook behavior, reconciliation, and component identity.
+  Source: [REACT-010](https://xanhast-pf.github.io/coding-bible/#REACT-010)
+
+- REACT-011 [MUST] Treat props, state, and Hook inputs as immutable snapshots
+  Rule: Do not mutate values supplied by React or values already passed into Hooks or JSX.
+  Why: React assumes render inputs remain stable for the duration of a render so it can restart, reuse, and optimize work safely.
+  Source: [REACT-011](https://xanhast-pf.github.io/coding-bible/#REACT-011)
+
+- REACT-012 [MUST] Do not suppress Hook dependency correctness
+  Rule: Include the reactive values a Hook depends on instead of silencing exhaustive-dependency checks to preserve an intended stale closure.
+  Why: Missing dependencies make Effects and memoized callbacks observe outdated values and create timing-sensitive bugs.
+  Source: [REACT-012](https://xanhast-pf.github.io/coding-bible/#REACT-012)
+
+- REACT-013 [SHOULD] Extract coherent React responsibilities, not arbitrary line counts
+  Rule: Split a component or custom Hook when it owns multiple independent responsibilities or becomes difficult to scan, not merely because it crossed a fixed LOC threshold.
+  Why: Small focused units are easier to test and understand, but mechanical file-size limits often create fragmentation without improving cohesion.
+  Source: [REACT-013](https://xanhast-pf.github.io/coding-bible/#REACT-013)
+
+When reporting violations, cite the rule ID and its canonical source URL.

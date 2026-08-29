@@ -24,6 +24,11 @@ const gates = [
     bypass: "SKIP_TYPECHECK",
   },
   {
+    name: "agent interface check",
+    command: [pnpmCommand, "agent:check"],
+    bypass: "SKIP_AGENT_INTERFACE",
+  },
+  {
     name: "Knip dependency check",
     command: [pnpmCommand, "knip:fast"],
     bypass: "SKIP_KNIP",

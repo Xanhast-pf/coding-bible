@@ -1,0 +1,43 @@
+# Coding Bible agent context
+
+Canonical source: https://xanhast-pf.github.io/coding-bible/
+Rules included: 7
+
+Use the following Coding Bible rules as engineering constraints when they are relevant to the code you review, plan, generate, or modify. Apply them by intent, not by blindly matching wording. Do not invent exceptions. If project-specific requirements conflict with a rule, call out the conflict and explain the tradeoff.
+
+- ARCH-001 [MUST] Separate responsibilities
+  Rule: Rendering, orchestration, transformation, persistence, and external I/O should have explicit ownership.
+  Why: Separating responsibilities makes code easier to reason about, test, replace, and review without requiring knowledge of unrelated behavior.
+  Source: [ARCH-001](https://xanhast-pf.github.io/coding-bible/#ARCH-001)
+
+- ARCH-002 [SHOULD] Keep dependencies explicit
+  Rule: A module should receive or import the dependencies it actually uses rather than reaching through unrelated layers.
+  Why: Explicit dependencies expose coupling and make ownership, testing, and replacement easier to understand.
+  Source: [ARCH-002](https://xanhast-pf.github.io/coding-bible/#ARCH-002)
+
+- ARCH-003 [PREFER] Abstract after understanding repetition
+  Rule: Do not create a shared abstraction until the repeated behavior and its stable differences are understood.
+  Why: Small duplication is cheaper than a premature abstraction that couples unrelated use cases and becomes difficult to change.
+  Source: [ARCH-003](https://xanhast-pf.github.io/coding-bible/#ARCH-003)
+
+- ARCH-004 [SHOULD] Keep side effects at boundaries
+  Rule: Prefer pure transformation logic internally and isolate network, storage, clock, DOM, and other side effects behind clear boundaries.
+  Why: Isolated side effects make behavior easier to test, replay, reason about, and replace.
+  Source: [ARCH-004](https://xanhast-pf.github.io/coding-bible/#ARCH-004)
+
+- ARCH-005 [MUST] Keep one source of truth
+  Rule: Do not maintain multiple independently writable representations of the same fact.
+  Why: Duplicated state can drift. A canonical owner with derived views removes synchronization bugs and clarifies responsibility.
+  Source: [ARCH-005](https://xanhast-pf.github.io/coding-bible/#ARCH-005)
+
+- ARCH-006 [PREFER] Do not add pass-through abstractions
+  Rule: An abstraction should add meaning, policy, transformation, or a stable boundary rather than merely forward every call unchanged.
+  Why: Pass-through layers add files and indirection without reducing coupling or complexity. Exceptions: A deliberate compatibility boundary or public facade may justify forwarding when it protects consumers from an unstable implementation.
+  Source: [ARCH-006](https://xanhast-pf.github.io/coding-bible/#ARCH-006)
+
+- ARCH-007 [SHOULD] Organize around cohesive domains
+  Rule: Prefer module boundaries that reflect product or business concepts over generic buckets that accumulate unrelated code.
+  Why: Domain-oriented structure keeps behavior that changes together physically close and makes ownership easier to discover.
+  Source: [ARCH-007](https://xanhast-pf.github.io/coding-bible/#ARCH-007)
+
+When reporting violations, cite the rule ID and its canonical source URL.

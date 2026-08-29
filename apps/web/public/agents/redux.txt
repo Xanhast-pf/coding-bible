@@ -1,0 +1,63 @@
+# Coding Bible agent context
+
+Canonical source: https://xanhast-pf.github.io/coding-bible/
+Rules included: 11
+
+Use the following Coding Bible rules as engineering constraints when they are relevant to the code you review, plan, generate, or modify. Apply them by intent, not by blindly matching wording. Do not invent exceptions. If project-specific requirements conflict with a rule, call out the conflict and explain the tradeoff.
+
+- REDUX-001 [SHOULD] Use Redux Toolkit for modern Redux
+  Rule: Prefer configureStore, createSlice, createAsyncThunk, RTK Query, and other Redux Toolkit APIs over hand-written legacy Redux boilerplate.
+  Why: Redux Toolkit is the official recommended toolset and encodes safer defaults for immutable updates, DevTools, and store configuration.
+  Source: [REDUX-001](https://xanhast-pf.github.io/coding-bible/#REDUX-001)
+
+- REDUX-002 [MUST] Keep reducers pure
+  Rule: Reducers must not perform async work, generate nondeterministic values, mutate external variables, or trigger side effects.
+  Why: Redux may replay reducer logic for debugging and hot reload; deterministic pure reducers make state transitions reproducible.
+  Source: [REDUX-002](https://xanhast-pf.github.io/coding-bible/#REDUX-002)
+
+- REDUX-003 [MUST] Keep Redux state and normal actions serializable
+  Rule: Avoid Promises, functions, class instances, Maps/Sets, DOM nodes, and other non-serializable values in Redux state or actions that reach reducers.
+  Why: Serializable data preserves DevTools, persistence, replay, predictable equality behavior, and debugging. Exceptions: Middleware may intentionally intercept a non-serializable action before it reaches reducers.
+  Source: [REDUX-003](https://xanhast-pf.github.io/coding-bible/#REDUX-003)
+
+- REDUX-004 [MUST] Keep Redux state minimal and derive the rest
+  Rule: Store canonical source data and derive filtered, aggregated, or presentation-ready values through selectors.
+  Why: Duplicated derived state introduces synchronization bugs and makes updates more complicated than recalculating from the source.
+  Source: [REDUX-004](https://xanhast-pf.github.io/coding-bible/#REDUX-004)
+
+- REDUX-005 [SHOULD] Normalize complex relational collections
+  Rule: Store heavily relational or repeatedly updated entity data in a normalized shape, typically with createEntityAdapter.
+  Why: Normalization makes entity lookup and single-item updates simpler and reduces duplicated nested copies of the same entity.
+  Source: [REDUX-005](https://xanhast-pf.github.io/coding-bible/#REDUX-005)
+
+- REDUX-006 [SHOULD] Use selectors to encapsulate state shape
+  Rule: Reusable consumers should ask selectors for domain values instead of spreading knowledge of deep store paths throughout the UI.
+  Why: Selectors create a stable read boundary so state structure can change without rewriting every consumer.
+  Source: [REDUX-006](https://xanhast-pf.github.io/coding-bible/#REDUX-006)
+
+- REDUX-007 [PREFER] Memoize selectors only when they derive expensive or referentially new values
+  Rule: Do not wrap every direct state lookup in createSelector; reserve memoization for real derivation or stable-reference needs.
+  Why: Unnecessary selector memoization adds complexity without avoiding work, while derived arrays and expensive calculations can benefit substantially.
+  Source: [REDUX-007](https://xanhast-pf.github.io/coding-bible/#REDUX-007)
+
+- REDUX-008 [PREFER] Keep transient UI and form state local by default
+  Rule: Do not put temporary form edits, hover state, or component-local interaction state in Redux without a genuine cross-application ownership need.
+  Why: Local state keeps ownership close to the UI and avoids dispatching global actions for data that is neither shared nor cached.
+  Source: [REDUX-008](https://xanhast-pf.github.io/coding-bible/#REDUX-008)
+
+- REDUX-009 [MUST] Use one Redux store per application
+  Rule: A standard Redux application should have one configured store instance shared through the application boundary.
+  Why: A single store preserves one state graph, one dispatch pipeline, and predictable DevTools/debugging behavior.
+  Source: [REDUX-009](https://xanhast-pf.github.io/coding-bible/#REDUX-009)
+
+- REDUX-010 [SHOULD] Organize Redux logic by feature
+  Rule: Keep a feature's reducer logic, actions, and selectors close together, typically in a Redux Toolkit slice, instead of separating the app into global actions/reducers folders.
+  Why: Feature-oriented slices improve cohesion and make the code that changes together easier to find and maintain.
+  Source: [REDUX-010](https://xanhast-pf.github.io/coding-bible/#REDUX-010)
+
+- REDUX-011 [SHOULD] Prefer RTK Query for server data in Redux applications
+  Rule: When Redux is already the application state platform, use RTK Query as the default server fetching and caching layer instead of hand-writing request/cache reducers.
+  Why: RTK Query provides request deduplication, caching, loading state, invalidation, and generated hooks while following Redux's recommended architecture.
+  Source: [REDUX-011](https://xanhast-pf.github.io/coding-bible/#REDUX-011)
+
+When reporting violations, cite the rule ID and its canonical source URL.

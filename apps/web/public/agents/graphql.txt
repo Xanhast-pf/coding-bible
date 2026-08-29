@@ -1,0 +1,38 @@
+# Coding Bible agent context
+
+Canonical source: https://xanhast-pf.github.io/coding-bible/
+Rules included: 6
+
+Use the following Coding Bible rules as engineering constraints when they are relevant to the code you review, plan, generate, or modify. Apply them by intent, not by blindly matching wording. Do not invent exceptions. If project-specific requirements conflict with a rule, call out the conflict and explain the tradeoff.
+
+- GQL-001 [MUST] Name production operations
+  Rule: Give queries, mutations, and subscriptions unique meaningful operation names.
+  Why: Operation names make logs, traces, errors, persisted operations, and refetch behavior easier to identify than anonymous documents.
+  Source: [GQL-001](https://xanhast-pf.github.io/coding-bible/#GQL-001)
+
+- GQL-002 [MUST] Pass dynamic values as variables
+  Rule: Use GraphQL variables for runtime values instead of interpolating user or application data into operation strings.
+  Why: Variables preserve a stable operation document, keep values typed separately, and avoid fragile or unsafe string construction.
+  Source: [GQL-002](https://xanhast-pf.github.io/coding-bible/#GQL-002)
+
+- GQL-003 [SHOULD] Use fragments for genuinely shared selection sets
+  Rule: Extract repeated or component-owned field groups into named fragments rather than duplicating the same selection in many operations.
+  Why: Fragments keep repeated data requirements consistent and make component-level GraphQL requirements composable.
+  Source: [GQL-003](https://xanhast-pf.github.io/coding-bible/#GQL-003)
+
+- GQL-004 [MUST] Validate operations against the schema
+  Rule: Generate or check client operations against the current schema instead of relying on hand-maintained assumptions about fields and types.
+  Why: GraphQL's schema can prove invalid fields, selections, and variable types before runtime, making schema-aware validation one of its strongest safety features.
+  Source: [GQL-004](https://xanhast-pf.github.io/coding-bible/#GQL-004)
+
+- GQL-005 [MUST] Treat nullability as part of the contract
+  Rule: Model nullable fields and variables exactly as the schema declares them rather than erasing nullability in client types.
+  Why: GraphQL nullability expresses real response and input guarantees; weakening or strengthening it locally creates impossible assumptions.
+  Source: [GQL-005](https://xanhast-pf.github.io/coding-bible/#GQL-005)
+
+- GQL-006 [MUST] Paginate collections that can grow without bound
+  Rule: Do not design clients or schemas around fetching an ever-growing collection in one operation; use an appropriate pagination model.
+  Why: Unbounded lists create unpredictable latency, payload size, memory pressure, and rendering cost.
+  Source: [GQL-006](https://xanhast-pf.github.io/coding-bible/#GQL-006)
+
+When reporting violations, cite the rule ID and its canonical source URL.

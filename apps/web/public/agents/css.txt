@@ -1,0 +1,28 @@
+# Coding Bible agent context
+
+Canonical source: https://xanhast-pf.github.io/coding-bible/
+Rules included: 4
+
+Use the following Coding Bible rules as engineering constraints when they are relevant to the code you review, plan, generate, or modify. Apply them by intent, not by blindly matching wording. Do not invent exceptions. If project-specific requirements conflict with a rule, call out the conflict and explain the tradeoff.
+
+- CSS-001 [SHOULD] Name styles by role, not appearance
+  Rule: Class names should describe what an element is responsible for rather than its current visual treatment.
+  Why: Role-based names survive visual redesigns and communicate intent without coupling markup to presentation.
+  Source: [CSS-001](https://xanhast-pf.github.io/coding-bible/#CSS-001)
+
+- CSS-002 [SHOULD] Use tokens for shared visual decisions
+  Rule: Repeated semantic values such as colors, spacing, radii, typography, and elevation should come from a shared token source.
+  Why: Tokens keep visual decisions consistent and make system-wide changes possible without hunting through feature styles. Exceptions: A truly one-off value may stay local when promoting it would create a meaningless token.
+  Source: [CSS-002](https://xanhast-pf.github.io/coding-bible/#CSS-002)
+
+- CSS-003 [SHOULD] Prefer layout systems over manual nudges
+  Rule: Use flexbox, grid, intrinsic sizing, and normal flow before offsets or spacer elements used only to force alignment.
+  Why: Layout primitives encode relationships and adapt to content, while manual nudges are brittle across font sizes, translations, and responsive states.
+  Source: [CSS-003](https://xanhast-pf.github.io/coding-bible/#CSS-003)
+
+- CSS-004 [MUST] Keep component styles scoped
+  Rule: Component-specific styling should not leak into unrelated parts of the application through broad global selectors.
+  Why: Global leakage creates hidden coupling where changing one feature unexpectedly changes another.
+  Source: [CSS-004](https://xanhast-pf.github.io/coding-bible/#CSS-004)
+
+When reporting violations, cite the rule ID and its canonical source URL.

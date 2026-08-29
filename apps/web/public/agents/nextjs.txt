@@ -1,0 +1,38 @@
+# Coding Bible agent context
+
+Canonical source: https://xanhast-pf.github.io/coding-bible/
+Rules included: 6
+
+Use the following Coding Bible rules as engineering constraints when they are relevant to the code you review, plan, generate, or modify. Apply them by intent, not by blindly matching wording. Do not invent exceptions. If project-specific requirements conflict with a rule, call out the conflict and explain the tradeoff.
+
+- NEXT-001 [SHOULD] Default to Server Components
+  Rule: In the App Router, keep components server-side unless they require state, event handlers, effects, custom client hooks, or browser-only APIs.
+  Why: Server Components reduce client JavaScript and can fetch data close to its source without exposing server credentials.
+  Source: [NEXT-001](https://xanhast-pf.github.io/coding-bible/#NEXT-001)
+
+- NEXT-002 [SHOULD] Keep use client boundaries as small as practical
+  Rule: Mark the client entry point that needs interactivity instead of moving an entire page or layout into the client module graph.
+  Why: Everything imported below a use client boundary contributes to the client graph, so unnecessarily high boundaries increase shipped JavaScript.
+  Source: [NEXT-002](https://xanhast-pf.github.io/coding-bible/#NEXT-002)
+
+- NEXT-003 [MUST] Pass serializable props across the server-client boundary
+  Rule: Values passed from Server Components into Client Component entry points must be serializable by React.
+  Why: The React Server Component payload crosses a network boundary and cannot transport arbitrary runtime values such as callbacks.
+  Source: [NEXT-003](https://xanhast-pf.github.io/coding-bible/#NEXT-003)
+
+- NEXT-004 [MUST] Protect server-only code from client imports
+  Rule: Keep secrets, privileged data access, and server-only modules behind server boundaries and mark them server-only when accidental client import is plausible.
+  Why: Shared JavaScript module graphs make accidental environment leakage possible; build-time server-only guards turn that mistake into an explicit error.
+  Source: [NEXT-004](https://xanhast-pf.github.io/coding-bible/#NEXT-004)
+
+- NEXT-005 [SHOULD] Fetch server data directly from Server Components
+  Rule: When code already runs on the server, call the data source or shared server data function directly instead of making an HTTP request to your own Route Handler.
+  Why: Calling your own server endpoint from a Server Component adds an unnecessary network hop and duplicates a boundary that is already local.
+  Source: [NEXT-005](https://xanhast-pf.github.io/coding-bible/#NEXT-005)
+
+- NEXT-006 [SHOULD] Avoid avoidable data-fetching waterfalls
+  Rule: Start independent server requests in parallel and use Suspense/streaming boundaries when slow work should not block the whole route.
+  Why: Sequential independent requests accumulate latency, while parallel fetching and streaming can deliver useful UI earlier.
+  Source: [NEXT-006](https://xanhast-pf.github.io/coding-bible/#NEXT-006)
+
+When reporting violations, cite the rule ID and its canonical source URL.

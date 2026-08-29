@@ -1,0 +1,43 @@
+# Coding Bible agent context
+
+Canonical source: https://xanhast-pf.github.io/coding-bible/
+Rules included: 7
+
+Use the following Coding Bible rules as engineering constraints when they are relevant to the code you review, plan, generate, or modify. Apply them by intent, not by blindly matching wording. Do not invent exceptions. If project-specific requirements conflict with a rule, call out the conflict and explain the tradeoff.
+
+- AI-001 [MUST] Generated code follows existing architecture
+  Rule: AI output should use established project patterns before introducing new abstractions.
+  Why: Agents can create parallel architectures and duplicate helpers when they optimize only for the local prompt.
+  Source: [AI-001](https://xanhast-pf.github.io/coding-bible/#AI-001)
+
+- AI-002 [MUST] Generated comments must add context
+  Rule: Remove AI comments that merely narrate the code.
+  Why: Generated narration adds noise quickly and creates stale text maintainers must keep synchronized.
+  Source: [AI-002](https://xanhast-pf.github.io/coding-bible/#AI-002)
+
+- AI-003 [SHOULD] Change the smallest coherent surface
+  Rule: Do not expand generated changes into unrelated cleanup or speculative refactors.
+  Why: Small coherent diffs are easier to validate, review, revert, and debug.
+  Source: [AI-003](https://xanhast-pf.github.io/coding-bible/#AI-003)
+
+- AI-004 [MUST] Inspect before creating
+  Rule: Before generating a new helper, component, type, dependency, or pattern, search for an existing solution in the project.
+  Why: Agents can generate locally correct duplicates because they do not automatically share a human maintainer's memory of the codebase.
+  Source: [AI-004](https://xanhast-pf.github.io/coding-bible/#AI-004)
+
+- AI-005 [MUST] Verify external APIs
+  Rule: Do not invent package exports, framework behavior, command flags, or platform capabilities from memory when they can be verified.
+  Why: Plausible-looking hallucinated APIs are especially expensive because generated code can appear correct until build or runtime.
+  Source: [AI-005](https://xanhast-pf.github.io/coding-bible/#AI-005)
+
+- AI-006 [SHOULD] Do not invent impossible edge cases
+  Rule: Generated defensive code and tests should reflect actual contracts, trust boundaries, and realistic failure modes.
+  Why: Speculative edge cases bloat types, branches, and tests while obscuring the conditions the system genuinely needs to handle.
+  Source: [AI-006](https://xanhast-pf.github.io/coding-bible/#AI-006)
+
+- AI-007 [MUST] Run the project's checks
+  Rule: Generated changes are not complete until the relevant type, lint, test, build, and project-specific validation commands have been run.
+  Why: AI can produce syntactically plausible changes that fail existing contracts elsewhere in the repository.
+  Source: [AI-007](https://xanhast-pf.github.io/coding-bible/#AI-007)
+
+When reporting violations, cite the rule ID and its canonical source URL.

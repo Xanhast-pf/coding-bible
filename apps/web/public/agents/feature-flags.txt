@@ -1,0 +1,28 @@
+# Coding Bible agent context
+
+Canonical source: https://xanhast-pf.github.io/coding-bible/
+Rules included: 4
+
+Use the following Coding Bible rules as engineering constraints when they are relevant to the code you review, plan, generate, or modify. Apply them by intent, not by blindly matching wording. Do not invent exceptions. If project-specific requirements conflict with a rule, call out the conflict and explain the tradeoff.
+
+- FLAG-001 [MUST] Every feature flag needs a removal plan
+  Rule: Create flags with an owner and a planned condition or date for removal.
+  Why: Flags are temporary branches in production code. Without an explicit end condition they become permanent complexity.
+  Source: [FLAG-001](https://xanhast-pf.github.io/coding-bible/#FLAG-001)
+
+- FLAG-002 [MUST] Delete flags after rollout
+  Rule: When rollout is complete, remove the code branches, tests that exist only for the flag, and the remote flag definition.
+  Why: Completed flags create dead branches and make maintainers reason about product states that can no longer occur.
+  Source: [FLAG-002](https://xanhast-pf.github.io/coding-bible/#FLAG-002)
+
+- FLAG-003 [SHOULD] Keep flag decisions at clear boundaries
+  Rule: Evaluate a feature flag in as few places as practical and pass the resulting behavior or state inward.
+  Why: Scattered flag checks create combinatorial states and make eventual removal much harder.
+  Source: [FLAG-003](https://xanhast-pf.github.io/coding-bible/#FLAG-003)
+
+- FLAG-004 [MUST] Test both reachable flag states
+  Rule: While a feature flag is active, test the meaningful enabled and disabled behavior that can reach production.
+  Why: A flag creates multiple production paths; only testing the preferred path leaves the fallback branch to rot.
+  Source: [FLAG-004](https://xanhast-pf.github.io/coding-bible/#FLAG-004)
+
+When reporting violations, cite the rule ID and its canonical source URL.

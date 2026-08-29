@@ -1,0 +1,38 @@
+# Coding Bible agent context
+
+Canonical source: https://xanhast-pf.github.io/coding-bible/
+Rules included: 6
+
+Use the following Coding Bible rules as engineering constraints when they are relevant to the code you review, plan, generate, or modify. Apply them by intent, not by blindly matching wording. Do not invent exceptions. If project-specific requirements conflict with a rule, call out the conflict and explain the tradeoff.
+
+- LEGEND-001 [MUST] Use useValue for React subscriptions
+  Rule: In new React code, read observables reactively through useValue instead of relying on observer plus get() tracking.
+  Why: Legend-State v3 recommends useValue for React Compiler compatibility because Hook calls remain visible to the compiler while arbitrary get() calls may be memoized.
+  Source: [LEGEND-001](https://xanhast-pf.github.io/coding-bible/#LEGEND-001)
+
+- LEGEND-002 [MUST] Use peek only when non-reactive access is intentional
+  Rule: Use get() in tracking contexts when changes should be observed and peek() when the read deliberately must not subscribe.
+  Why: get() participates in Legend-State dependency tracking while peek() explicitly opts out, so the choice communicates reactivity intent.
+  Source: [LEGEND-002](https://xanhast-pf.github.io/coding-bible/#LEGEND-002)
+
+- LEGEND-003 [MUST] Update observable state through observable APIs
+  Rule: Do not mutate raw objects returned from an observable and then set the same reference back; update the observable node with set, assign, or another notifying API.
+  Why: Mutating raw data bypasses Legend-State notifications, and setting the same reference back may produce no observable change.
+  Source: [LEGEND-003](https://xanhast-pf.github.io/coding-bible/#LEGEND-003)
+
+- LEGEND-004 [SHOULD] Batch sibling updates with assign
+  Rule: When several sibling fields change as one logical operation, prefer assign over a sequence of independent set calls.
+  Why: assign batches its individual writes so observers update once and the operation is represented as one coherent state transition.
+  Source: [LEGEND-004](https://xanhast-pf.github.io/coding-bible/#LEGEND-004)
+
+- LEGEND-005 [SHOULD] Subscribe at the narrowest useful observable
+  Rule: Prefer fine-grained subscriptions or computed useValue selectors over reading broad trees when only a small value drives rendering.
+  Why: Legend-State's performance model depends on minimizing tracked observables so unrelated changes do not rerender parent components.
+  Source: [LEGEND-005](https://xanhast-pf.github.io/coding-bible/#LEGEND-005)
+
+- LEGEND-006 [MUST] Keep persisted or synchronized state serializable
+  Rule: When observable data crosses persistence, transport, devtool, or application-specific serialization boundaries, keep that state plain and serializable.
+  Why: Legend-State itself can hold functions and rich values, but serialization layers cannot reliably preserve arbitrary runtime objects or circular references. Exceptions: Purely in-memory observables that never cross a serialization boundary may intentionally contain functions or other supported runtime values.
+  Source: [LEGEND-006](https://xanhast-pf.github.io/coding-bible/#LEGEND-006)
+
+When reporting violations, cite the rule ID and its canonical source URL.

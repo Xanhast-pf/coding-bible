@@ -1,0 +1,28 @@
+# Coding Bible agent context
+
+Canonical source: https://xanhast-pf.github.io/coding-bible/
+Rules included: 4
+
+Use the following Coding Bible rules as engineering constraints when they are relevant to the code you review, plan, generate, or modify. Apply them by intent, not by blindly matching wording. Do not invent exceptions. If project-specific requirements conflict with a rule, call out the conflict and explain the tradeoff.
+
+- I18N-001 [MUST] Localize user-visible text
+  Rule: Labels, messages, placeholders, tooltips, empty states, and other user-visible copy should come from the application's localization system.
+  Why: Hardcoded interface strings create inaccessible translation boundaries and are expensive to find after a product expands to more locales.
+  Source: [I18N-001](https://xanhast-pf.github.io/coding-bible/#I18N-001)
+
+- I18N-002 [MUST] Parameterize messages instead of concatenating sentences
+  Rule: Use the localization system's placeholders and plural/select features rather than assembling human sentences from fragments.
+  Why: Word order, plural rules, gender, and punctuation vary by language; concatenation assumes English-like grammar.
+  Source: [I18N-002](https://xanhast-pf.github.io/coding-bible/#I18N-002)
+
+- I18N-003 [SHOULD] Use Intl for locale-sensitive formatting
+  Rule: Prefer Intl.DateTimeFormat, Intl.NumberFormat, and related platform APIs for dates, numbers, currencies, lists, and relative time.
+  Why: Intl encodes locale-specific formatting rules and avoids shipping another library for capabilities already provided by the platform.
+  Source: [I18N-003](https://xanhast-pf.github.io/coding-bible/#I18N-003)
+
+- I18N-004 [SHOULD] Design layouts for text expansion and direction
+  Rule: Avoid UI assumptions that only hold for short English text or left-to-right content.
+  Why: Translated labels can grow substantially, and RTL locales invert directional relationships that fixed-width or left/right-specific layouts may encode incorrectly.
+  Source: [I18N-004](https://xanhast-pf.github.io/coding-bible/#I18N-004)
+
+When reporting violations, cite the rule ID and its canonical source URL.

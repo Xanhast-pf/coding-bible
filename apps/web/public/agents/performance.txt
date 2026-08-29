@@ -1,0 +1,28 @@
+# Coding Bible agent context
+
+Canonical source: https://xanhast-pf.github.io/coding-bible/
+Rules included: 4
+
+Use the following Coding Bible rules as engineering constraints when they are relevant to the code you review, plan, generate, or modify. Apply them by intent, not by blindly matching wording. Do not invent exceptions. If project-specific requirements conflict with a rule, call out the conflict and explain the tradeoff.
+
+- PERF-001 [PREFER] Optimize where scale exists
+  Rule: Prefer readability by default; reduce passes and allocations when scale makes the cost meaningful.
+  Why: Premature micro-optimization obscures code, while repeated work over genuinely large datasets creates measurable cost.
+  Source: [PERF-001](https://xanhast-pf.github.io/coding-bible/#PERF-001)
+
+- PERF-002 [SHOULD] Measure before micro-optimizing
+  Rule: Use profiling, benchmarks, production telemetry, or a known complexity bound before sacrificing clarity for small performance gains.
+  Why: Without evidence, optimization effort often targets code that is not responsible for meaningful user-visible cost.
+  Source: [PERF-002](https://xanhast-pf.github.io/coding-bible/#PERF-002)
+
+- PERF-003 [PREFER] Prefer one pass on hot large-data paths
+  Rule: When processing large collections in a hot path, avoid chains that create avoidable intermediate arrays when one clear pass can do the work.
+  Why: Repeated passes and intermediate allocations scale with dataset size and can become significant in data-heavy applications. Exceptions: For small collections or non-hot paths, a readable map/filter chain may be the better engineering choice.
+  Source: [PERF-003](https://xanhast-pf.github.io/coding-bible/#PERF-003)
+
+- PERF-004 [SHOULD] Choose data structures for access patterns
+  Rule: Use arrays, sets, maps, indexes, or other structures according to how the data is actually queried and updated.
+  Why: An appropriate data structure can remove repeated linear scans and communicate the intended operations directly.
+  Source: [PERF-004](https://xanhast-pf.github.io/coding-bible/#PERF-004)
+
+When reporting violations, cite the rule ID and its canonical source URL.
