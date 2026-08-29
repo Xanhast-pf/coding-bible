@@ -28,6 +28,7 @@ const validOverrideKeys = new Set(["files", "packs", "rules"]);
 const validPacks = new Set(analyzerPacks);
 
 export const defaultIgnore = [
+  "**/.coding-bible/**",
   "**/.git/**",
   "**/.next/**",
   "**/.turbo/**",

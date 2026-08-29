@@ -1,7 +1,12 @@
 import ts from "typescript";
 
 import type { AnalyzerFinding, Detector } from "../types.ts";
-import { createFinding, getReferences, nodesOfKind } from "../utils.ts";
+import {
+  createFinding,
+  getReferences,
+  insertBeforeNodeEdit,
+  nodesOfKind,
+} from "../utils.ts";
 
 const isTypeOnlyUsage = (identifier: ts.Identifier) => {
   let current: ts.Node = identifier.parent;
@@ -67,6 +72,12 @@ export const typeOnlyImportsDetector: Detector = {
         findings.push(
           createFinding(context, specifier, {
             detectorId: "type-only-imports",
+            fix: {
+              description: `Mark \`${specifier.name.text}\` as type-only without changing the other imports in this declaration.`,
+              edits: [insertBeforeNodeEdit(context, specifier, "type ")],
+              safety: "safe",
+              title: "Mark import as type-only",
+            },
             message: `\`${specifier.name.text}\` is used only as a type.`,
             ruleId: "TS-003",
             suggestion: `Mark it as type-only: \`import { type ${specifier.name.text} } ...\` or use \`import type\`.`,

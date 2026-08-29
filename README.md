@@ -102,6 +102,20 @@ apply file-specific overrides. Git-aware scopes report only requested changes
 while retaining project context for analysis. `--profile` exposes scanner phase
 timings and memory use.
 
+Analyzer results can also be exported without modifying source files:
+
+```bash
+coding-bible check . --report
+coding-bible check . --report --patch
+coding-bible check . --report --patch --include-review-fixes
+```
+
+The default `.coding-bible/` output contains a versioned `report.json` plus a
+standard Git `safe-fixes.patch` when requested. Behavior-sensitive proposed
+edits are isolated in `review-fixes.patch` behind the explicit
+`--include-review-fixes` flag. Safe fixes are re-analyzed before export and can
+be reviewed with `git apply --check` before anything touches the working tree.
+
 ## Git quality gates
 
 Husky installs repository hooks during `pnpm install`. Pre-commit deliberately

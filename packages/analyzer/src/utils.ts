@@ -56,7 +56,7 @@ export const createFinding = (
   node: ts.Node,
   details: Pick<
     AnalyzerFinding,
-    "detectorId" | "message" | "ruleId" | "suggestion"
+    "detectorId" | "fix" | "message" | "ruleId" | "suggestion"
   >,
 ): AnalyzerFinding => {
   const start = node.getStart(context.sourceFile);
@@ -78,6 +78,30 @@ export const createFinding = (
       endLine: endPosition.line + 1,
       line: startPosition.line + 1,
     },
+  };
+};
+
+export const replaceNodeEdit = (
+  context: DetectorContext,
+  node: ts.Node,
+  replacement: string,
+) => ({
+  end: node.getEnd(),
+  replacement,
+  start: node.getStart(context.sourceFile),
+});
+
+export const insertBeforeNodeEdit = (
+  context: DetectorContext,
+  node: ts.Node,
+  replacement: string,
+) => {
+  const start = node.getStart(context.sourceFile);
+
+  return {
+    end: start,
+    replacement,
+    start,
   };
 };
 

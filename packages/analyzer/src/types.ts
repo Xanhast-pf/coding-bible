@@ -48,6 +48,21 @@ export interface AnalyzeOptions {
   signal?: AbortSignal;
 }
 
+export type AnalyzerFixSafety = "safe" | "review";
+
+export interface AnalyzerTextEdit {
+  start: number;
+  end: number;
+  replacement: string;
+}
+
+export interface AnalyzerSuggestedFix {
+  title: string;
+  description: string;
+  safety: AnalyzerFixSafety;
+  edits?: readonly AnalyzerTextEdit[];
+}
+
 export interface SourceLocation {
   line: number;
   column: number;
@@ -60,6 +75,7 @@ export interface AnalyzerFinding {
   ruleId: string;
   message: string;
   suggestion: string;
+  fix?: AnalyzerSuggestedFix;
   location: SourceLocation;
   excerpt: string;
 }

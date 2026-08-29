@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdtemp, mkdir, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -117,7 +117,7 @@ test("runCli exits non-zero for findings and supports JSON output", async () => 
     assert.equal(exitCode, 1);
     assert.equal(stderr.value, "");
     assert.equal(result.findings[0].ruleId, "TS-001");
-    assert.equal(result.ruleIdsChecked.length, 11);
+    assert.equal(result.summary.rulesChecked, 11);
   });
 });
 
@@ -609,4 +609,147 @@ test("config rejects unknown keys instead of silently ignoring typos", async () 
     assert.equal(exitCode, 2);
     assert.match(stderr.value, /Unknown Coding Bible config option "ignores"/);
   });
+});
+
+test("JSON output uses the versioned report schema with stable finding fingerprints", async () => {
+  await withFixture(async (directory) => {
+    const filePath = path.join(directory, "bad.ts");
+    await writeFile(filePath, "const value: any = 1;\n");
+    const stdout = createWriter();
+    const stderr = createWriter();
+
+    const firstExitCode = await runCli(["check", ".", "--json"], {
+      cwd: directory,
+      stderr,
+      stdout,
+    });
+    const first = JSON.parse(stdout.value);
+
+    assert.equal(firstExitCode, 1);
+    assert.equal(first.schemaVersion, 1);
+    assert.equal(first.summary.findings, 1);
+    assert.equal(first.findings[0].ruleId, "TS-001");
+    assert.match(first.findings[0].fingerprint, /^[a-f0-9]{24}$/);
+    assert.equal(
+      first.findings[0].ruleUrl,
+      "https://xanhast-pf.github.io/coding-bible/#TS-001",
+    );
+    assert.deepEqual(first.findings[0].fix, {
+      available: false,
+      safety: "none",
+    });
+
+    await writeFile(filePath, "// moved down\nconst value: any = 1;\n");
+    const secondStdout = createWriter();
+    await runCli(["check", ".", "--json"], {
+      cwd: directory,
+      stderr: createWriter(),
+      stdout: secondStdout,
+    });
+    const second = JSON.parse(secondStdout.value);
+
+    assert.equal(second.findings[0].location.line, 2);
+    assert.equal(second.findings[0].fingerprint, first.findings[0].fingerprint);
+  });
+});
+
+test("report and patch export separate safe fixes from review-required fixes", async () => {
+  await withFixture(async (directory) => {
+    const { execFile } = await import("node:child_process");
+    const runGit = (args) =>
+      new Promise((resolve, reject) => {
+        execFile("git", args, { cwd: directory }, (error, stdout, stderr) => {
+          if (error) reject(new Error(stderr || error.message));
+          else resolve(stdout);
+        });
+      });
+
+    await runGit(["init", "-q"]);
+    await mkdir(path.join(directory, "src"), { recursive: true });
+    await writeFile(
+      path.join(directory, "src", "types.ts"),
+      "export type User = { id: string };\n",
+    );
+    await writeFile(
+      path.join(directory, "src", "example.ts"),
+      `import { User } from "./types";\n\nexport function inspect(items: number[]): User | null {\n  const parsed = parseInt("42", 10);\n  const invalid = isNaN(parsed);\n  const sorted = items.sort((a, b) => a - b);\n  return invalid || sorted.length === 0 ? null : { id: String(parsed) };\n}\n`,
+    );
+
+    const stdout = createWriter();
+    const stderr = createWriter();
+    const exitCode = await runCli(
+      [
+        "check",
+        "src",
+        "--report",
+        "--patch",
+        "--include-review-fixes",
+        "--output-dir",
+        "artifacts",
+      ],
+      { cwd: directory, stderr, stdout },
+    );
+
+    assert.equal(exitCode, 1);
+    assert.equal(stderr.value, "");
+    assert.match(stdout.value, /artifacts[/\\]report\.json/);
+    assert.match(stdout.value, /artifacts[/\\]safe-fixes\.patch/);
+    assert.match(stdout.value, /artifacts[/\\]review-fixes\.patch/);
+
+    const report = JSON.parse(
+      await readFile(path.join(directory, "artifacts", "report.json"), "utf8"),
+    );
+    assert.equal(report.schemaVersion, 1);
+    assert.equal(report.summary.safeFixes, 2);
+    assert.equal(report.summary.reviewFixes, 2);
+    assert.equal(
+      report.findings.find(({ ruleId }) => ruleId === "TS-003")?.fix.safety,
+      "safe",
+    );
+
+    const safePatch = await readFile(
+      path.join(directory, "artifacts", "safe-fixes.patch"),
+      "utf8",
+    );
+    const reviewPatch = await readFile(
+      path.join(directory, "artifacts", "review-fixes.patch"),
+      "utf8",
+    );
+    assert.match(safePatch, /\+import \{ type User \}/);
+    assert.match(safePatch, /Number\.parseInt/);
+    assert.doesNotMatch(safePatch, /Number\.isNaN/);
+    assert.match(reviewPatch, /Number\.isNaN/);
+    assert.match(reviewPatch, /toSorted/);
+
+    await runGit([
+      "apply",
+      "--check",
+      path.join("artifacts", "safe-fixes.patch"),
+    ]);
+    await runGit([
+      "apply",
+      "--check",
+      path.join("artifacts", "review-fixes.patch"),
+    ]);
+    await runGit(["apply", path.join("artifacts", "safe-fixes.patch")]);
+    const fixed = await readFile(
+      path.join(directory, "src", "example.ts"),
+      "utf8",
+    );
+    assert.match(fixed, /import \{ type User \}/);
+    assert.match(fixed, /Number\.parseInt/);
+  });
+});
+
+test("review fix export requires patch export", async () => {
+  const stdout = createWriter();
+  const stderr = createWriter();
+  const exitCode = await runCli(["check", ".", "--include-review-fixes"], {
+    cwd: process.cwd(),
+    stderr,
+    stdout,
+  });
+
+  assert.equal(exitCode, 2);
+  assert.match(stderr.value, /requires --patch/);
 });
