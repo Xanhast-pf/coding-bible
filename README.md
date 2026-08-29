@@ -19,7 +19,7 @@ That single source can eventually power:
 - a project-aware CLI / CI scanner
 - a local MCP server for coding agents
 - editor integrations
-- PR review tooling
+- GitHub Actions / PR review tooling
 - framework-specific rule packs
 
 ## Workspace
@@ -29,6 +29,7 @@ apps/
   web/                  Public website
 
 packages/
+  action/               Self-contained GitHub Action runtime
   analyzer/             AST-backed source analyzer
   mcp/                  Read-only local MCP server
   rules/                Canonical rule schema + rule content
@@ -98,6 +99,49 @@ pnpm agent:check
 The Learn view's `tldr;` action remains the interactive filtered export for any
 current search/pack/level combination, while the generated `agents/<pack>.txt`
 files provide stable pack-level prompts for external tooling.
+
+## GitHub Action
+
+Coding Bible can run directly in another repository from a release tag. The
+consumer does not install Coding Bible, pnpm, or TypeScript:
+
+```yaml
+name: Coding Bible
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - uses: Xanhast-pf/coding-bible@v0.25.0
+```
+
+The default `changed` scope analyzes current files with project/tsconfig context
+but reports only findings on added or modified lines. GitHub annotations and a
+Step Summary are always available without extra permissions. The action also
+writes `.coding-bible/coding-bible.sarif` for optional Code Scanning upload.
+Baselines and `coding-bible.config.*` remain analyzer contracts rather than
+Action-specific rule definitions.
+
+The release contains a committed self-contained Node 24 runtime under
+`packages/action/dist`. Keep it synchronized with:
+
+```bash
+pnpm action:build
+pnpm action:check
+```
+
+See `packages/action/README.md` and ADR-013 for inputs, outputs, SARIF upload,
+and version-pinning guidance.
 
 ## MCP server
 

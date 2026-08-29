@@ -5,6 +5,7 @@ import { planAffectedTests } from "../affected-test-plan.mjs";
 const allTargets = [
   "@coding-bible/rules",
   "@coding-bible/analyzer",
+  "@coding-bible/action",
   "@coding-bible/mcp",
   "@coding-bible/web",
 ];
@@ -12,6 +13,7 @@ const allTargets = [
 test("rules changes run rules and downstream consumer tests", () => {
   assert.deepEqual(planAffectedTests(["packages/rules/src/index.ts"]), [
     "@coding-bible/rules",
+    "@coding-bible/action",
     "@coding-bible/mcp",
     "@coding-bible/web",
   ]);
@@ -20,8 +22,15 @@ test("rules changes run rules and downstream consumer tests", () => {
 test("analyzer changes run analyzer and downstream consumer tests", () => {
   assert.deepEqual(planAffectedTests(["packages/analyzer/src/analyze.ts"]), [
     "@coding-bible/analyzer",
+    "@coding-bible/action",
     "@coding-bible/mcp",
     "@coding-bible/web",
+  ]);
+});
+
+test("action-only changes run action tests only", () => {
+  assert.deepEqual(planAffectedTests(["packages/action/src/index.mjs"]), [
+    "@coding-bible/action",
   ]);
 });
 

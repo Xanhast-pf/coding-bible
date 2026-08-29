@@ -18,6 +18,10 @@
       "entry": ["src/main.tsx", "vite.config.ts", "test/*.test.mjs"],
       "project": ["src/**/*.{ts,tsx}", "vite.config.ts", "test/*.test.mjs"],
     },
+    "packages/action": {
+      "entry": ["build.mjs", "src/index.mjs", "test/*.test.mjs"],
+      "project": ["build.mjs", "src/*.mjs", "test/*.test.mjs"],
+    },
     "packages/analyzer": {
       "entry": [
         "src/index.ts",

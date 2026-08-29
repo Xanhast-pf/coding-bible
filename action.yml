@@ -1,0 +1,63 @@
+name: Coding Bible
+description: Deterministic Coding Bible review with GitHub annotations, summaries, baselines, and optional SARIF output.
+author: Xanhast-pf
+
+inputs:
+  scope:
+    description: Review only added/modified lines (changed) or scan the selected project path (project).
+    required: false
+    default: changed
+  path:
+    description: Repository-relative file or directory to analyze.
+    required: false
+    default: .
+  base-ref:
+    description: Git ref/SHA used as the changed-scope comparison base. Auto-detected for pull requests and pushes.
+    required: false
+    default: ""
+  fail-on:
+    description: Failure threshold. One of error, warning, or none.
+    required: false
+    default: error
+  config:
+    description: Optional repository-relative Coding Bible config path.
+    required: false
+    default: ""
+  baseline:
+    description: Honor the project's Coding Bible baseline when present.
+    required: false
+    default: "true"
+  annotations:
+    description: Emit GitHub error/warning annotations for findings.
+    required: false
+    default: "true"
+  sarif:
+    description: Write .coding-bible/coding-bible.sarif for optional Code Scanning upload.
+    required: false
+    default: "true"
+
+outputs:
+  conclusion:
+    description: passed or failed according to fail-on.
+  findings:
+    description: Number of active Coding Bible findings in scope.
+  errors:
+    description: Number of error-severity findings.
+  warnings:
+    description: Number of warning-severity findings.
+  diagnostics:
+    description: Number of syntax diagnostics.
+  files-analyzed:
+    description: Number of source files analyzed.
+  rules-checked:
+    description: Number of deterministic rule IDs exercised by the analyzer.
+  sarif-path:
+    description: Repository-relative SARIF path, or an empty string when SARIF output is disabled.
+
+runs:
+  using: node24
+  main: packages/action/dist/index.mjs
+
+branding:
+  icon: book-open
+  color: blue
