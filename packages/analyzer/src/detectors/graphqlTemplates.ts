@@ -16,7 +16,10 @@ const graphqlModules = new Set([
   "urql",
 ]);
 
-const isGraphqlIdentifier = (context: DetectorContext, identifier: ts.Identifier) => {
+const isGraphqlIdentifier = (
+  context: DetectorContext,
+  identifier: ts.Identifier,
+) => {
   const binding = getImportBinding(context, identifier);
   if (binding) {
     return (
@@ -27,10 +30,16 @@ const isGraphqlIdentifier = (context: DetectorContext, identifier: ts.Identifier
     );
   }
 
-  return (identifier.text === "gql" || identifier.text === "graphql") && !getSymbol(context, identifier);
+  return (
+    (identifier.text === "gql" || identifier.text === "graphql") &&
+    !getSymbol(context, identifier)
+  );
 };
 
-const isGraphqlTag = (context: DetectorContext, tag: ts.LeftHandSideExpression) => {
+const isGraphqlTag = (
+  context: DetectorContext,
+  tag: ts.LeftHandSideExpression,
+) => {
   if (ts.isIdentifier(tag)) {
     return isGraphqlIdentifier(context, tag);
   }
@@ -42,9 +51,9 @@ const isGraphqlTag = (context: DetectorContext, tag: ts.LeftHandSideExpression) 
   const binding = getImportBinding(context, tag.expression);
   return Boolean(
     binding &&
-      binding.kind === "namespace" &&
-      graphqlModules.has(binding.moduleName) &&
-      (tag.name.text === "gql" || tag.name.text === "graphql"),
+    binding.kind === "namespace" &&
+    graphqlModules.has(binding.moduleName) &&
+    (tag.name.text === "gql" || tag.name.text === "graphql"),
   );
 };
 
@@ -82,11 +91,16 @@ const isLikelyDocumentInterpolation = (
   }
 
   const importBinding = getImportBinding(context, expression);
-  if (importBinding && /(fragment|document|query|mutation|subscription)$/i.test(expression.text)) {
+  if (
+    importBinding &&
+    /(fragment|document|query|mutation|subscription)$/i.test(expression.text)
+  ) {
     return true;
   }
 
-  return /(fragment|document|query|mutation|subscription)$/i.test(expression.text);
+  return /(fragment|document|query|mutation|subscription)$/i.test(
+    expression.text,
+  );
 };
 
 export const graphqlInterpolationDetector: Detector = {
@@ -99,7 +113,10 @@ export const graphqlInterpolationDetector: Detector = {
       context,
       ts.SyntaxKind.TaggedTemplateExpression,
     )) {
-      if (!isGraphqlTag(context, node.tag) || !ts.isTemplateExpression(node.template)) {
+      if (
+        !isGraphqlTag(context, node.tag) ||
+        !ts.isTemplateExpression(node.template)
+      ) {
         continue;
       }
 
@@ -111,9 +128,11 @@ export const graphqlInterpolationDetector: Detector = {
         findings.push(
           createFinding(context, span.expression, {
             detectorId: "graphql-runtime-interpolation",
-            message: "A runtime value is interpolated directly into a GraphQL operation document.",
+            message:
+              "A runtime value is interpolated directly into a GraphQL operation document.",
             ruleId: "GQL-002",
-            suggestion: "Keep the operation static and pass runtime values through GraphQL variables.",
+            suggestion:
+              "Keep the operation static and pass runtime values through GraphQL variables.",
           }),
         );
       }

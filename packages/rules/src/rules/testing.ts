@@ -18,7 +18,7 @@ export const testingRules = [
     },
     good: {
       language: "tsx",
-      code: "openModal();\nexpect(screen.getByRole(\"dialog\")).toBeVisible();",
+      code: 'openModal();\nexpect(screen.getByRole("dialog")).toBeVisible();',
     },
     detection: {
       autoFixable: false,
@@ -39,11 +39,11 @@ export const testingRules = [
     tags: ["edge-cases", "testing"],
     bad: {
       language: "ts",
-      code: "expect(formatUser(null as never)).toBe(\"Unknown\");",
+      code: 'expect(formatUser(null as never)).toBe("Unknown");',
     },
     good: {
       language: "ts",
-      code: "expect(\n  formatUser({ firstName: \"\", lastName: \"Lee\" }),\n).toBe(\"Lee\");",
+      code: 'expect(\n  formatUser({ firstName: "", lastName: "Lee" }),\n).toBe("Lee");',
     },
     detection: {
       autoFixable: false,
@@ -64,11 +64,11 @@ export const testingRules = [
     tags: ["mocks", "testing"],
     bad: {
       language: "ts",
-      code: "vi.mock(\"payment-sdk\", () => ({\n  Client: class {\n    payments = { create: vi.fn().mockResolvedValue({ id: \"pay_1\" }) };\n  },\n}));",
+      code: 'vi.mock("payment-sdk", () => ({\n  Client: class {\n    payments = { create: vi.fn().mockResolvedValue({ id: "pay_1" }) };\n  },\n}));',
     },
     good: {
       language: "ts",
-      code: "const paymentGateway = {\n  charge: vi.fn().mockResolvedValue({ id: \"pay_1\" }),\n};\n\nawait checkout(order, { paymentGateway });",
+      code: 'const paymentGateway = {\n  charge: vi.fn().mockResolvedValue({ id: "pay_1" }),\n};\n\nawait checkout(order, { paymentGateway });',
     },
     detection: {
       autoFixable: false,
@@ -89,11 +89,11 @@ export const testingRules = [
     tags: ["logic", "testing", "unit-tests"],
     bad: {
       language: "tsx",
-      code: "render(<Checkout subtotal={100} tier=\"gold\" />);\nexpect(screen.getByText(\"$90.00\")).toBeVisible();",
+      code: 'render(<Checkout subtotal={100} tier="gold" />);\nexpect(screen.getByText("$90.00")).toBeVisible();',
     },
     good: {
       language: "ts",
-      code: "expect(\n  calculateDiscount({ subtotal: 100, tier: \"gold\" }),\n).toBe(10);",
+      code: 'expect(\n  calculateDiscount({ subtotal: 100, tier: "gold" }),\n).toBe(10);',
     },
     detection: {
       autoFixable: false,
@@ -118,7 +118,7 @@ export const testingRules = [
     },
     good: {
       language: "tsx",
-      code: "render(<CheckoutPage />);\nexpect(\n  screen.getByRole(\"heading\", { name: \"Checkout\" }),\n).toBeVisible();",
+      code: 'render(<CheckoutPage />);\nexpect(\n  screen.getByRole("heading", { name: "Checkout" }),\n).toBeVisible();',
     },
     detection: {
       autoFixable: false,
@@ -143,7 +143,7 @@ export const testingRules = [
     },
     good: {
       language: "ts",
-      code: "it(\"rejects a coupon at its exact expiry time\", () => {\n  const now = new Date(\"2026-08-28T12:00:00Z\");\n\n  expect(applyCoupon({ total: 100, expiresAt: now }, now)).toBe(100);\n});",
+      code: 'it("rejects a coupon at its exact expiry time", () => {\n  const now = new Date("2026-08-28T12:00:00Z");\n\n  expect(applyCoupon({ total: 100, expiresAt: now }, now)).toBe(100);\n});',
     },
     detection: {
       autoFixable: false,

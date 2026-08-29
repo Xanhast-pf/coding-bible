@@ -18,9 +18,11 @@ export const noExplicitAnyDetector: Detector = {
       findings.push(
         createFinding(context, node, {
           detectorId: "no-explicit-any",
-          message: "Explicit `any` disables TypeScript's safety at this boundary.",
+          message:
+            "Explicit `any` disables TypeScript's safety at this boundary.",
           ruleId: "TS-001",
-          suggestion: "Use the narrowest correct type, or `unknown` until the value is validated.",
+          suggestion:
+            "Use the narrowest correct type, or `unknown` until the value is validated.",
         }),
       );
     });

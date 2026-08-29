@@ -6,14 +6,35 @@
     "node": ">=24"
   },
   "scripts": {
+    "bible:check": "node packages/analyzer/bin/coding-bible.mjs check .",
+    "bible:staged": "node packages/analyzer/bin/coding-bible.mjs check . --staged",
     "build": "pnpm -r --if-present build",
-    "check": "pnpm typecheck && pnpm test && pnpm build",
+    "check": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm knip && pnpm test && pnpm build && pnpm bible:check",
     "dev": "pnpm --filter @coding-bible/web dev",
-    "test": "pnpm -r --if-present test",
-    "typecheck": "pnpm -r --if-present typecheck",
-    "bible:check": "node packages/analyzer/bin/coding-bible.mjs check ."
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "knip": "knip --include files,dependencies,unlisted,binaries,unresolved --use-tsconfig-files",
+    "knip:fast": "knip --dependencies --use-tsconfig-files",
+    "lint": "eslint . --cache --cache-location .cache/eslint --max-warnings=0",
+    "lint:fix": "eslint . --cache --cache-location .cache/eslint --fix --max-warnings=0",
+    "prepare": "husky",
+    "precommit": "lint-staged && node scripts/run-precommit.mjs",
+    "prepush": "pnpm check",
+    "test": "node --test scripts/test/*.test.mjs && pnpm -r --if-present test",
+    "test:affected": "node scripts/run-affected-tests.mjs",
+    "typecheck": "pnpm -r --if-present typecheck"
   },
   "devDependencies": {
-    "typescript": "^5.9.2"
+    "@eslint/js": "^9.39.5",
+    "eslint": "^9.39.5",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^17.11.0",
+    "husky": "^9.1.7",
+    "knip": "^6.32.2",
+    "lint-staged": "^17.3.0",
+    "prettier": "^3.9.6",
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.68.0"
   }
 }

@@ -6,7 +6,10 @@ import { createFinding, getReferences, nodesOfKind } from "../utils.ts";
 const isTypeOnlyUsage = (identifier: ts.Identifier) => {
   let current: ts.Node = identifier.parent;
 
-  while (!ts.isStatement(current) && current.kind !== ts.SyntaxKind.SourceFile) {
+  while (
+    !ts.isStatement(current) &&
+    current.kind !== ts.SyntaxKind.SourceFile
+  ) {
     if (ts.isTypeQueryNode(current)) {
       return false;
     }
@@ -53,7 +56,8 @@ export const typeOnlyImportsDetector: Detector = {
 
         const usages = getReferences(context, specifier.name).filter(
           (identifier) =>
-            identifier !== specifier.name && identifier !== specifier.propertyName,
+            identifier !== specifier.name &&
+            identifier !== specifier.propertyName,
         );
 
         if (!usages.length || !usages.every(isTypeOnlyUsage)) {
@@ -65,8 +69,7 @@ export const typeOnlyImportsDetector: Detector = {
             detectorId: "type-only-imports",
             message: `\`${specifier.name.text}\` is used only as a type.`,
             ruleId: "TS-003",
-            suggestion:
-              `Mark it as type-only: \`import { type ${specifier.name.text} } ...\` or use \`import type\`.`,
+            suggestion: `Mark it as type-only: \`import { type ${specifier.name.text} } ...\` or use \`import type\`.`,
           }),
         );
       }

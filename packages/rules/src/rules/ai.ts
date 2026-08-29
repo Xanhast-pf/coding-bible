@@ -14,7 +14,7 @@ export const aiRules = [
     tags: ["ai", "architecture"],
     bad: {
       language: "ts",
-      code: "// New parallel data-access pattern.\nconst response = await fetch(\"/api/users\");\nconst users = await response.json();",
+      code: '// New parallel data-access pattern.\nconst response = await fetch("/api/users");\nconst users = await response.json();',
     },
     good: {
       language: "ts",
@@ -80,7 +80,7 @@ export const aiRules = [
     },
     good: {
       language: "ts",
-      code: "import { formatCurrency } from \"@/shared/currency\";\n\nconst label = formatCurrency(total);",
+      code: 'import { formatCurrency } from "@/shared/currency";\n\nconst label = formatCurrency(total);',
     },
     detection: { autoFixable: false, detectable: true, strategy: "semantic" },
   },
@@ -97,11 +97,11 @@ export const aiRules = [
     tags: ["ai", "dependencies", "verification"],
     bad: {
       language: "tsx",
-      code: "// Guessed from memory.\nimport { useAsyncEffect } from \"react\";\n\nuseAsyncEffect(loadUser, [userId]);",
+      code: '// Guessed from memory.\nimport { useAsyncEffect } from "react";\n\nuseAsyncEffect(loadUser, [userId]);',
     },
     good: {
       language: "tsx",
-      code: "import { useEffect } from \"react\";\n\nuseEffect(() => {\n  void loadUser(userId);\n}, [userId]);",
+      code: 'import { useEffect } from "react";\n\nuseEffect(() => {\n  void loadUser(userId);\n}, [userId]);',
     },
     detection: { autoFixable: false, detectable: false },
   },
@@ -118,7 +118,7 @@ export const aiRules = [
     tags: ["ai", "defensive-code", "testing"],
     bad: {
       language: "ts",
-      code: "function getUserName(user: User) {\n  if (!user || Array.isArray(user) || typeof user.name !== \"string\") {\n    return \"Unknown\";\n  }\n\n  return user.name;\n}",
+      code: 'function getUserName(user: User) {\n  if (!user || Array.isArray(user) || typeof user.name !== "string") {\n    return "Unknown";\n  }\n\n  return user.name;\n}',
     },
     good: {
       language: "ts",

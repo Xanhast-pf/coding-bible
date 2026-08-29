@@ -18,7 +18,7 @@ export const featureFlagRules = [
     },
     good: {
       language: "ts",
-      code: "export const flags = {\n  newCheckout: {\n    defaultValue: false,\n    owner: \"checkout\",\n    removalCondition: \"100% rollout is stable for 7 days\",\n  },\n};",
+      code: 'export const flags = {\n  newCheckout: {\n    defaultValue: false,\n    owner: "checkout",\n    removalCondition: "100% rollout is stable for 7 days",\n  },\n};',
     },
     detection: { autoFixable: false, detectable: false },
   },
@@ -77,11 +77,11 @@ export const featureFlagRules = [
     tags: ["feature-flags", "testing"],
     bad: {
       language: "ts",
-      code: "it(\"uses the new checkout\", () => {\n  setFlag(\"newCheckout\", true);\n  expect(renderCheckout()).toBe(\"new\");\n});",
+      code: 'it("uses the new checkout", () => {\n  setFlag("newCheckout", true);\n  expect(renderCheckout()).toBe("new");\n});',
     },
     good: {
       language: "ts",
-      code: "it.each([\n  [true, \"new\"],\n  [false, \"legacy\"],\n])(\"newCheckout=%s renders %s\", (enabled, expected) => {\n  setFlag(\"newCheckout\", enabled);\n  expect(renderCheckout()).toBe(expected);\n});",
+      code: 'it.each([\n  [true, "new"],\n  [false, "legacy"],\n])("newCheckout=%s renders %s", (enabled, expected) => {\n  setFlag("newCheckout", enabled);\n  expect(renderCheckout()).toBe(expected);\n});',
     },
     detection: { autoFixable: false, detectable: true, strategy: "semantic" },
   },

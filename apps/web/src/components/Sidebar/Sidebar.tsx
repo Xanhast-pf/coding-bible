@@ -1,7 +1,4 @@
-import {
-  rulePackGroups,
-  rulePackLabels,
-} from "@coding-bible/rules";
+import { rulePackGroups, rulePackLabels } from "@coding-bible/rules";
 import type { RulePack } from "@coding-bible/rules";
 
 import styles from "./Sidebar.module.css";

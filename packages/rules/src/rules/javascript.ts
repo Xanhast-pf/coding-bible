@@ -14,11 +14,11 @@ export const javascriptRules = [
     tags: ["async", "functions", "promises"],
     bad: {
       language: "ts",
-      code: "async function getStatusLabel() {\n  return \"Ready\";\n}",
+      code: 'async function getStatusLabel() {\n  return "Ready";\n}',
     },
     good: {
       language: "ts",
-      code: "function getStatusLabel() {\n  return \"Ready\";\n}",
+      code: 'function getStatusLabel() {\n  return "Ready";\n}',
     },
     detection: { autoFixable: true, detectable: true, strategy: "ast" },
   },
@@ -33,7 +33,10 @@ export const javascriptRules = [
     pack: "javascript",
     status: "stable",
     tags: ["null-safety", "optional-chaining"],
-    bad: { language: "ts", code: "const city = user && user.address && user.address.city;" },
+    bad: {
+      language: "ts",
+      code: "const city = user && user.address && user.address.city;",
+    },
     good: { language: "ts", code: "const city = user?.address?.city;" },
     detection: { autoFixable: false, detectable: true, strategy: "ast" },
   },
@@ -48,8 +51,14 @@ export const javascriptRules = [
     pack: "javascript",
     status: "stable",
     tags: ["defaults", "functions"],
-    bad: { language: "ts", code: "const process = (items?: Item[]) => {\n  items = items ?? [];\n};" },
-    good: { language: "ts", code: "const process = (items: Item[] = []) => {\n  // ...\n};" },
+    bad: {
+      language: "ts",
+      code: "const process = (items?: Item[]) => {\n  items = items ?? [];\n};",
+    },
+    good: {
+      language: "ts",
+      code: "const process = (items: Item[] = []) => {\n  // ...\n};",
+    },
     detection: { autoFixable: false, detectable: true, strategy: "semantic" },
   },
   {
@@ -64,7 +73,10 @@ export const javascriptRules = [
     status: "stable",
     tags: ["built-ins", "modern-javascript"],
     bad: { language: "ts", code: "parseInt(value);\nobj.hasOwnProperty(key);" },
-    good: { language: "ts", code: "Number.parseInt(value, 10);\nObject.hasOwn(obj, key);" },
+    good: {
+      language: "ts",
+      code: "Number.parseInt(value, 10);\nObject.hasOwn(obj, key);",
+    },
     detection: { autoFixable: true, detectable: true, strategy: "lint" },
   },
   {
@@ -99,13 +111,20 @@ export const javascriptRules = [
     pack: "javascript",
     status: "stable",
     tags: ["arrays", "immutability", "modern-javascript"],
-    bad: { language: "ts", code: "const sortedUsers = users.sort(compareUsers);" },
-    good: { language: "ts", code: "const sortedUsers = users.toSorted(compareUsers);" },
+    bad: {
+      language: "ts",
+      code: "const sortedUsers = users.sort(compareUsers);",
+    },
+    good: {
+      language: "ts",
+      code: "const sortedUsers = users.toSorted(compareUsers);",
+    },
     detection: { autoFixable: false, detectable: true, strategy: "semantic" },
   },
   {
     id: "JS-007",
-    title: "Use an options object when positional parameters stop being obvious",
+    title:
+      "Use an options object when positional parameters stop being obvious",
     summary:
       "When a function has several same-shaped or optional arguments, prefer one named options object over a long positional signature.",
     rationale:
@@ -116,11 +135,11 @@ export const javascriptRules = [
     tags: ["api-design", "functions", "parameters"],
     bad: {
       language: "ts",
-      code: "createReport(data, true, 50, false, \"USD\");",
+      code: 'createReport(data, true, 50, false, "USD");',
     },
     good: {
       language: "ts",
-      code: "createReport({ data, currency: \"USD\", includeDrafts: true, limit: 50 });",
+      code: 'createReport({ data, currency: "USD", includeDrafts: true, limit: 50 });',
     },
     detection: { autoFixable: false, detectable: true, strategy: "semantic" },
   },

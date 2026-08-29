@@ -45,11 +45,12 @@ pnpm check
 pnpm dev
 ```
 
-`pnpm check` runs typechecking, the dependency-free Node test suites, and a
-production build. TypeScript is installed at the workspace root because
-multiple workspace packages use `tsc`. pnpm is also configured to allow the
-`esbuild` lifecycle script required by Vite, so a fresh install does not require
-a manual `pnpm approve-builds` step.
+`pnpm check` is the authoritative repository gate. It runs ESLint, Prettier
+verification, typechecking, Knip, the Node test suites, a production build, and
+finally a full Coding Bible scan. TypeScript is installed at the workspace root
+because multiple workspace packages use `tsc`. pnpm is also configured to allow
+the `esbuild` lifecycle script required by Vite, so a fresh install does not
+require a manual `pnpm approve-builds` step.
 
 ## Source distillation
 
@@ -100,6 +101,44 @@ enable or disable automated packs/rules, set error versus warning severity, and
 apply file-specific overrides. Git-aware scopes report only requested changes
 while retaining project context for analysis. `--profile` exposes scanner phase
 timings and memory use.
+
+## Git quality gates
+
+Husky installs repository hooks during `pnpm install`. Pre-commit deliberately
+keeps auto-fixing separate from verification:
+
+```text
+ESLint --fix + Prettier on staged files
+  -> affected workspace tests
+  -> typecheck
+  -> Knip dependency check
+  -> Coding Bible --staged
+```
+
+`lint-staged` protects partially staged files while applying ESLint and Prettier
+fixes and re-stages only those fixes. Coding Bible runs last so its findings are
+not mixed with formatting or basic lint noise.
+
+Affected tests are selected at workspace granularity: changes in a shared
+package run that package plus downstream web tests; documentation-only commits
+do not pay for unrelated tests. If that step becomes disruptive during an
+iterative commit, bypass only it rather than disabling the whole hook:
+
+```bash
+SKIP_AFFECTED_TESTS=1 git commit -m "wip"
+```
+
+Targeted escape hatches also exist for exceptional local work:
+
+```text
+SKIP_TYPECHECK=1
+SKIP_KNIP=1
+SKIP_BIBLE=1
+```
+
+They are intentionally opt-in. Pre-push and CI still run the complete `pnpm
+check` gate: full lint, formatting verification, typecheck, Knip, all tests,
+production build, and finally the full Coding Bible project scan.
 
 Each rule also exposes a `tldr;` action that copies an AI-optimized prompt with
 the rule rationale, examples, exceptions, and canonical deep link. The rule-list

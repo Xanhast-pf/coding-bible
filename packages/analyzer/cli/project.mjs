@@ -33,8 +33,13 @@ const getTargetMatchers = async (targets, cwd) => {
     }
 
     if (targetStat.isDirectory()) {
-      const prefix = absolutePath.endsWith(path.sep) ? absolutePath : `${absolutePath}${path.sep}`;
-      matchers.push((candidate) => candidate === absolutePath || candidate.startsWith(prefix));
+      const prefix = absolutePath.endsWith(path.sep)
+        ? absolutePath
+        : `${absolutePath}${path.sep}`;
+      matchers.push(
+        (candidate) =>
+          candidate === absolutePath || candidate.startsWith(prefix),
+      );
       continue;
     }
 
@@ -75,7 +80,8 @@ export const discoverSourceFiles = async (
 
 const formatTsDiagnostics = (diagnostics, cwd) =>
   ts.formatDiagnostics(diagnostics, {
-    getCanonicalFileName: (fileName) => path.relative(cwd, fileName) || fileName,
+    getCanonicalFileName: (fileName) =>
+      path.relative(cwd, fileName) || fileName,
     getCurrentDirectory: () => cwd,
     getNewLine: () => "\n",
   });
@@ -127,7 +133,10 @@ const loadTsConfig = (cwd, configPath) => {
 
 const isInside = (parent, candidate) => {
   const relative = path.relative(parent, candidate);
-  return relative === "" || (!relative.startsWith("..") && !path.isAbsolute(relative));
+  return (
+    relative === "" ||
+    (!relative.startsWith("..") && !path.isAbsolute(relative))
+  );
 };
 
 const findNearestTsconfig = (filePath, cwd) => {
@@ -182,14 +191,11 @@ export const createProjectPlans = (
     .map(([configPath, files]) => ({ configPath, files }));
 };
 
-export const createProjectProgram = (
-  plan,
-  { cwd = process.cwd() } = {},
-) => {
+export const createProjectProgram = (plan, { cwd = process.cwd() } = {}) => {
   const startedAt = performance.now();
   const project = loadTsConfig(cwd, plan.configPath);
-  const rootNames = [...new Set([...project.fileNames, ...plan.files])].sort((left, right) =>
-    left.localeCompare(right),
+  const rootNames = [...new Set([...project.fileNames, ...plan.files])].sort(
+    (left, right) => left.localeCompare(right),
   );
   const program = ts.createProgram({
     options: project.options,

@@ -14,7 +14,7 @@ export const nextjsRules = [
     tags: ["client-components", "nextjs", "server-components"],
     bad: {
       language: "tsx",
-      code: "\"use client\";\n\nconst UsersPage = () => {\n  const [users, setUsers] = useState([]);\n  useEffect(() => void fetch(\"/api/users\").then(/* ... */), []);\n  return <Users users={users} />;\n};",
+      code: '"use client";\n\nconst UsersPage = () => {\n  const [users, setUsers] = useState([]);\n  useEffect(() => void fetch("/api/users").then(/* ... */), []);\n  return <Users users={users} />;\n};',
     },
     good: {
       language: "tsx",
@@ -41,11 +41,11 @@ export const nextjsRules = [
     tags: ["bundle-size", "client-components", "nextjs"],
     bad: {
       language: "tsx",
-      code: "\"use client\";\n\nexport default function Dashboard() {\n  return <LargeDashboardWithOneInteractiveButton />;\n}",
+      code: '"use client";\n\nexport default function Dashboard() {\n  return <LargeDashboardWithOneInteractiveButton />;\n}',
     },
     good: {
       language: "tsx",
-      code: "// Dashboard.tsx — Server Component\nexport default function Dashboard() {\n  return <FavoriteButton />;\n}\n\n// FavoriteButton.tsx\n\"use client\";",
+      code: '// Dashboard.tsx — Server Component\nexport default function Dashboard() {\n  return <FavoriteButton />;\n}\n\n// FavoriteButton.tsx\n"use client";',
     },
     references: [
       {
@@ -72,7 +72,7 @@ export const nextjsRules = [
     },
     good: {
       language: "tsx",
-      code: "// Server Component\nreturn <ClientPrice amount={12} currency=\"USD\" />;",
+      code: '// Server Component\nreturn <ClientPrice amount={12} currency="USD" />;',
       note: "Pass serializable data and keep ordinary client behavior inside the Client Component.",
     },
     references: [
@@ -100,7 +100,7 @@ export const nextjsRules = [
     },
     good: {
       language: "ts",
-      code: "import \"server-only\";\n\nexport const getUsers = () => db.user.findMany();",
+      code: 'import "server-only";\n\nexport const getUsers = () => db.user.findMany();',
     },
     references: [
       {
@@ -123,7 +123,7 @@ export const nextjsRules = [
     tags: ["data-fetching", "nextjs", "server-components"],
     bad: {
       language: "tsx",
-      code: "export default async function UsersPage() {\n  const response = await fetch(\"https://my-app.test/api/users\");\n  const users = await response.json();\n  return <Users users={users} />;\n}",
+      code: 'export default async function UsersPage() {\n  const response = await fetch("https://my-app.test/api/users");\n  const users = await response.json();\n  return <Users users={users} />;\n}',
     },
     good: {
       language: "tsx",

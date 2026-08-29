@@ -22,9 +22,15 @@ const rules = [
     title: "Avoid any",
   },
   {
-    bad: { code: "items.map((item, index) => <Row key={index} />);", language: "tsx" },
+    bad: {
+      code: "items.map((item, index) => <Row key={index} />);",
+      language: "tsx",
+    },
     detection: { autoFixable: false, detectable: true, strategy: "semantic" },
-    good: { code: "items.map((item) => <Row key={item.id} />);", language: "tsx" },
+    good: {
+      code: "items.map((item) => <Row key={item.id} />);",
+      language: "tsx",
+    },
     id: "REACT-006",
     level: "should",
     pack: "react",
@@ -57,7 +63,12 @@ test("filterRules applies pack and level filters before search", () => {
 });
 
 test("rule counts include zero-valued configured entries", () => {
-  const levelCounts = countRulesByLevel(rules, ["must", "should", "prefer", "avoid"]);
+  const levelCounts = countRulesByLevel(rules, [
+    "must",
+    "should",
+    "prefer",
+    "avoid",
+  ]);
   const packCounts = countRulesByPack(rules, ["typescript", "react", "css"]);
 
   assert.equal(levelCounts.get("must"), 1);

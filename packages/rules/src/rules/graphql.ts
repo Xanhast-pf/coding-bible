@@ -20,7 +20,9 @@ export const graphqlRules = [
       language: "graphql",
       code: "query ViewerQuery {\n  viewer { id name }\n}",
     },
-    references: [{ label: "GraphQL — Queries", url: "https://graphql.org/learn/queries/" }],
+    references: [
+      { label: "GraphQL — Queries", url: "https://graphql.org/learn/queries/" },
+    ],
     detection: { autoFixable: false, detectable: true, strategy: "ast" },
   },
   {
@@ -36,13 +38,15 @@ export const graphqlRules = [
     tags: ["graphql", "queries", "variables"],
     bad: {
       language: "ts",
-      code: "const document = gql`\n  query UserQuery {\n    user(id: \"${userId}\") { id name }\n  }\n`;",
+      code: 'const document = gql`\n  query UserQuery {\n    user(id: "${userId}") { id name }\n  }\n`;',
     },
     good: {
       language: "ts",
       code: "const document = gql`\n  query UserQuery($id: ID!) {\n    user(id: $id) { id name }\n  }\n`;\n\nclient.query({ query: document, variables: { id: userId } });",
     },
-    references: [{ label: "GraphQL — Queries", url: "https://graphql.org/learn/queries/" }],
+    references: [
+      { label: "GraphQL — Queries", url: "https://graphql.org/learn/queries/" },
+    ],
     detection: { autoFixable: false, detectable: true, strategy: "ast" },
   },
   {
@@ -64,7 +68,9 @@ export const graphqlRules = [
       language: "graphql",
       code: "fragment UserSummary on User {\n  id\n  name\n  avatarUrl\n}\n\nquery DashboardQuery {\n  viewer { ...UserSummary }\n  owner { ...UserSummary }\n}",
     },
-    references: [{ label: "GraphQL — Queries", url: "https://graphql.org/learn/queries/" }],
+    references: [
+      { label: "GraphQL — Queries", url: "https://graphql.org/learn/queries/" },
+    ],
     detection: { autoFixable: false, detectable: true, strategy: "semantic" },
   },
   {
@@ -114,7 +120,9 @@ export const graphqlRules = [
       language: "ts",
       code: "// Schema: nickname: String\ntype User = { nickname: string | null };",
     },
-    references: [{ label: "GraphQL — Schema", url: "https://graphql.org/learn/schema/" }],
+    references: [
+      { label: "GraphQL — Schema", url: "https://graphql.org/learn/schema/" },
+    ],
     detection: { autoFixable: false, detectable: true, strategy: "semantic" },
   },
   {

@@ -1,8 +1,4 @@
-import type {
-  CodingRule,
-  RuleLevel,
-  RulePack,
-} from "@coding-bible/rules";
+import type { CodingRule, RuleLevel, RulePack } from "@coding-bible/rules";
 
 const getRuleSearchText = (rule: CodingRule) => {
   return [

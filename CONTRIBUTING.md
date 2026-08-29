@@ -57,3 +57,21 @@ For every detector change:
    when changing those boundaries.
 9. Use `--profile` and the synthetic benchmark before accepting analyzer changes
    that materially affect project-scale work.
+
+
+## Commit quality gates
+
+Do not bypass the entire Git hook for routine development. The pre-commit hook
+auto-fixes staged lint/format issues first, then runs affected tests, typecheck,
+a fast Knip dependency pass, and Coding Bible as the final staged-code gate.
+
+If affected tests are temporarily disruptive, prefer the narrow bypass:
+
+```bash
+SKIP_AFFECTED_TESTS=1 git commit -m "message"
+```
+
+`SKIP_TYPECHECK`, `SKIP_KNIP`, and `SKIP_BIBLE` exist for exceptional local
+work, but the full `pnpm check` gate must pass before code is pushed or merged.
+Pre-push and CI intentionally run the complete suite rather than inheriting
+pre-commit bypasses.

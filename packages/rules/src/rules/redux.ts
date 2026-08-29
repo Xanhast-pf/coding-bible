@@ -14,13 +14,18 @@ export const reduxRules = [
     tags: ["redux", "redux-toolkit"],
     bad: {
       language: "ts",
-      code: "const reducer = (state = initialState, action) => {\n  switch (action.type) {\n    case \"todos/todoAdded\":\n      return { ...state, todos: [...state.todos, action.payload] };\n    default:\n      return state;\n  }\n};",
+      code: 'const reducer = (state = initialState, action) => {\n  switch (action.type) {\n    case "todos/todoAdded":\n      return { ...state, todos: [...state.todos, action.payload] };\n    default:\n      return state;\n  }\n};',
     },
     good: {
       language: "ts",
-      code: "const todosSlice = createSlice({\n  name: \"todos\",\n  initialState,\n  reducers: {\n    todoAdded(state, action) {\n      state.todos.push(action.payload);\n    },\n  },\n});",
+      code: 'const todosSlice = createSlice({\n  name: "todos",\n  initialState,\n  reducers: {\n    todoAdded(state, action) {\n      state.todos.push(action.payload);\n    },\n  },\n});',
     },
-    references: [{ label: "Redux — Style Guide", url: "https://redux.js.org/style-guide/" }],
+    references: [
+      {
+        label: "Redux — Style Guide",
+        url: "https://redux.js.org/style-guide/",
+      },
+    ],
     detection: { autoFixable: false, detectable: true, strategy: "semantic" },
   },
   {
@@ -42,7 +47,12 @@ export const reduxRules = [
       language: "ts",
       code: "markUpdated(state, action: PayloadAction<number>) {\n  state.lastUpdated = action.payload;\n}\n\ndispatch(markUpdated(Date.now()));",
     },
-    references: [{ label: "Redux — Style Guide", url: "https://redux.js.org/style-guide/" }],
+    references: [
+      {
+        label: "Redux — Style Guide",
+        url: "https://redux.js.org/style-guide/",
+      },
+    ],
     detection: { autoFixable: false, detectable: true, strategy: "semantic" },
   },
   {
@@ -67,7 +77,12 @@ export const reduxRules = [
     exceptions: [
       "Middleware may intentionally intercept a non-serializable action before it reaches reducers.",
     ],
-    references: [{ label: "Redux — Style Guide", url: "https://redux.js.org/style-guide/" }],
+    references: [
+      {
+        label: "Redux — Style Guide",
+        url: "https://redux.js.org/style-guide/",
+      },
+    ],
     detection: { autoFixable: false, detectable: true, strategy: "semantic" },
   },
   {
@@ -110,11 +125,11 @@ export const reduxRules = [
     tags: ["entities", "normalization", "redux"],
     bad: {
       language: "ts",
-      code: "const posts = [\n  { id: \"p1\", author: { id: \"u1\", name: \"Ada\" } },\n  { id: \"p2\", author: { id: \"u1\", name: \"Ada\" } },\n];",
+      code: 'const posts = [\n  { id: "p1", author: { id: "u1", name: "Ada" } },\n  { id: "p2", author: { id: "u1", name: "Ada" } },\n];',
     },
     good: {
       language: "ts",
-      code: "const state = {\n  authors: { byId: { u1: { id: \"u1\", name: \"Ada\" } } },\n  posts: { byId: { p1: { id: \"p1\", authorId: \"u1\" } } },\n};",
+      code: 'const state = {\n  authors: { byId: { u1: { id: "u1", name: "Ada" } } },\n  posts: { byId: { p1: { id: "p1", authorId: "u1" } } },\n};',
     },
     references: [
       {
@@ -153,7 +168,8 @@ export const reduxRules = [
   },
   {
     id: "REDUX-007",
-    title: "Memoize selectors only when they derive expensive or referentially new values",
+    title:
+      "Memoize selectors only when they derive expensive or referentially new values",
     summary:
       "Do not wrap every direct state lookup in createSelector; reserve memoization for real derivation or stable-reference needs.",
     rationale:
@@ -195,9 +211,14 @@ export const reduxRules = [
     },
     good: {
       language: "tsx",
-      code: "const [name, setName] = useState(\"\");\n\n<input value={name} onChange={(event) => setName(event.target.value)} />",
+      code: 'const [name, setName] = useState("");\n\n<input value={name} onChange={(event) => setName(event.target.value)} />',
     },
-    references: [{ label: "Redux — Style Guide", url: "https://redux.js.org/style-guide/" }],
+    references: [
+      {
+        label: "Redux — Style Guide",
+        url: "https://redux.js.org/style-guide/",
+      },
+    ],
     detection: { autoFixable: false, detectable: true, strategy: "semantic" },
   },
   {
@@ -267,11 +288,11 @@ export const reduxRules = [
     tags: ["data-fetching", "redux", "rtk-query", "server-state"],
     bad: {
       language: "ts",
-      code: "const fetchTodos = createAsyncThunk(\"todos/fetch\", fetchTodosApi);\n\n// Slice also tracks request status, cache lifetime, and refetch logic.",
+      code: 'const fetchTodos = createAsyncThunk("todos/fetch", fetchTodosApi);\n\n// Slice also tracks request status, cache lifetime, and refetch logic.',
     },
     good: {
       language: "ts",
-      code: "const api = createApi({\n  baseQuery: fetchBaseQuery({ baseUrl: \"/api\" }),\n  endpoints: (build) => ({\n    getTodos: build.query<Todo[], void>({ query: () => \"todos\" }),\n  }),\n});",
+      code: 'const api = createApi({\n  baseQuery: fetchBaseQuery({ baseUrl: "/api" }),\n  endpoints: (build) => ({\n    getTodos: build.query<Todo[], void>({ query: () => "todos" }),\n  }),\n});',
     },
     references: [
       {

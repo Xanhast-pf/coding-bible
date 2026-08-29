@@ -45,8 +45,7 @@ export const typescriptRules = [
   {
     id: "TS-003",
     title: "Use type-only imports",
-    summary:
-      "Use import type when an import exists only in the type system.",
+    summary: "Use import type when an import exists only in the type system.",
     rationale:
       "Type-only imports communicate intent and prevent accidental runtime coupling or emitted imports.",
     level: "should",
@@ -143,7 +142,7 @@ export const typescriptRules = [
     },
     good: {
       language: "ts",
-      code: "if (!isUser(payload)) {\n  throw new Error(\"Invalid user payload\");\n}\n\nrenderUser(payload);",
+      code: 'if (!isUser(payload)) {\n  throw new Error("Invalid user payload");\n}\n\nrenderUser(payload);',
     },
     exceptions: [
       "A narrow assertion is acceptable when runtime invariants are stronger than TypeScript can express and that invariant is documented or proven locally.",

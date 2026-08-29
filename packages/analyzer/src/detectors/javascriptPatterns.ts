@@ -26,12 +26,15 @@ const flattenLogicalAnd = (expression: ts.Expression): ts.Expression[] => {
 
 const getStaticElementName = (expression: ts.ElementAccessExpression) => {
   const argument = expression.argumentExpression;
-  return argument && (ts.isStringLiteral(argument) || ts.isNumericLiteral(argument))
+  return argument &&
+    (ts.isStringLiteral(argument) || ts.isNumericLiteral(argument))
     ? argument.text
     : null;
 };
 
-const getPropertyPath = (expression: ts.Expression): readonly string[] | null => {
+const getPropertyPath = (
+  expression: ts.Expression,
+): readonly string[] | null => {
   const candidate = unwrapExpression(expression);
 
   if (ts.isIdentifier(candidate)) {
@@ -46,14 +49,20 @@ const getPropertyPath = (expression: ts.Expression): readonly string[] | null =>
   if (ts.isElementAccessExpression(candidate)) {
     const parentPath = getPropertyPath(candidate.expression);
     const elementName = getStaticElementName(candidate);
-    return parentPath && elementName !== null ? [...parentPath, elementName] : null;
+    return parentPath && elementName !== null
+      ? [...parentPath, elementName]
+      : null;
   }
 
   return null;
 };
 
-const isExtendingPath = (previous: readonly string[], next: readonly string[]) =>
-  next.length > previous.length && previous.every((part, index) => next[index] === part);
+const isExtendingPath = (
+  previous: readonly string[],
+  next: readonly string[],
+) =>
+  next.length > previous.length &&
+  previous.every((part, index) => next[index] === part);
 
 export const optionalChainingDetector: Detector = {
   id: "optional-chaining-guard-chain",
@@ -68,7 +77,8 @@ export const optionalChainingDetector: Detector = {
       if (
         node.operatorToken.kind !== ts.SyntaxKind.AmpersandAmpersandToken ||
         (ts.isBinaryExpression(node.parent) &&
-          node.parent.operatorToken.kind === ts.SyntaxKind.AmpersandAmpersandToken)
+          node.parent.operatorToken.kind ===
+            ts.SyntaxKind.AmpersandAmpersandToken)
       ) {
         continue;
       }
@@ -92,7 +102,8 @@ export const optionalChainingDetector: Detector = {
       findings.push(
         createFinding(context, node, {
           detectorId: "optional-chaining-guard-chain",
-          message: "This repeated nullish access guard can be expressed more clearly with optional chaining.",
+          message:
+            "This repeated nullish access guard can be expressed more clearly with optional chaining.",
           ruleId: "JS-002",
           suggestion:
             "Use optional chaining when null/undefined are the values you intend to guard against.",
@@ -111,7 +122,8 @@ const typeContainsNull = (type: ts.TypeNode | undefined): boolean => {
 
   if (
     type.kind === ts.SyntaxKind.NullKeyword ||
-    (ts.isLiteralTypeNode(type) && type.literal.kind === ts.SyntaxKind.NullKeyword)
+    (ts.isLiteralTypeNode(type) &&
+      type.literal.kind === ts.SyntaxKind.NullKeyword)
   ) {
     return true;
   }
@@ -155,7 +167,10 @@ export const defaultParameterDetector: Detector = {
               !parameter.initializer &&
               isUndefinedOnlyDefaultCandidate(parameter),
           )
-          .map((parameter) => [(parameter.name as ts.Identifier).text, parameter]),
+          .map((parameter) => [
+            (parameter.name as ts.Identifier).text,
+            parameter,
+          ]),
       );
 
       if (!parameters.size) {
@@ -163,7 +178,10 @@ export const defaultParameterDetector: Detector = {
       }
 
       for (const statement of node.body.statements) {
-        if (!ts.isExpressionStatement(statement) || !ts.isBinaryExpression(statement.expression)) {
+        if (
+          !ts.isExpressionStatement(statement) ||
+          !ts.isBinaryExpression(statement.expression)
+        ) {
           continue;
         }
 
@@ -173,7 +191,8 @@ export const defaultParameterDetector: Detector = {
           !ts.isIdentifier(assignment.left) ||
           !parameters.has(assignment.left.text) ||
           !ts.isBinaryExpression(assignment.right) ||
-          assignment.right.operatorToken.kind !== ts.SyntaxKind.QuestionQuestionToken ||
+          assignment.right.operatorToken.kind !==
+            ts.SyntaxKind.QuestionQuestionToken ||
           !ts.isIdentifier(assignment.right.left) ||
           assignment.right.left.text !== assignment.left.text
         ) {
@@ -297,8 +316,7 @@ export const nonMutatingCollectionDetector: Detector = {
       findings.push(
         createFinding(context, node.initializer, {
           detectorId: "non-mutating-collection-copy",
-          message:
-            `\`${receiver}.${method}()\` mutates \`${receiver}\` while its result is stored as a separate value.`,
+          message: `\`${receiver}.${method}()\` mutates \`${receiver}\` while its result is stored as a separate value.`,
           ruleId: "JS-006",
           suggestion: `Use \`${receiver}.${replacement}(...)\` when the original collection should remain unchanged.`,
         }),

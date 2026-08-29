@@ -2,7 +2,8 @@ import ts from "typescript";
 
 import type { AnalyzerFinding, Detector } from "../types.ts";
 
-const suppressionPattern = /eslint-disable(?:-next-line|-line)?[^\n]*react-hooks\/exhaustive-deps/;
+const suppressionPattern =
+  /eslint-disable(?:-next-line|-line)?[^\n]*react-hooks\/exhaustive-deps/;
 
 export const hookDependencySuppressionsDetector: Detector = {
   id: "react-hook-dependency-suppression",
@@ -16,7 +17,11 @@ export const hookDependencySuppressionsDetector: Detector = {
       context.source,
     );
 
-    for (let token = scanner.scan(); token !== ts.SyntaxKind.EndOfFileToken; token = scanner.scan()) {
+    for (
+      let token = scanner.scan();
+      token !== ts.SyntaxKind.EndOfFileToken;
+      token = scanner.scan()
+    ) {
       if (
         token !== ts.SyntaxKind.SingleLineCommentTrivia &&
         token !== ts.SyntaxKind.MultiLineCommentTrivia
@@ -32,9 +37,13 @@ export const hookDependencySuppressionsDetector: Detector = {
 
       const start = scanner.getTokenPos() + match.index;
       const end = start + match[0].length;
-      const startPosition = context.sourceFile.getLineAndCharacterOfPosition(start);
+      const startPosition =
+        context.sourceFile.getLineAndCharacterOfPosition(start);
       const endPosition = context.sourceFile.getLineAndCharacterOfPosition(end);
-      const lineStart = context.sourceFile.getPositionOfLineAndCharacter(startPosition.line, 0);
+      const lineStart = context.sourceFile.getPositionOfLineAndCharacter(
+        startPosition.line,
+        0,
+      );
       const lineEnd = context.sourceFile.getLineEndOfPosition(start);
 
       findings.push({

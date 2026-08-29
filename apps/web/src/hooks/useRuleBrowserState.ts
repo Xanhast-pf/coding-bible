@@ -1,10 +1,7 @@
 import type { RuleLevel, RulePack } from "@coding-bible/rules";
 import { useEffect, useState } from "react";
 
-import {
-  readRuleBrowserState,
-  writeRuleBrowserState,
-} from "../utils/urlState";
+import { readRuleBrowserState, writeRuleBrowserState } from "../utils/urlState";
 
 export const useRuleBrowserState = () => {
   const [state, setState] = useState(readRuleBrowserState);

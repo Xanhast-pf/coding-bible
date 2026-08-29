@@ -14,7 +14,7 @@ export const accessibilityRules = [
     tags: ["accessibility", "html", "semantics"],
     bad: {
       language: "tsx",
-      code: '<div onClick={handleSave}>Save</div>',
+      code: "<div onClick={handleSave}>Save</div>",
     },
     good: {
       language: "tsx",
@@ -39,11 +39,11 @@ export const accessibilityRules = [
     tags: ["accessibility", "interaction", "keyboard"],
     bad: {
       language: "tsx",
-      code: "<div role=\"button\" tabIndex={0} onClick={openMenu}>\n  Menu\n</div>",
+      code: '<div role="button" tabIndex={0} onClick={openMenu}>\n  Menu\n</div>',
     },
     good: {
       language: "tsx",
-      code: "<button type=\"button\" onClick={openMenu}>\n  Menu\n</button>",
+      code: '<button type="button" onClick={openMenu}>\n  Menu\n</button>',
     },
     detection: { autoFixable: false, detectable: true, strategy: "semantic" },
   },
@@ -81,11 +81,11 @@ export const accessibilityRules = [
     tags: ["accessibility", "forms", "labels"],
     bad: {
       language: "tsx",
-      code: "<button type=\"button\" onClick={closeDialog}>\n  <CloseIcon />\n</button>",
+      code: '<button type="button" onClick={closeDialog}>\n  <CloseIcon />\n</button>',
     },
     good: {
       language: "tsx",
-      code: "<button\n  type=\"button\"\n  aria-label=\"Close dialog\"\n  onClick={closeDialog}\n>\n  <CloseIcon aria-hidden=\"true\" />\n</button>",
+      code: '<button\n  type="button"\n  aria-label="Close dialog"\n  onClick={closeDialog}\n>\n  <CloseIcon aria-hidden="true" />\n</button>',
     },
     detection: { autoFixable: false, detectable: true, strategy: "ast" },
   },
@@ -102,11 +102,11 @@ export const accessibilityRules = [
     tags: ["accessibility", "color", "semantics"],
     bad: {
       language: "tsx",
-      code: "<span className={isOverdue ? \"statusRed\" : \"statusGreen\"}>\n  ●\n</span>",
+      code: '<span className={isOverdue ? "statusRed" : "statusGreen"}>\n  ●\n</span>',
     },
     good: {
       language: "tsx",
-      code: "<span className={isOverdue ? \"statusRed\" : \"statusGreen\"}>\n  <StatusIcon aria-hidden=\"true\" />\n  {isOverdue ? \"Overdue\" : \"On time\"}\n</span>",
+      code: '<span className={isOverdue ? "statusRed" : "statusGreen"}>\n  <StatusIcon aria-hidden="true" />\n  {isOverdue ? "Overdue" : "On time"}\n</span>',
     },
     detection: { autoFixable: false, detectable: true, strategy: "semantic" },
   },

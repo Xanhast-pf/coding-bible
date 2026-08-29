@@ -7,12 +7,16 @@ import { analyze, detectors } from "../src/index.ts";
 const readFixture = (name) =>
   readFile(new URL(`./fixtures/${name}`, import.meta.url), "utf8");
 
-const automatedRuleIds = [...new Set(detectors.map(({ ruleId }) => ruleId))].sort();
+const automatedRuleIds = [
+  ...new Set(detectors.map(({ ruleId }) => ruleId)),
+].sort();
 
 test("all-violations fixture exercises every automated rule", async () => {
   const source = await readFixture("all-violations.tsx.fixture");
   const result = analyze({ language: "tsx", source });
-  const findingRuleIds = [...new Set(result.findings.map(({ ruleId }) => ruleId))].sort();
+  const findingRuleIds = [
+    ...new Set(result.findings.map(({ ruleId }) => ruleId)),
+  ].sort();
 
   assert.deepEqual(result.diagnostics, []);
   assert.deepEqual(findingRuleIds, automatedRuleIds);

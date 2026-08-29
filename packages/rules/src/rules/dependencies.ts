@@ -14,7 +14,7 @@ export const dependencyRules = [
     tags: ["dependencies", "platform"],
     bad: {
       language: "ts",
-      code: "import uniq from \"lodash/uniq\";\n\nconst uniqueIds = uniq(ids);",
+      code: 'import uniq from "lodash/uniq";\n\nconst uniqueIds = uniq(ids);',
     },
     good: {
       language: "ts",
@@ -35,7 +35,7 @@ export const dependencyRules = [
     tags: ["dependencies", "maintenance", "runtime"],
     bad: {
       language: "ts",
-      code: "// New runtime package for one trivial operation.\nimport isOdd from \"is-odd\";\n\nconst shouldAlternate = isOdd(index);",
+      code: '// New runtime package for one trivial operation.\nimport isOdd from "is-odd";\n\nconst shouldAlternate = isOdd(index);',
     },
     good: {
       language: "ts",
@@ -56,11 +56,11 @@ export const dependencyRules = [
     tags: ["cleanup", "dependencies"],
     bad: {
       language: "jsonc",
-      code: "{\n  \"dependencies\": {\n    \"date-fns\": \"^4.0.0\",\n    \"moment\": \"^2.0.0\"\n  }\n}\n\n// moment has no remaining imports.",
+      code: '{\n  "dependencies": {\n    "date-fns": "^4.0.0",\n    "moment": "^2.0.0"\n  }\n}\n\n// moment has no remaining imports.',
     },
     good: {
       language: "json",
-      code: "{\n  \"dependencies\": {\n    \"date-fns\": \"^4.0.0\"\n  }\n}",
+      code: '{\n  "dependencies": {\n    "date-fns": "^4.0.0"\n  }\n}',
     },
     detection: { autoFixable: false, detectable: true, strategy: "ast" },
   },
@@ -77,11 +77,11 @@ export const dependencyRules = [
     tags: ["dependencies", "consistency"],
     bad: {
       language: "json",
-      code: "{\n  \"dependencies\": {\n    \"axios\": \"^1.0.0\",\n    \"ky\": \"^1.0.0\"\n  }\n}",
+      code: '{\n  "dependencies": {\n    "axios": "^1.0.0",\n    "ky": "^1.0.0"\n  }\n}',
     },
     good: {
       language: "json",
-      code: "{\n  \"dependencies\": {\n    \"ky\": \"^1.0.0\"\n  }\n}",
+      code: '{\n  "dependencies": {\n    "ky": "^1.0.0"\n  }\n}',
     },
     detection: { autoFixable: false, detectable: true, strategy: "semantic" },
   },

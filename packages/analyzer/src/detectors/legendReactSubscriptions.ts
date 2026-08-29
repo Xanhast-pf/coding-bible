@@ -9,7 +9,8 @@ import {
   nodesOfKind,
 } from "../utils.ts";
 
-const isLegendModule = (moduleName: string) => moduleName.startsWith("@legendapp/state");
+const isLegendModule = (moduleName: string) =>
+  moduleName.startsWith("@legendapp/state");
 
 const isImportedFunction = (
   context: DetectorContext,
@@ -20,21 +21,24 @@ const isImportedFunction = (
     const binding = getImportBinding(context, expression);
     return Boolean(
       binding &&
-        isLegendModule(binding.moduleName) &&
-        binding.importedName === importedName,
+      isLegendModule(binding.moduleName) &&
+      binding.importedName === importedName,
     );
   }
 
-  if (!ts.isPropertyAccessExpression(expression) || !ts.isIdentifier(expression.expression)) {
+  if (
+    !ts.isPropertyAccessExpression(expression) ||
+    !ts.isIdentifier(expression.expression)
+  ) {
     return false;
   }
 
   const binding = getImportBinding(context, expression.expression);
   return Boolean(
     binding &&
-      binding.kind === "namespace" &&
-      isLegendModule(binding.moduleName) &&
-      expression.name.text === importedName,
+    binding.kind === "namespace" &&
+    isLegendModule(binding.moduleName) &&
+    expression.name.text === importedName,
   );
 };
 
@@ -61,7 +65,11 @@ const collectObservableSymbols = (context: DetectorContext) => {
       !ts.isIdentifier(declaration.name) ||
       !declaration.initializer ||
       !ts.isCallExpression(declaration.initializer) ||
-      !isImportedFunction(context, declaration.initializer.expression, "observable")
+      !isImportedFunction(
+        context,
+        declaration.initializer.expression,
+        "observable",
+      )
     ) {
       continue;
     }
@@ -80,7 +88,10 @@ const getRootIdentifier = (expression: ts.Expression): ts.Identifier | null => {
     return expression;
   }
 
-  if (ts.isPropertyAccessExpression(expression) || ts.isElementAccessExpression(expression)) {
+  if (
+    ts.isPropertyAccessExpression(expression) ||
+    ts.isElementAccessExpression(expression)
+  ) {
     return getRootIdentifier(expression.expression);
   }
 
@@ -105,7 +116,9 @@ const isObservableRead = (
   }
 
   const symbol = getSymbol(context, root);
-  return root.text.endsWith("$") || Boolean(symbol && observableSymbols.has(symbol));
+  return (
+    root.text.endsWith("$") || Boolean(symbol && observableSymbols.has(symbol))
+  );
 };
 
 const visitRenderBody = (
@@ -140,21 +153,29 @@ export const legendReactSubscriptionDetector: Detector = {
       }
 
       const render = node.arguments[0];
-      if (!render || (!ts.isArrowFunction(render) && !ts.isFunctionExpression(render))) {
+      if (
+        !render ||
+        (!ts.isArrowFunction(render) && !ts.isFunctionExpression(render))
+      ) {
         continue;
       }
 
       visitRenderBody(render.body, render, (child) => {
-        if (!ts.isCallExpression(child) || !isObservableRead(context, child, observableSymbols)) {
+        if (
+          !ts.isCallExpression(child) ||
+          !isObservableRead(context, child, observableSymbols)
+        ) {
           return;
         }
 
         findings.push(
           createFinding(context, child, {
             detectorId: "legend-react-use-value",
-            message: "A Legend-State observable is read with `get()` inside an `observer` render.",
+            message:
+              "A Legend-State observable is read with `get()` inside an `observer` render.",
             ruleId: "LEGEND-001",
-            suggestion: "Read the observable with `useValue(...)` in new React code.",
+            suggestion:
+              "Read the observable with `useValue(...)` in new React code.",
           }),
         );
       });
