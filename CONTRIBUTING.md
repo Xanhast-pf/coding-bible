@@ -80,6 +80,29 @@ pnpm agent:check
 Backward-incompatible `rules.json` changes require a deliberate `formatVersion`
 bump, schema updates, and regression coverage.
 
+## GitHub Action changes
+
+The GitHub Action is a read-only CI consumer of the canonical analyzer. It must
+not fork detector behavior or redefine rule content.
+
+When changing the Action:
+
+1. Keep `action.yml` inputs/outputs backward-compatible within a release line.
+2. Preserve changed-line filtering: analyze with project context, then report
+   only added/modified-line findings for `scope: changed`.
+3. Keep the default path permission-light. Native annotations and Step Summaries
+   must work with `contents: read`; SARIF upload stays an explicit consumer step.
+4. Do not add a runtime package-install/bootstrap step. The committed runtime is
+   self-contained and generated with `pnpm action:build`.
+5. Run `pnpm action:check` after analyzer or rule-interface changes. Drift in
+   `packages/action/dist` is a release-blocking failure.
+6. Keep failure semantics explicit through `fail-on`; syntax diagnostics remain
+   failures unless the consumer chooses `none`.
+7. Do not imply semantic-rule coverage. Report the deterministic rule count
+   actually exercised by the analyzer.
+8. Add regression coverage for Git diff edge cases, annotation escaping, SARIF,
+   and any new input/output contract.
+
 ## MCP changes
 
 The MCP server is a read-only consumer of `packages/rules` and
@@ -105,7 +128,7 @@ When changing MCP tools:
 
 Do not bypass the entire Git hook for routine development. The pre-commit hook
 auto-fixes staged lint/format issues first, then runs affected tests, typecheck,
-the agent-interface drift check, a fast Knip dependency pass, and Coding Bible as
+the agent-interface and GitHub-Action runtime drift checks, a fast Knip dependency pass, and Coding Bible as
 the final staged-code gate.
 
 If affected tests are temporarily disruptive, prefer the narrow bypass:
@@ -114,7 +137,7 @@ If affected tests are temporarily disruptive, prefer the narrow bypass:
 SKIP_AFFECTED_TESTS=1 git commit -m "message"
 ```
 
-`SKIP_TYPECHECK`, `SKIP_AGENT_INTERFACE`, `SKIP_KNIP`, and `SKIP_BIBLE`
+`SKIP_TYPECHECK`, `SKIP_AGENT_INTERFACE`, `SKIP_ACTION_RUNTIME`, `SKIP_KNIP`, and `SKIP_BIBLE`
 exist for exceptional local work, but the full `pnpm check` gate must pass before
 code is pushed or merged. Pre-push and CI intentionally run the complete suite
 rather than inheriting pre-commit bypasses.

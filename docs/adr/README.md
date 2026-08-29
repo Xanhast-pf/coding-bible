@@ -15,3 +15,4 @@
 | [010](010-agent-interface.md) | Generated, versioned agent interface |
 | [011](011-mcp-server.md) | Local read-only MCP server |
 | [012](012-mcp-adoption-and-diff-review.md) | MCP adoption and change-focused review |
+| [013](013-github-action.md) | Self-contained GitHub Action and changed-line PR review |

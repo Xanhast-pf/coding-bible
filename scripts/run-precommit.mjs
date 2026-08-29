@@ -29,6 +29,11 @@ const gates = [
     bypass: "SKIP_AGENT_INTERFACE",
   },
   {
+    name: "GitHub Action runtime check",
+    command: [pnpmCommand, "action:check"],
+    bypass: "SKIP_ACTION_RUNTIME",
+  },
+  {
     name: "Knip dependency check",
     command: [pnpmCommand, "knip:fast"],
     bypass: "SKIP_KNIP",

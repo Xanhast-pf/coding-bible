@@ -52,13 +52,30 @@ jobs:
         with:
           path: apps/web/dist
 
+  action-smoke:
+    name: Self-contained Action smoke test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Dogfood GitHub Action runtime
+        uses: ./
+        with:
+          scope: changed
+          fail-on: error
+
   deploy:
     name: Deploy Pages
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    needs: build
+    needs: [build, action-smoke]
     permissions:
       pages: write
       id-token: write
