@@ -6,6 +6,7 @@ import {
   getSymbol,
   isExecutableFunction,
   nodesOfKind,
+  replaceNodeEdit,
   unwrapExpression,
   visit,
 } from "../utils.ts";
@@ -316,6 +317,18 @@ export const nonMutatingCollectionDetector: Detector = {
       findings.push(
         createFinding(context, node.initializer, {
           detectorId: "non-mutating-collection-copy",
+          fix: {
+            description: `Replace \`${method}\` with \`${replacement}\`. Review runtime support and identity/performance expectations before applying.`,
+            edits: [
+              replaceNodeEdit(
+                context,
+                node.initializer.expression.name,
+                replacement,
+              ),
+            ],
+            safety: "review",
+            title: `Use ${replacement}()`,
+          },
           message: `\`${receiver}.${method}()\` mutates \`${receiver}\` while its result is stored as a separate value.`,
           ruleId: "JS-006",
           suggestion: `Use \`${receiver}.${replacement}(...)\` when the original collection should remain unchanged.`,

@@ -24,6 +24,8 @@ coding-bible check . --staged
 coding-bible check . --since origin/main
 coding-bible check . --json
 coding-bible check . --profile
+coding-bible check . --report --patch
+coding-bible check . --report --patch --include-review-fixes
 ```
 
 Exit codes are stable for CI:
@@ -36,6 +38,37 @@ Git scopes affect which files are reported, not the TypeScript context used to
 understand them. `--since` includes committed branch changes plus current local
 changes; `--changed` covers the working tree and untracked files; `--staged`
 checks only the index.
+
+### Reports and proposed fixes
+
+`--json` emits the versioned report schema. `--report` writes the same payload to
+`.coding-bible/report.json`. Findings include a canonical rule URL and a stable
+fingerprint derived from the rule, detector, file, normalized offending source,
+and message rather than a fragile line number.
+
+```bash
+coding-bible check . --report
+coding-bible check . --report --patch
+coding-bible check . --report --patch --include-review-fixes
+```
+
+Patch export never edits source files. `safe-fixes.patch` contains only
+deterministic edits that Coding Bible re-analyzes in memory before export.
+`review-fixes.patch` is deliberately separate because those edits can change
+behavior, runtime compatibility, allocation, or identity semantics. Both files
+are standard unified Git patches:
+
+```bash
+git apply --check .coding-bible/safe-fixes.patch
+git apply .coding-bible/safe-fixes.patch
+```
+
+The first safe fixes are intentionally narrow: type-only import markers and the
+namespaced `Number.parseInt` / `Number.parseFloat` equivalents. Coercion-sensitive
+`isNaN` / `isFinite` changes and non-mutating `toSorted` / `toReversed` changes
+are review-only. Findings without a defensible mechanical edit still carry their
+human suggestion but produce no patch change. Use `--output-dir <path>` to move
+all generated artifacts together.
 
 ### Configuration
 

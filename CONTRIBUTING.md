@@ -57,6 +57,12 @@ For every detector change:
    when changing those boundaries.
 9. Use `--profile` and the synthetic benchmark before accepting analyzer changes
    that materially affect project-scale work.
+10. Treat fix safety as a public contract. A `safe` fix must preserve intended
+    semantics, survive in-memory re-analysis, and have a `git apply --check`
+    regression. Behavior-sensitive transformations belong in `review`, never in
+    the safe patch merely because the rewrite looks obvious.
+11. Keep report fingerprints independent of line numbers so baselines, agents,
+    and PR tooling can recognize a finding after unrelated lines move.
 
 
 ## Commit quality gates

@@ -2,6 +2,7 @@ import path from "node:path";
 
 import { loadAnalyzerConfig } from "./config.mjs";
 import { checkPaths } from "./check.mjs";
+import { writeAnalysisArtifacts } from "./fixes.mjs";
 
 const usage = `Coding Bible CLI
 
@@ -15,15 +16,22 @@ Scan options:
   --staged              Check only staged files.
   --since <git-ref>     Check branch changes since a Git ref plus local changes.
   --config <path>       Use an explicit Coding Bible config file.
-  --json                Print structured JSON.
+  --json                Print the versioned analyzer report JSON.
   --profile             Include analyzer timing information.
+  --report              Write .coding-bible/report.json.
+  --patch               Write .coding-bible/safe-fixes.patch.
+  --include-review-fixes
+                        Also write .coding-bible/review-fixes.patch.
+  --output-dir <path>   Override the artifact directory (default: .coding-bible).
 
 Examples:
   coding-bible check src
   coding-bible check . --changed
   coding-bible check . --staged
   coding-bible check . --since origin/main
-  coding-bible check . --config coding-bible.config.ts --profile
+  coding-bible check . --report --patch
+  coding-bible check . --report --patch --include-review-fixes
+  coding-bible check . --json
   coding-bible config --json
 `;
 
@@ -40,8 +48,12 @@ const parseArguments = (args) => {
   const options = {
     command,
     configPath: undefined,
+    includeReviewFixes: false,
     json: false,
+    outputDirectory: ".coding-bible",
+    patch: false,
     profile: false,
+    report: false,
     scope: { mode: "project" },
     targets: [],
   };
@@ -57,6 +69,31 @@ const parseArguments = (args) => {
 
     if (argument === "--profile") {
       options.profile = true;
+      continue;
+    }
+
+    if (argument === "--report") {
+      options.report = true;
+      continue;
+    }
+
+    if (argument === "--patch") {
+      options.patch = true;
+      continue;
+    }
+
+    if (argument === "--include-review-fixes") {
+      options.includeReviewFixes = true;
+      continue;
+    }
+
+    if (argument === "--output-dir") {
+      const value = rest[index + 1];
+      if (!value || value.startsWith("--")) {
+        throw new Error("--output-dir requires a directory path.");
+      }
+      options.outputDirectory = value;
+      index += 1;
       continue;
     }
 
@@ -104,8 +141,26 @@ const parseArguments = (args) => {
     throw new Error("Use only one of --changed, --staged, or --since.");
   }
 
-  if (command === "config" && options.targets.length) {
-    throw new Error("The config command does not accept source paths.");
+  if (options.includeReviewFixes && !options.patch) {
+    throw new Error("--include-review-fixes requires --patch.");
+  }
+
+  if (command === "config") {
+    if (options.targets.length) {
+      throw new Error("The config command does not accept source paths.");
+    }
+    if (
+      options.report ||
+      options.patch ||
+      options.includeReviewFixes ||
+      options.outputDirectory !== ".coding-bible" ||
+      options.profile ||
+      scopeCount
+    ) {
+      throw new Error(
+        "Report, patch, profile, and scan-scope options are only valid for check.",
+      );
+    }
   }
 
   return options;
@@ -117,11 +172,20 @@ const writeLine = (stream, value = "") => {
 
 const formatFinding = (finding) => {
   const { column, line } = finding.location;
+  const fixLabel = finding.fix?.edits?.length
+    ? finding.fix.safety === "safe"
+      ? "  ✓ Safe fix available"
+      : "  ⚠ Review fix available"
+    : null;
+
   return [
     `${finding.filePath}:${line}:${column}  ${finding.severity.toUpperCase()}  ${finding.ruleId}`,
     `  ${finding.message}`,
     `  → ${finding.suggestion}`,
-  ].join("\n");
+    fixLabel,
+  ]
+    .filter(Boolean)
+    .join("\n");
 };
 
 const formatDiagnostic = (diagnostic) => {
@@ -253,9 +317,18 @@ export const runCli = async (
       profile: options.profile,
       scope: options.scope,
     });
+    const artifacts =
+      options.json || options.report || options.patch
+        ? await writeAnalysisArtifacts(result, {
+            includeReviewFixes: options.includeReviewFixes,
+            outputDirectory: options.outputDirectory,
+            patch: options.patch,
+            report: options.report,
+          })
+        : { files: [], report: null };
 
     if (options.json) {
-      writeLine(stdout, JSON.stringify(result, null, 2));
+      writeLine(stdout, JSON.stringify(artifacts.report, null, 2));
     } else {
       writeLine(stdout, formatSummary(result));
 
@@ -275,6 +348,14 @@ export const runCli = async (
       if (result.profile) {
         writeLine(stdout);
         writeLine(stdout, formatProfile(result.profile));
+      }
+
+      if (artifacts.files.length) {
+        writeLine(stdout);
+        writeLine(stdout, "Generated");
+        for (const filePath of artifacts.files) {
+          writeLine(stdout, `  ${filePath}`);
+        }
       }
     }
 
