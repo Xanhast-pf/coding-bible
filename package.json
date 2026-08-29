@@ -6,11 +6,13 @@
     "node": ">=24"
   },
   "scripts": {
+    "agent:check": "node scripts/generate-agent-interface.mjs --check",
+    "agent:generate": "node scripts/generate-agent-interface.mjs",
     "bible:baseline": "node packages/analyzer/bin/coding-bible.mjs baseline create .",
     "bible:check": "node packages/analyzer/bin/coding-bible.mjs check .",
     "bible:staged": "node packages/analyzer/bin/coding-bible.mjs check . --staged",
-    "build": "pnpm -r --if-present build",
-    "check": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm knip && pnpm test && pnpm build && pnpm bible:check",
+    "build": "pnpm agent:generate && pnpm -r --if-present build",
+    "check": "pnpm lint && pnpm format:check && pnpm agent:check && pnpm typecheck && pnpm knip && pnpm test && pnpm build && pnpm bible:check",
     "dev": "pnpm --filter @coding-bible/web dev",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

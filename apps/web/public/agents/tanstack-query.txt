@@ -1,0 +1,33 @@
+# Coding Bible agent context
+
+Canonical source: https://xanhast-pf.github.io/coding-bible/
+Rules included: 5
+
+Use the following Coding Bible rules as engineering constraints when they are relevant to the code you review, plan, generate, or modify. Apply them by intent, not by blindly matching wording. Do not invent exceptions. If project-specific requirements conflict with a rule, call out the conflict and explain the tradeoff.
+
+- TQ-001 [MUST] Put every query dependency in the query key
+  Rule: If the query function changes its result based on a variable, include that variable in the query key.
+  Why: The query key is TanStack Query's cache identity and dependency list; omitting an input can return or overwrite data under the wrong cache entry.
+  Source: [TQ-001](https://xanhast-pf.github.io/coding-bible/#TQ-001)
+
+- TQ-002 [MUST] Keep query keys serializable and deterministic
+  Rule: Use stable serializable values that uniquely describe the requested server data.
+  Why: TanStack Query hashes query keys to identify cached results; unstable or non-serializable identity makes caching unpredictable.
+  Source: [TQ-002](https://xanhast-pf.github.io/coding-bible/#TQ-002)
+
+- TQ-003 [SHOULD] Configure freshness instead of fighting refetch behavior
+  Rule: Understand staleTime and the default refetch triggers before disabling mount, focus, or reconnect refetching globally.
+  Why: TanStack Query considers cached data stale by default and refetches stale queries at useful lifecycle points; staleTime is the primary control for expected freshness.
+  Source: [TQ-003](https://xanhast-pf.github.io/coding-bible/#TQ-003)
+
+- TQ-004 [MUST] Invalidate related queries after successful mutations
+  Rule: When a mutation makes cached server data stale, invalidate the smallest relevant query-key scope after success.
+  Why: Targeted invalidation lets TanStack Query mark dependent data stale and refetch active consumers without manually synchronizing duplicate server state.
+  Source: [TQ-004](https://xanhast-pf.github.io/coding-bible/#TQ-004)
+
+- TQ-005 [MUST] Make query functions reject failed requests
+  Rule: A query function must throw or return a rejected Promise for failures; clients such as fetch need an explicit non-OK response check.
+  Why: TanStack Query determines error state from rejected query functions. Returning an error response as successful data bypasses retry and error handling.
+  Source: [TQ-005](https://xanhast-pf.github.io/coding-bible/#TQ-005)
+
+When reporting violations, cite the rule ID and its canonical source URL.

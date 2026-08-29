@@ -1,0 +1,38 @@
+# Coding Bible agent context
+
+Canonical source: https://xanhast-pf.github.io/coding-bible/
+Rules included: 6
+
+Use the following Coding Bible rules as engineering constraints when they are relevant to the code you review, plan, generate, or modify. Apply them by intent, not by blindly matching wording. Do not invent exceptions. If project-specific requirements conflict with a rule, call out the conflict and explain the tradeoff.
+
+- APOLLO-001 [MUST] Define stable cache identity
+  Rule: Ensure normalized entity types have stable identifiers, configuring keyFields when the schema does not use Apollo's default ID conventions.
+  Why: Apollo's normalized cache can only merge references to the same entity reliably when it can identify that entity consistently across operations.
+  Source: [APOLLO-001](https://xanhast-pf.github.io/coding-bible/#APOLLO-001)
+
+- APOLLO-002 [SHOULD] Choose fetch policies deliberately
+  Rule: Use cache-first, cache-and-network, network-only, no-cache, and related policies according to data freshness requirements rather than applying one policy everywhere.
+  Why: Fetch policy is a correctness and UX decision: it controls whether the UI trusts cached data, waits for the network, or persists results for future consumers.
+  Source: [APOLLO-002](https://xanhast-pf.github.io/coding-bible/#APOLLO-002)
+
+- APOLLO-003 [SHOULD] Return modified entities from mutations
+  Rule: When practical, mutation responses should include the modified entities and fields the UI/cache needs to reconcile.
+  Why: Apollo can normalize returned entities automatically, reducing manual cache manipulation and extra network requests.
+  Source: [APOLLO-003](https://xanhast-pf.github.io/coding-bible/#APOLLO-003)
+
+- APOLLO-004 [MUST] Reconcile mutation results explicitly
+  Rule: After a mutation, rely on normalized returned entities, update the cache, or selectively refetch affected queries instead of leaving stale client state.
+  Why: Server mutation success does not automatically guarantee every cached list or derived field reflects the new server state.
+  Source: [APOLLO-004](https://xanhast-pf.github.io/coding-bible/#APOLLO-004)
+
+- APOLLO-005 [SHOULD] Encode pagination and merge semantics in field policies
+  Rule: When cached fields require argument-aware identity, pagination, or custom merging, define that behavior in typePolicies instead of scattering cache repair logic across components.
+  Why: Field policies centralize how the normalized cache reads and merges a field, producing consistent behavior for every consumer.
+  Source: [APOLLO-005](https://xanhast-pf.github.io/coding-bible/#APOLLO-005)
+
+- APOLLO-006 [MUST] Handle GraphQL errors and partial data intentionally
+  Rule: Choose errorPolicy based on whether partial data is usable and distinguish GraphQL execution errors from network or transport failures.
+  Why: A GraphQL response may contain both data and errors; treating every failure as identical can discard useful data or display invalid partial state.
+  Source: [APOLLO-006](https://xanhast-pf.github.io/coding-bible/#APOLLO-006)
+
+When reporting violations, cite the rule ID and its canonical source URL.

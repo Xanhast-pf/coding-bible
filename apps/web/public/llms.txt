@@ -1,0 +1,35 @@
+# Coding Bible
+
+> Opinionated, structured engineering standards for software that is easy to understand, difficult to misuse, and pleasant to maintain.
+
+Coding Bible is rules-first. Stable rule IDs, rationale, severity, examples, exceptions, references, and detection metadata live in one canonical registry. Use the compact resources below for machine consumption rather than scraping the rendered website.
+
+## Agent resources
+
+- [Full rule context](https://xanhast-pf.github.io/coding-bible/llms-full.txt): Complete Markdown context with all 128 rules, rationale, examples, exceptions, and references.
+- [Rules JSON](https://xanhast-pf.github.io/coding-bible/rules.json): Versioned machine-readable rule export.
+- [Rules JSON Schema](https://xanhast-pf.github.io/coding-bible/rules.schema.json): JSON Schema for the stable export contract.
+- [Compact all-rules prompt](https://xanhast-pf.github.io/coding-bible/agents/all.txt): Token-conscious agent instructions for the entire current rule set.
+
+## Rule packs
+
+- [Accessibility agent context](https://xanhast-pf.github.io/coding-bible/agents/accessibility.txt): 6 rules from the Accessibility pack.
+- [AI agent context](https://xanhast-pf.github.io/coding-bible/agents/ai.txt): 7 rules from the AI pack.
+- [Apollo Client agent context](https://xanhast-pf.github.io/coding-bible/agents/apollo.txt): 6 rules from the Apollo Client pack.
+- [Architecture agent context](https://xanhast-pf.github.io/coding-bible/agents/architecture.txt): 7 rules from the Architecture pack.
+- [Core agent context](https://xanhast-pf.github.io/coding-bible/agents/core.txt): 11 rules from the Core pack.
+- [CSS agent context](https://xanhast-pf.github.io/coding-bible/agents/css.txt): 4 rules from the CSS pack.
+- [Dependencies agent context](https://xanhast-pf.github.io/coding-bible/agents/dependencies.txt): 4 rules from the Dependencies pack.
+- [Feature Flags agent context](https://xanhast-pf.github.io/coding-bible/agents/feature-flags.txt): 4 rules from the Feature Flags pack.
+- [GraphQL agent context](https://xanhast-pf.github.io/coding-bible/agents/graphql.txt): 6 rules from the GraphQL pack.
+- [Internationalization agent context](https://xanhast-pf.github.io/coding-bible/agents/internationalization.txt): 4 rules from the Internationalization pack.
+- [JavaScript agent context](https://xanhast-pf.github.io/coding-bible/agents/javascript.txt): 7 rules from the JavaScript pack.
+- [Legend-State agent context](https://xanhast-pf.github.io/coding-bible/agents/legend-state.txt): 6 rules from the Legend-State pack.
+- [Next.js agent context](https://xanhast-pf.github.io/coding-bible/agents/nextjs.txt): 6 rules from the Next.js pack.
+- [Performance agent context](https://xanhast-pf.github.io/coding-bible/agents/performance.txt): 4 rules from the Performance pack.
+- [React agent context](https://xanhast-pf.github.io/coding-bible/agents/react.txt): 13 rules from the React pack.
+- [Redux agent context](https://xanhast-pf.github.io/coding-bible/agents/redux.txt): 11 rules from the Redux pack.
+- [TanStack Query agent context](https://xanhast-pf.github.io/coding-bible/agents/tanstack-query.txt): 5 rules from the TanStack Query pack.
+- [Testing agent context](https://xanhast-pf.github.io/coding-bible/agents/testing.txt): 6 rules from the Testing pack.
+- [TypeScript agent context](https://xanhast-pf.github.io/coding-bible/agents/typescript.txt): 7 rules from the TypeScript pack.
+- [Workflow agent context](https://xanhast-pf.github.io/coding-bible/agents/workflow.txt): 4 rules from the Workflow pack.

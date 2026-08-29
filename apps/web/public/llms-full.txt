@@ -1,0 +1,4030 @@
+# Coding Bible — full agent context
+
+> Complete human- and agent-readable engineering rules for Coding Bible.
+
+Canonical source: https://xanhast-pf.github.io/coding-bible/
+Rules included: 128
+JSON contract: https://xanhast-pf.github.io/coding-bible/rules.json
+
+Use these rules as engineering constraints when relevant. Apply them by intent, preserve documented exceptions, and cite the stable rule ID when reporting a violation.
+
+## Accessibility
+
+### A11Y-001 — Prefer semantic HTML
+
+**Level:** MUST
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#A11Y-001
+
+**Rule:** Use the native element whose semantics match the interaction or content before recreating that behavior with generic elements.
+
+**Why:** Native semantics provide keyboard behavior, accessibility information, and browser interoperability with less custom code.
+
+**DO**
+
+```tsx
+<button type="button" onClick={handleSave}>Save</button>
+```
+
+**DON'T**
+
+```tsx
+<div onClick={handleSave}>Save</div>
+```
+
+### A11Y-002 — Keyboard access is mandatory
+
+**Level:** MUST
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#A11Y-002
+
+**Rule:** Every interactive operation available with a pointer must also be operable from the keyboard when the platform interaction supports it.
+
+**Why:** Pointer-only controls exclude keyboard and many assistive-technology users and usually indicate missing native semantics.
+
+**DO**
+
+```tsx
+<button type="button" onClick={openMenu}>
+  Menu
+</button>
+```
+
+**DON'T**
+
+```tsx
+<div role="button" tabIndex={0} onClick={openMenu}>
+  Menu
+</div>
+```
+
+### A11Y-003 — Keep focus visible
+
+**Level:** MUST
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#A11Y-003
+
+**Rule:** Interactive elements must expose a clear visible state when they receive keyboard focus.
+
+**Why:** Keyboard users need a persistent visual indicator of where the next interaction will occur.
+
+**DO**
+
+```css
+.button:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+```
+
+**DON'T**
+
+```css
+*:focus {
+  outline: none;
+}
+```
+
+### A11Y-004 — Controls need accessible names
+
+**Level:** MUST
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#A11Y-004
+
+**Rule:** Inputs and interactive controls must expose a meaningful programmatic name through visible text, a label, or appropriate accessible naming.
+
+**Why:** A control that is visually recognizable but unnamed programmatically is ambiguous or unusable to assistive technology.
+
+**DO**
+
+```tsx
+<button
+  type="button"
+  aria-label="Close dialog"
+  onClick={closeDialog}
+>
+  <CloseIcon aria-hidden="true" />
+</button>
+```
+
+**DON'T**
+
+```tsx
+<button type="button" onClick={closeDialog}>
+  <CloseIcon />
+</button>
+```
+
+### A11Y-005 — Do not communicate with color alone
+
+**Level:** MUST
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#A11Y-005
+
+**Rule:** When color carries status or meaning, provide another perceivable cue such as text, iconography, shape, or position.
+
+**Why:** Color perception varies and may be unavailable entirely. Redundant cues make meaning robust for more users and environments.
+
+**DO**
+
+```tsx
+<span className={isOverdue ? "statusRed" : "statusGreen"}>
+  <StatusIcon aria-hidden="true" />
+  {isOverdue ? "Overdue" : "On time"}
+</span>
+```
+
+**DON'T**
+
+```tsx
+<span className={isOverdue ? "statusRed" : "statusGreen"}>
+  ●
+</span>
+```
+
+### A11Y-006 — Respect reduced motion preferences
+
+**Level:** MUST
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#A11Y-006
+
+**Rule:** Non-essential animation and smooth motion should adapt when the user requests reduced motion.
+
+**Why:** Motion can cause discomfort or make interfaces harder to use, and operating systems expose a preference specifically for this need.
+
+**DO**
+
+```css
+.panel {
+  scroll-behavior: smooth;
+  transition: transform 300ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel {
+    scroll-behavior: auto;
+    transition: none;
+  }
+}
+```
+
+**DON'T**
+
+```css
+.panel {
+  scroll-behavior: smooth;
+  transition: transform 300ms ease;
+}
+```
+
+## AI
+
+### AI-001 — Generated code follows existing architecture
+
+**Level:** MUST
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#AI-001
+
+**Rule:** AI output should use established project patterns before introducing new abstractions.
+
+**Why:** Agents can create parallel architectures and duplicate helpers when they optimize only for the local prompt.
+
+**DO**
+
+```ts
+// Reuse the project's established boundary.
+const users = await userRepository.list();
+```
+
+**DON'T**
+
+```ts
+// New parallel data-access pattern.
+const response = await fetch("/api/users");
+const users = await response.json();
+```
+
+### AI-002 — Generated comments must add context
+
+**Level:** MUST
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#AI-002
+
+**Rule:** Remove AI comments that merely narrate the code.
+
+**Why:** Generated narration adds noise quickly and creates stale text maintainers must keep synchronized.
+
+**DO**
+
+```ts
+// The legacy endpoint can return stale data for ~30s after account merges.
+const user = await userApi.get(id);
+```
+
+**DON'T**
+
+```ts
+// Set loading to true.
+setLoading(true);
+
+// Fetch the user.
+const user = await userApi.get(id);
+```
+
+### AI-003 — Change the smallest coherent surface
+
+**Level:** SHOULD
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#AI-003
+
+**Rule:** Do not expand generated changes into unrelated cleanup or speculative refactors.
+
+**Why:** Small coherent diffs are easier to validate, review, revert, and debug.
+
+**DO**
+
+```text
+Requested: Fix invoice rounding
+
+Generated diff:
+- Fix invoice rounding
+- Add the regression test
+```
+
+**DON'T**
+
+```text
+Requested: Fix invoice rounding
+
+Generated diff:
+- Fix invoice rounding
+- Rename money utilities
+- Move billing folders
+- Reformat unrelated tests
+```
+
+### AI-004 — Inspect before creating
+
+**Level:** MUST
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#AI-004
+
+**Rule:** Before generating a new helper, component, type, dependency, or pattern, search for an existing solution in the project.
+
+**Why:** Agents can generate locally correct duplicates because they do not automatically share a human maintainer's memory of the codebase.
+
+**DO**
+
+```ts
+import { formatCurrency } from "@/shared/currency";
+
+const label = formatCurrency(total);
+```
+
+**DON'T**
+
+```ts
+// New duplicate helper.
+const formatCurrency = (value: number) =>
+  `$${value.toFixed(2)}`;
+```
+
+### AI-005 — Verify external APIs
+
+**Level:** MUST
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#AI-005
+
+**Rule:** Do not invent package exports, framework behavior, command flags, or platform capabilities from memory when they can be verified.
+
+**Why:** Plausible-looking hallucinated APIs are especially expensive because generated code can appear correct until build or runtime.
+
+**DO**
+
+```tsx
+import { useEffect } from "react";
+
+useEffect(() => {
+  void loadUser(userId);
+}, [userId]);
+```
+
+**DON'T**
+
+```tsx
+// Guessed from memory.
+import { useAsyncEffect } from "react";
+
+useAsyncEffect(loadUser, [userId]);
+```
+
+### AI-006 — Do not invent impossible edge cases
+
+**Level:** SHOULD
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#AI-006
+
+**Rule:** Generated defensive code and tests should reflect actual contracts, trust boundaries, and realistic failure modes.
+
+**Why:** Speculative edge cases bloat types, branches, and tests while obscuring the conditions the system genuinely needs to handle.
+
+**DO**
+
+```ts
+function getUserName(user: User) {
+  return user.name;
+}
+
+// Validate unknown input once at the system boundary.
+```
+
+**DON'T**
+
+```ts
+function getUserName(user: User) {
+  if (!user || Array.isArray(user) || typeof user.name !== "string") {
+    return "Unknown";
+  }
+
+  return user.name;
+}
+```
+
+### AI-007 — Run the project's checks
+
+**Level:** MUST
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#AI-007
+
+**Rule:** Generated changes are not complete until the relevant type, lint, test, build, and project-specific validation commands have been run.
+
+**Why:** AI can produce syntactically plausible changes that fail existing contracts elsewhere in the repository.
+
+**DO**
+
+```bash
+pnpm typecheck
+pnpm lint
+pnpm test
+pnpm build
+```
+
+**DON'T**
+
+```bash
+# Generated files look plausible, so stop here.
+git status
+```
+
+## Apollo Client
+
+### APOLLO-001 — Define stable cache identity
+
+**Level:** MUST
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#APOLLO-001
+
+**Rule:** Ensure normalized entity types have stable identifiers, configuring keyFields when the schema does not use Apollo's default ID conventions.
+
+**Why:** Apollo's normalized cache can only merge references to the same entity reliably when it can identify that entity consistently across operations.
+
+**DO**
+
+```ts
+const cache = new InMemoryCache({
+  typePolicies: {
+    Product: { keyFields: ["sku"] },
+  },
+});
+```
+
+**DON'T**
+
+```ts
+// Product has sku, but no id/_id.
+const cache = new InMemoryCache();
+```
+
+**References:**
+- [Apollo Client — Cache configuration](https://www.apollographql.com/docs/react/caching/cache-configuration)
+
+### APOLLO-002 — Choose fetch policies deliberately
+
+**Level:** SHOULD
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#APOLLO-002
+
+**Rule:** Use cache-first, cache-and-network, network-only, no-cache, and related policies according to data freshness requirements rather than applying one policy everywhere.
+
+**Why:** Fetch policy is a correctness and UX decision: it controls whether the UI trusts cached data, waits for the network, or persists results for future consumers.
+
+**DO**
+
+```tsx
+useQuery(GET_PROFILE, {
+  fetchPolicy: "cache-and-network",
+  nextFetchPolicy: "cache-first",
+});
+```
+
+Note: Choose a policy per freshness requirement; this is one example, not a universal default.
+
+**DON'T**
+
+```ts
+const client = new ApolloClient({
+  cache,
+  defaultOptions: {
+    watchQuery: { fetchPolicy: "network-only" },
+  },
+});
+```
+
+**References:**
+- [Apollo Client — Queries](https://www.apollographql.com/docs/react/data/queries)
+
+### APOLLO-003 — Return modified entities from mutations
+
+**Level:** SHOULD
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#APOLLO-003
+
+**Rule:** When practical, mutation responses should include the modified entities and fields the UI/cache needs to reconcile.
+
+**Why:** Apollo can normalize returned entities automatically, reducing manual cache manipulation and extra network requests.
+
+**DO**
+
+```graphql
+mutation RenameUser($id: ID!, $name: String!) {
+  renameUser(id: $id, name: $name) {
+    user { id name }
+  }
+}
+```
+
+**DON'T**
+
+```graphql
+mutation RenameUser($id: ID!, $name: String!) {
+  renameUser(id: $id, name: $name) {
+    success
+  }
+}
+```
+
+**References:**
+- [Apollo Client — Mutations](https://www.apollographql.com/docs/react/data/mutations)
+
+### APOLLO-004 — Reconcile mutation results explicitly
+
+**Level:** MUST
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#APOLLO-004
+
+**Rule:** After a mutation, rely on normalized returned entities, update the cache, or selectively refetch affected queries instead of leaving stale client state.
+
+**Why:** Server mutation success does not automatically guarantee every cached list or derived field reflects the new server state.
+
+**DO**
+
+```tsx
+await deleteTodo({
+  variables: { id },
+  refetchQueries: [{ query: GET_TODOS }],
+});
+```
+
+**DON'T**
+
+```tsx
+await deleteTodo({ variables: { id } });
+// GET_TODOS may still contain the deleted item.
+```
+
+**References:**
+- [Apollo Client — Mutations](https://www.apollographql.com/docs/react/data/mutations)
+- [Apollo Client — Refetching](https://www.apollographql.com/docs/react/data/refetching)
+
+### APOLLO-005 — Encode pagination and merge semantics in field policies
+
+**Level:** SHOULD
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#APOLLO-005
+
+**Rule:** When cached fields require argument-aware identity, pagination, or custom merging, define that behavior in typePolicies instead of scattering cache repair logic across components.
+
+**Why:** Field policies centralize how the normalized cache reads and merges a field, producing consistent behavior for every consumer.
+
+**DO**
+
+```ts
+const cache = new InMemoryCache({
+  typePolicies: {
+    Query: {
+      fields: {
+        feed: offsetLimitPagination(),
+      },
+    },
+  },
+});
+```
+
+**DON'T**
+
+```tsx
+const nextPage = await fetchMore({ variables: { offset: items.length } });
+setItems((items) => [...items, ...nextPage.data.feed]);
+```
+
+**References:**
+- [Apollo Client — Cached field behavior](https://www.apollographql.com/docs/react/caching/cache-field-behavior)
+
+### APOLLO-006 — Handle GraphQL errors and partial data intentionally
+
+**Level:** MUST
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#APOLLO-006
+
+**Rule:** Choose errorPolicy based on whether partial data is usable and distinguish GraphQL execution errors from network or transport failures.
+
+**Why:** A GraphQL response may contain both data and errors; treating every failure as identical can discard useful data or display invalid partial state.
+
+**DO**
+
+```tsx
+const { data, error } = useQuery(DASHBOARD_QUERY, {
+  errorPolicy: "all",
+});
+
+if (error && !data) return <ErrorState />;
+return <Dashboard data={data} warning={error?.message} />;
+```
+
+**DON'T**
+
+```tsx
+const { data } = useQuery(DASHBOARD_QUERY, {
+  errorPolicy: "ignore",
+});
+```
+
+**References:**
+- [Apollo Client — Error handling](https://www.apollographql.com/docs/react/data/error-handling)
+
+## Architecture
+
+### ARCH-001 — Separate responsibilities
+
+**Level:** MUST
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#ARCH-001
+
+**Rule:** Rendering, orchestration, transformation, persistence, and external I/O should have explicit ownership.
+
+**Why:** Separating responsibilities makes code easier to reason about, test, replace, and review without requiring knowledge of unrelated behavior.
+
+**DO**
+
+```ts
+const orders = await orderApi.list();
+const summary = summarizeOrders(orders);
+
+orderCache.save(orders);
+renderOrderSummary(summary);
+```
+
+**DON'T**
+
+```ts
+export const loadOrders = async () => {
+  const response = await fetch("/api/orders");
+  const orders = await response.json();
+  localStorage.setItem("orders", JSON.stringify(orders));
+  document.querySelector("#total")!.textContent = summarizeOrders(orders);
+};
+```
+
+### ARCH-002 — Keep dependencies explicit
+
+**Level:** SHOULD
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#ARCH-002
+
+**Rule:** A module should receive or import the dependencies it actually uses rather than reaching through unrelated layers.
+
+**Why:** Explicit dependencies expose coupling and make ownership, testing, and replacement easier to understand.
+
+**DO**
+
+```ts
+export const completeCheckout = (
+  order: Order,
+  analytics: Analytics,
+) => {
+  analytics.track("checkout_completed", order.id);
+};
+```
+
+**DON'T**
+
+```ts
+export const completeCheckout = (order: Order) => {
+  app.services.analytics.track("checkout_completed", order.id);
+};
+```
+
+### ARCH-003 — Abstract after understanding repetition
+
+**Level:** PREFER
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#ARCH-003
+
+**Rule:** Do not create a shared abstraction until the repeated behavior and its stable differences are understood.
+
+**Why:** Small duplication is cheaper than a premature abstraction that couples unrelated use cases and becomes difficult to change.
+
+**DO**
+
+```ts
+saveArticleDraft(article);
+issueInvoice(invoice);
+
+// Extract shared behavior only after the common contract is clear.
+```
+
+**DON'T**
+
+```ts
+saveEntity("article", article, { draft: true, audit: false });
+saveEntity("invoice", invoice, { draft: false, audit: true });
+```
+
+### ARCH-004 — Keep side effects at boundaries
+
+**Level:** SHOULD
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#ARCH-004
+
+**Rule:** Prefer pure transformation logic internally and isolate network, storage, clock, DOM, and other side effects behind clear boundaries.
+
+**Why:** Isolated side effects make behavior easier to test, replay, reason about, and replace.
+
+**DO**
+
+```ts
+export const calculateCartTotal = (cart: CartItem[]) =>
+  cart.reduce((sum, item) => sum + item.price, 0);
+
+const cart = cartStorage.load();
+const total = calculateCartTotal(cart);
+```
+
+**DON'T**
+
+```ts
+export const calculateCartTotal = () => {
+  const cart = JSON.parse(localStorage.getItem("cart") ?? "[]");
+  return cart.reduce((sum, item) => sum + item.price, 0);
+};
+```
+
+### ARCH-005 — Keep one source of truth
+
+**Level:** MUST
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#ARCH-005
+
+**Rule:** Do not maintain multiple independently writable representations of the same fact.
+
+**Why:** Duplicated state can drift. A canonical owner with derived views removes synchronization bugs and clarifies responsibility.
+
+**DO**
+
+```tsx
+const [items, setItems] = useState<Item[]>([]);
+const itemCount = items.length;
+```
+
+**DON'T**
+
+```tsx
+const [items, setItems] = useState<Item[]>([]);
+const [itemCount, setItemCount] = useState(0);
+
+// Both must now stay synchronized.
+```
+
+### ARCH-006 — Do not add pass-through abstractions
+
+**Level:** PREFER
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#ARCH-006
+
+**Rule:** An abstraction should add meaning, policy, transformation, or a stable boundary rather than merely forward every call unchanged.
+
+**Why:** Pass-through layers add files and indirection without reducing coupling or complexity.
+
+**Exceptions:**
+- A deliberate compatibility boundary or public facade may justify forwarding when it protects consumers from an unstable implementation.
+
+**DO**
+
+```ts
+await fetch("/api/users");
+```
+
+**DON'T**
+
+```ts
+class HttpClient {
+  get(url: string) {
+    return fetch(url);
+  }
+}
+
+await httpClient.get("/api/users");
+```
+
+### ARCH-007 — Organize around cohesive domains
+
+**Level:** SHOULD
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#ARCH-007
+
+**Rule:** Prefer module boundaries that reflect product or business concepts over generic buckets that accumulate unrelated code.
+
+**Why:** Domain-oriented structure keeps behavior that changes together physically close and makes ownership easier to discover.
+
+**DO**
+
+```text
+src/
+  orders/
+    OrderList.tsx
+    useOrders.ts
+    orderApi.ts
+  profile/
+    UserAvatar.tsx
+    useProfile.ts
+    profileApi.ts
+```
+
+**DON'T**
+
+```text
+src/
+  components/
+    OrderList.tsx
+    UserAvatar.tsx
+  hooks/
+    useOrders.ts
+    useProfile.ts
+  services/
+    orders.ts
+    profile.ts
+```
+
+## Core
+
+### CORE-001 — Optimize for understanding
+
+**Level:** MUST
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#CORE-001
+
+**Rule:** Prefer code that communicates intent without requiring reconstruction by the reader.
+
+**Why:** Code is maintained and reviewed far more often than it is initially written. Readability lowers review cost, defect risk, and onboarding time.
+
+**DO**
+
+```ts
+const activeUsers = users.filter(
+  (user) => user.active && !user.suspended,
+);
+
+return activeUsers.map((user) => user.email);
+```
+
+**DON'T**
+
+```ts
+return users.filter((u) => u.a && !u.s).map((u) => u.e);
+```
+
+### CORE-002 — Use descriptive names
+
+**Level:** MUST
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#CORE-002
+
+**Rule:** Names should communicate the role of a value, function, or module.
+
+**Why:** Descriptive names reduce the surrounding code a reader must inspect to understand behavior.
+
+**Exceptions:**
+- Established mathematical notation in a clearly mathematical scope.
+- Conventional short names whose meaning is unambiguous in the immediate context.
+
+**DO**
+
+```ts
+strategies.filter((strategy) => strategy.goalType);
+```
+
+**DON'T**
+
+```ts
+strategies.filter((s) => s.goalType);
+```
+
+### CORE-003 — Prefer const
+
+**Level:** MUST
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#CORE-003
+
+**Rule:** Declare bindings with const unless reassignment is required.
+
+**Why:** Stable bindings reduce the number of state transitions a reader must track and prevent accidental reassignment.
+
+**DO**
+
+```ts
+const user = getUser();
+```
+
+**DON'T**
+
+```ts
+let user = getUser();
+```
+
+### CORE-004 — Comments explain why
+
+**Level:** SHOULD
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#CORE-004
+
+**Rule:** Do not narrate obvious code. Document decisions, constraints, and workarounds.
+
+**Why:** Narrative comments duplicate code and become stale. Decision comments preserve context the implementation cannot express.
+
+**DO**
+
+```ts
+// Suspended accounts remain for audit history, so exclude only inactive accounts.
+const activeUsers = users.filter((user) => user.active);
+```
+
+**DON'T**
+
+```ts
+// Filter active users
+const activeUsers = users.filter((user) => user.active);
+```
+
+### CORE-005 — Delete dead code
+
+**Level:** MUST
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#CORE-005
+
+**Rule:** Remove unused functions, imports, exports, files, branches, and dependencies when their last real use disappears.
+
+**Why:** Dead code expands the surface maintainers must understand, obscures what is still supported, and creates false confidence that obsolete paths are tested.
+
+**DO**
+
+```ts
+export const calculateTax = (total: number) =>
+  taxService.calculate(total);
+```
+
+**DON'T**
+
+```ts
+const calculateLegacyTax = (total: number) => total * 0.07;
+
+export const calculateTax = (total: number) =>
+  taxService.calculate(total);
+```
+
+### CORE-006 — Name meaningful constants
+
+**Level:** SHOULD
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#CORE-006
+
+**Rule:** Give unexplained values a name when their meaning, policy, or unit is not obvious from local context.
+
+**Why:** A named value communicates why a number or string exists and makes policy changes less error-prone.
+
+**Exceptions:**
+- Values whose meaning is inherent to the operation, such as 0 when checking an array length.
+
+**DO**
+
+```ts
+const MAX_LOGIN_ATTEMPTS = 5;
+
+if (attempts >= MAX_LOGIN_ATTEMPTS) lockAccount();
+```
+
+**DON'T**
+
+```ts
+if (attempts >= 5) lockAccount();
+```
+
+### CORE-007 — Keep cohesive code together
+
+**Level:** SHOULD
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#CORE-007
+
+**Rule:** Place closely related logic together instead of scattering tiny pieces across unnecessary files.
+
+**Why:** Excessive fragmentation forces readers to jump between files to understand one behavior and can be as harmful as oversized modules.
+
+**DO**
+
+```ts
+// pricing/formatters.ts
+export const formatPrice = (value: number) => { /* ... */ };
+export const getCurrencySymbol = (currency: Currency) => { /* ... */ };
+```
+
+**DON'T**
+
+```ts
+// formatPrice.ts
+export const formatPrice = (value: number) => { /* ... */ };
+
+// getCurrencySymbol.ts
+export const getCurrencySymbol = (currency: Currency) => { /* ... */ };
+```
+
+### CORE-008 — Reduce nesting when it improves clarity
+
+**Level:** PREFER
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#CORE-008
+
+**Rule:** Prefer guard clauses and early exits when they make the main control flow easier to follow.
+
+**Why:** Deep nesting increases the amount of state a reader must hold in mind. Early exits can make the successful path visually obvious.
+
+**Exceptions:**
+- Do not introduce multiple early exits when they make cleanup or transactional behavior harder to reason about.
+
+**DO**
+
+```ts
+if (!user || !user.active) return;
+
+save(user);
+```
+
+**DON'T**
+
+```ts
+if (user) {
+  if (user.active) {
+    save(user);
+  }
+}
+```
+
+### CORE-009 — Preserve non-obvious context during refactors
+
+**Level:** MUST
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#CORE-009
+
+**Rule:** When moving code, preserve explanations and constraints that remain relevant to the behavior.
+
+**Why:** Refactors should change structure without silently deleting historical context that future maintainers still need.
+
+**DO**
+
+```ts
+// Gateway may duplicate charges after 2 retries; see PAY-1842.
+const MAX_PAYMENT_RETRIES = 2;
+
+export const retryPayment = () => { /* ... */ };
+```
+
+**DON'T**
+
+```ts
+const MAX_PAYMENT_RETRIES = 2;
+
+export const retryPayment = () => { /* ... */ };
+```
+
+### CORE-010 — Keep the public surface minimal
+
+**Level:** SHOULD
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#CORE-010
+
+**Rule:** Do not export functions, types, modules, or abstractions that have no external consumer.
+
+**Why:** Every export becomes a dependency point that constrains future refactoring and increases the surface maintainers must understand.
+
+**DO**
+
+```ts
+const normalizeEmail = (email: string) =>
+  email.trim().toLowerCase();
+
+export const createUser = (email: string) =>
+  repository.create(normalizeEmail(email));
+```
+
+**DON'T**
+
+```ts
+export const normalizeEmail = (email: string) =>
+  email.trim().toLowerCase();
+
+export const createUser = (email: string) =>
+  repository.create(normalizeEmail(email));
+```
+
+### CORE-011 — Hoist context-free helpers
+
+**Level:** PREFER
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#CORE-011
+
+**Rule:** If a helper does not depend on its parent function's local values, define it in a stable outer scope.
+
+**Why:** Hoisting communicates independence, avoids needless recreation, and makes the helper easier to test or reuse locally.
+
+**DO**
+
+```ts
+const formatCurrency = (value: number) => `$${value.toFixed(2)}`;
+
+export const buildReport = (rows: Row[]) =>
+  rows.map((row) => formatCurrency(row.total));
+```
+
+**DON'T**
+
+```ts
+export const buildReport = (rows: Row[]) => {
+  const formatCurrency = (value: number) => `$${value.toFixed(2)}`;
+
+  return rows.map((row) => formatCurrency(row.total));
+};
+```
+
+## CSS
+
+### CSS-001 — Name styles by role, not appearance
+
+**Level:** SHOULD
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#CSS-001
+
+**Rule:** Class names should describe what an element is responsible for rather than its current visual treatment.
+
+**Why:** Role-based names survive visual redesigns and communicate intent without coupling markup to presentation.
+
+**DO**
+
+```css
+.errorMessage {}
+```
+
+**DON'T**
+
+```css
+.redBox {}
+```
+
+### CSS-002 — Use tokens for shared visual decisions
+
+**Level:** SHOULD
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#CSS-002
+
+**Rule:** Repeated semantic values such as colors, spacing, radii, typography, and elevation should come from a shared token source.
+
+**Why:** Tokens keep visual decisions consistent and make system-wide changes possible without hunting through feature styles.
+
+**Exceptions:**
+- A truly one-off value may stay local when promoting it would create a meaningless token.
+
+**DO**
+
+```css
+:root {
+  --color-accent: #34ff6d;
+  --radius-control: 0.5rem;
+}
+
+.saveButton,
+.confirmButton {
+  background: var(--color-accent);
+  border-radius: var(--radius-control);
+}
+```
+
+**DON'T**
+
+```css
+.saveButton {
+  background: #34ff6d;
+  border-radius: 8px;
+  padding: 8px 16px;
+}
+
+.confirmButton {
+  background: #34ff6d;
+  border-radius: 8px;
+}
+```
+
+### CSS-003 — Prefer layout systems over manual nudges
+
+**Level:** SHOULD
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#CSS-003
+
+**Rule:** Use flexbox, grid, intrinsic sizing, and normal flow before offsets or spacer elements used only to force alignment.
+
+**Why:** Layout primitives encode relationships and adapt to content, while manual nudges are brittle across font sizes, translations, and responsive states.
+
+**DO**
+
+```css
+.toolbar {
+  align-items: center;
+  display: flex;
+  gap: var(--space-3);
+}
+```
+
+**DON'T**
+
+```css
+.toolbarButton + .toolbarButton {
+  margin-left: 12px;
+}
+
+.toolbarButton:last-child {
+  position: relative;
+  left: 4px;
+}
+```
+
+### CSS-004 — Keep component styles scoped
+
+**Level:** MUST
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#CSS-004
+
+**Rule:** Component-specific styling should not leak into unrelated parts of the application through broad global selectors.
+
+**Why:** Global leakage creates hidden coupling where changing one feature unexpectedly changes another.
+
+**DO**
+
+```css
+/* RuleCard.module.css */
+.title {
+  font-size: var(--font-size-heading);
+}
+
+.actionButton {
+  border-radius: var(--radius-control);
+}
+```
+
+**DON'T**
+
+```css
+button {
+  border-radius: 0;
+}
+
+.card h2 {
+  font-size: 14px;
+}
+```
+
+## Dependencies
+
+### DEP-001 — Prefer the platform before a dependency
+
+**Level:** SHOULD
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#DEP-001
+
+**Rule:** Check whether the language, runtime, browser, or existing stack already solves the problem before adding a package.
+
+**Why:** Every dependency adds bundle, security, upgrade, compatibility, and maintenance cost that native capabilities do not.
+
+**DO**
+
+```ts
+const uniqueIds = [...new Set(ids)];
+```
+
+**DON'T**
+
+```ts
+import uniq from "lodash/uniq";
+
+const uniqueIds = uniq(ids);
+```
+
+### DEP-002 — Justify runtime dependencies
+
+**Level:** MUST
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#DEP-002
+
+**Rule:** A runtime dependency should provide enough durable value to outweigh its bundle size, API surface, security surface, and upgrade cost.
+
+**Why:** Convenient packages can become long-lived architectural commitments after their original use case disappears.
+
+**DO**
+
+```ts
+const shouldAlternate = index % 2 !== 0;
+```
+
+**DON'T**
+
+```ts
+// New runtime package for one trivial operation.
+import isOdd from "is-odd";
+
+const shouldAlternate = isOdd(index);
+```
+
+### DEP-003 — Remove unused dependencies
+
+**Level:** MUST
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#DEP-003
+
+**Rule:** Delete packages when no production, test, build, or tooling path still requires them.
+
+**Why:** Unused packages continue to consume install time, security attention, and upgrade effort while providing no value.
+
+**DO**
+
+```json
+{
+  "dependencies": {
+    "date-fns": "^4.0.0"
+  }
+}
+```
+
+**DON'T**
+
+```jsonc
+{
+  "dependencies": {
+    "date-fns": "^4.0.0",
+    "moment": "^2.0.0"
+  }
+}
+
+// moment has no remaining imports.
+```
+
+### DEP-004 — Avoid duplicate solutions
+
+**Level:** SHOULD
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#DEP-004
+
+**Rule:** Do not introduce a second library for a capability the project already solves adequately.
+
+**Why:** Multiple libraries for the same job increase bundle size, cognitive load, inconsistent conventions, and migration cost.
+
+**DO**
+
+```json
+{
+  "dependencies": {
+    "ky": "^1.0.0"
+  }
+}
+```
+
+**DON'T**
+
+```json
+{
+  "dependencies": {
+    "axios": "^1.0.0",
+    "ky": "^1.0.0"
+  }
+}
+```
+
+## Feature Flags
+
+### FLAG-001 — Every feature flag needs a removal plan
+
+**Level:** MUST
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#FLAG-001
+
+**Rule:** Create flags with an owner and a planned condition or date for removal.
+
+**Why:** Flags are temporary branches in production code. Without an explicit end condition they become permanent complexity.
+
+**DO**
+
+```ts
+export const flags = {
+  newCheckout: {
+    defaultValue: false,
+    owner: "checkout",
+    removalCondition: "100% rollout is stable for 7 days",
+  },
+};
+```
+
+**DON'T**
+
+```ts
+export const flags = {
+  newCheckout: false,
+};
+```
+
+### FLAG-002 — Delete flags after rollout
+
+**Level:** MUST
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#FLAG-002
+
+**Rule:** When rollout is complete, remove the code branches, tests that exist only for the flag, and the remote flag definition.
+
+**Why:** Completed flags create dead branches and make maintainers reason about product states that can no longer occur.
+
+**DO**
+
+```ts
+return renderNewCheckout();
+```
+
+**DON'T**
+
+```ts
+if (flags.newCheckout) {
+  return renderNewCheckout();
+}
+
+return renderLegacyCheckout();
+```
+
+### FLAG-003 — Keep flag decisions at clear boundaries
+
+**Level:** SHOULD
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#FLAG-003
+
+**Rule:** Evaluate a feature flag in as few places as practical and pass the resulting behavior or state inward.
+
+**Why:** Scattered flag checks create combinatorial states and make eventual removal much harder.
+
+**DO**
+
+```ts
+const pricing = flags.newPricing ? newPricing : legacyPricing;
+
+const price = pricing.getPrice();
+const tax = pricing.getTax();
+const total = pricing.getTotal();
+```
+
+**DON'T**
+
+```ts
+const price = flags.newPricing ? getNewPrice() : getLegacyPrice();
+const tax = flags.newPricing ? getNewTax() : getLegacyTax();
+const total = flags.newPricing ? getNewTotal() : getLegacyTotal();
+```
+
+### FLAG-004 — Test both reachable flag states
+
+**Level:** MUST
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#FLAG-004
+
+**Rule:** While a feature flag is active, test the meaningful enabled and disabled behavior that can reach production.
+
+**Why:** A flag creates multiple production paths; only testing the preferred path leaves the fallback branch to rot.
+
+**DO**
+
+```ts
+it.each([
+  [true, "new"],
+  [false, "legacy"],
+])("newCheckout=%s renders %s", (enabled, expected) => {
+  setFlag("newCheckout", enabled);
+  expect(renderCheckout()).toBe(expected);
+});
+```
+
+**DON'T**
+
+```ts
+it("uses the new checkout", () => {
+  setFlag("newCheckout", true);
+  expect(renderCheckout()).toBe("new");
+});
+```
+
+## GraphQL
+
+### GQL-001 — Name production operations
+
+**Level:** MUST
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#GQL-001
+
+**Rule:** Give queries, mutations, and subscriptions unique meaningful operation names.
+
+**Why:** Operation names make logs, traces, errors, persisted operations, and refetch behavior easier to identify than anonymous documents.
+
+**DO**
+
+```graphql
+query ViewerQuery {
+  viewer { id name }
+}
+```
+
+**DON'T**
+
+```graphql
+query {
+  viewer { id name }
+}
+```
+
+**References:**
+- [GraphQL — Queries](https://graphql.org/learn/queries/)
+
+### GQL-002 — Pass dynamic values as variables
+
+**Level:** MUST
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#GQL-002
+
+**Rule:** Use GraphQL variables for runtime values instead of interpolating user or application data into operation strings.
+
+**Why:** Variables preserve a stable operation document, keep values typed separately, and avoid fragile or unsafe string construction.
+
+**DO**
+
+```ts
+const document = gql`
+  query UserQuery($id: ID!) {
+    user(id: $id) { id name }
+  }
+`;
+
+client.query({ query: document, variables: { id: userId } });
+```
+
+**DON'T**
+
+```ts
+const document = gql`
+  query UserQuery {
+    user(id: "${userId}") { id name }
+  }
+`;
+```
+
+**References:**
+- [GraphQL — Queries](https://graphql.org/learn/queries/)
+
+### GQL-003 — Use fragments for genuinely shared selection sets
+
+**Level:** SHOULD
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#GQL-003
+
+**Rule:** Extract repeated or component-owned field groups into named fragments rather than duplicating the same selection in many operations.
+
+**Why:** Fragments keep repeated data requirements consistent and make component-level GraphQL requirements composable.
+
+**DO**
+
+```graphql
+fragment UserSummary on User {
+  id
+  name
+  avatarUrl
+}
+
+query DashboardQuery {
+  viewer { ...UserSummary }
+  owner { ...UserSummary }
+}
+```
+
+**DON'T**
+
+```graphql
+query DashboardQuery {
+  viewer { id name avatarUrl }
+  owner { id name avatarUrl }
+}
+```
+
+**References:**
+- [GraphQL — Queries](https://graphql.org/learn/queries/)
+
+### GQL-004 — Validate operations against the schema
+
+**Level:** MUST
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#GQL-004
+
+**Rule:** Generate or check client operations against the current schema instead of relying on hand-maintained assumptions about fields and types.
+
+**Why:** GraphQL's schema can prove invalid fields, selections, and variable types before runtime, making schema-aware validation one of its strongest safety features.
+
+**DO**
+
+```sh
+pnpm graphql:validate
+pnpm type-check
+```
+
+Note: Use schema-aware validation or code generation in CI; the exact command depends on the project toolchain.
+
+**DON'T**
+
+```sh
+pnpm type-check
+# GraphQL documents are never checked against the schema
+```
+
+**References:**
+- [GraphQL — Validation](https://graphql.org/learn/validation/)
+
+### GQL-005 — Treat nullability as part of the contract
+
+**Level:** MUST
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#GQL-005
+
+**Rule:** Model nullable fields and variables exactly as the schema declares them rather than erasing nullability in client types.
+
+**Why:** GraphQL nullability expresses real response and input guarantees; weakening or strengthening it locally creates impossible assumptions.
+
+**DO**
+
+```ts
+// Schema: nickname: String
+type User = { nickname: string | null };
+```
+
+**DON'T**
+
+```ts
+// Schema: nickname: String
+type User = { nickname: string };
+```
+
+**References:**
+- [GraphQL — Schema](https://graphql.org/learn/schema/)
+
+### GQL-006 — Paginate collections that can grow without bound
+
+**Level:** MUST
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#GQL-006
+
+**Rule:** Do not design clients or schemas around fetching an ever-growing collection in one operation; use an appropriate pagination model.
+
+**Why:** Unbounded lists create unpredictable latency, payload size, memory pressure, and rendering cost.
+
+**DO**
+
+```graphql
+query UsersQuery($after: String, $first: Int!) {
+  users(after: $after, first: $first) {
+    edges { node { id name } }
+    pageInfo { endCursor hasNextPage }
+  }
+}
+```
+
+**DON'T**
+
+```graphql
+query UsersQuery {
+  users { id name }
+}
+```
+
+**References:**
+- [GraphQL — Pagination](https://graphql.org/learn/pagination/)
+
+## Internationalization
+
+### I18N-001 — Localize user-visible text
+
+**Level:** MUST
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#I18N-001
+
+**Rule:** Labels, messages, placeholders, tooltips, empty states, and other user-visible copy should come from the application's localization system.
+
+**Why:** Hardcoded interface strings create inaccessible translation boundaries and are expensive to find after a product expands to more locales.
+
+**DO**
+
+```tsx
+<button type="button">
+  {t("actions.saveChanges")}
+</button>
+```
+
+**DON'T**
+
+```tsx
+<button type="button">Save changes</button>
+```
+
+### I18N-002 — Parameterize messages instead of concatenating sentences
+
+**Level:** MUST
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#I18N-002
+
+**Rule:** Use the localization system's placeholders and plural/select features rather than assembling human sentences from fragments.
+
+**Why:** Word order, plural rules, gender, and punctuation vary by language; concatenation assumes English-like grammar.
+
+**DO**
+
+```ts
+const message = t("cart.itemCount", { count });
+
+// cart.itemCount:
+// "You have {count, plural, one {# item} other {# items}}"
+```
+
+**DON'T**
+
+```ts
+const message = "You have " + count + (count === 1 ? " item" : " items");
+```
+
+### I18N-003 — Use Intl for locale-sensitive formatting
+
+**Level:** SHOULD
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#I18N-003
+
+**Rule:** Prefer Intl.DateTimeFormat, Intl.NumberFormat, and related platform APIs for dates, numbers, currencies, lists, and relative time.
+
+**Why:** Intl encodes locale-specific formatting rules and avoids shipping another library for capabilities already provided by the platform.
+
+**DO**
+
+```ts
+const label = new Intl.DateTimeFormat(locale, {
+  dateStyle: "medium",
+}).format(date);
+```
+
+**DON'T**
+
+```ts
+const label = `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
+```
+
+### I18N-004 — Design layouts for text expansion and direction
+
+**Level:** SHOULD
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#I18N-004
+
+**Rule:** Avoid UI assumptions that only hold for short English text or left-to-right content.
+
+**Why:** Translated labels can grow substantially, and RTL locales invert directional relationships that fixed-width or left/right-specific layouts may encode incorrectly.
+
+**DO**
+
+```css
+.label {
+  margin-inline-start: var(--space-2);
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+```
+
+**DON'T**
+
+```css
+.label {
+  margin-left: 8px;
+  width: 120px;
+  white-space: nowrap;
+}
+```
+
+## JavaScript
+
+### JS-001 — Use async only for Promise semantics
+
+**Level:** MUST
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#JS-001
+
+**Rule:** Do not mark a function async unless it awaits work or intentionally exposes a Promise-returning contract.
+
+**Why:** async changes the function's return contract and error behavior. Adding it without Promise semantics misleads callers and readers.
+
+**DO**
+
+```ts
+function getStatusLabel() {
+  return "Ready";
+}
+```
+
+**DON'T**
+
+```ts
+async function getStatusLabel() {
+  return "Ready";
+}
+```
+
+### JS-002 — Use optional chaining for genuine nullish access
+
+**Level:** SHOULD
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#JS-002
+
+**Rule:** Prefer optional chaining when a value may legitimately be nullish, and avoid it when the contract guarantees the value exists.
+
+**Why:** Correct optional chaining makes uncertainty explicit. Defensive chaining on guaranteed values hides incorrect types and weakens reasoning.
+
+**DO**
+
+```ts
+const city = user?.address?.city;
+```
+
+**DON'T**
+
+```ts
+const city = user && user.address && user.address.city;
+```
+
+### JS-003 — Prefer default parameters for default inputs
+
+**Level:** PREFER
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#JS-003
+
+**Rule:** When undefined should map to a stable default, express that contract in the function signature.
+
+**Why:** Default parameters centralize input normalization and avoid mutation or guard boilerplate inside the function body.
+
+**DO**
+
+```ts
+const process = (items: Item[] = []) => {
+  // ...
+};
+```
+
+**DON'T**
+
+```ts
+const process = (items?: Item[]) => {
+  items = items ?? [];
+};
+```
+
+### JS-004 — Prefer namespace-safe built-ins
+
+**Level:** SHOULD
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#JS-004
+
+**Rule:** Use Number.parseInt, Number.isNaN, Object.hasOwn, and other precise modern built-ins instead of ambiguous legacy globals.
+
+**Why:** Namespaced APIs communicate intent and avoid historical coercion or prototype pitfalls.
+
+**DO**
+
+```ts
+Number.parseInt(value, 10);
+Object.hasOwn(obj, key);
+```
+
+**DON'T**
+
+```ts
+parseInt(value);
+obj.hasOwnProperty(key);
+```
+
+### JS-005 — Scope try/catch to the operation that can fail
+
+**Level:** SHOULD
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#JS-005
+
+**Rule:** Keep setup and unrelated transformation outside a try block unless those operations are intentionally part of the same failure boundary.
+
+**Why:** A narrow catch boundary makes it clear what failed and prevents unrelated programming errors from being mistaken for expected operational failures.
+
+**DO**
+
+```ts
+const payload = buildPayload(form);
+
+let result: SaveResult;
+try {
+  result = await api.save(payload);
+} catch {
+  showNetworkError();
+  return;
+}
+
+renderResult(result);
+```
+
+**DON'T**
+
+```ts
+try {
+  const payload = buildPayload(form);
+  const result = await api.save(payload);
+  renderResult(result);
+} catch {
+  showNetworkError();
+}
+```
+
+### JS-006 — Prefer non-mutating collection APIs when mutation is not intended
+
+**Level:** PREFER
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#JS-006
+
+**Rule:** Use APIs such as toSorted, toReversed, and toSpliced when callers should retain the original collection.
+
+**Why:** Non-mutating operations make ownership explicit and prevent changes from leaking through shared references.
+
+**DO**
+
+```ts
+const sortedUsers = users.toSorted(compareUsers);
+```
+
+**DON'T**
+
+```ts
+const sortedUsers = users.sort(compareUsers);
+```
+
+### JS-007 — Use an options object when positional parameters stop being obvious
+
+**Level:** PREFER
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#JS-007
+
+**Rule:** When a function has several same-shaped or optional arguments, prefer one named options object over a long positional signature.
+
+**Why:** Named arguments make call sites self-documenting and allow the API to evolve without argument-order traps.
+
+**DO**
+
+```ts
+createReport({ data, currency: "USD", includeDrafts: true, limit: 50 });
+```
+
+**DON'T**
+
+```ts
+createReport(data, true, 50, false, "USD");
+```
+
+## Legend-State
+
+### LEGEND-001 — Use useValue for React subscriptions
+
+**Level:** MUST
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#LEGEND-001
+
+**Rule:** In new React code, read observables reactively through useValue instead of relying on observer plus get() tracking.
+
+**Why:** Legend-State v3 recommends useValue for React Compiler compatibility because Hook calls remain visible to the compiler while arbitrary get() calls may be memoized.
+
+**DO**
+
+```tsx
+const Component = () => {
+  const name = useValue(store$.name);
+  return <div>{name}</div>;
+};
+```
+
+**DON'T**
+
+```tsx
+const Component = observer(() => <div>{store$.name.get()}</div>);
+```
+
+**References:**
+- [Legend-State v3 — Migrating](https://legendapp.com/open-source/state/v3/other/migrating/)
+
+### LEGEND-002 — Use peek only when non-reactive access is intentional
+
+**Level:** MUST
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#LEGEND-002
+
+**Rule:** Use get() in tracking contexts when changes should be observed and peek() when the read deliberately must not subscribe.
+
+**Why:** get() participates in Legend-State dependency tracking while peek() explicitly opts out, so the choice communicates reactivity intent.
+
+**DO**
+
+```ts
+const userId = session$.userId.peek();
+analytics.track("checkout", { userId });
+```
+
+Note: peek() makes the intentional non-reactive read explicit.
+
+**DON'T**
+
+```ts
+const userId = session$.userId.get();
+analytics.track("checkout", { userId });
+```
+
+**References:**
+- [Legend-State v3 — Observable](https://legendapp.com/open-source/state/v3/usage/observable/)
+
+### LEGEND-003 — Update observable state through observable APIs
+
+**Level:** MUST
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#LEGEND-003
+
+**Rule:** Do not mutate raw objects returned from an observable and then set the same reference back; update the observable node with set, assign, or another notifying API.
+
+**Why:** Mutating raw data bypasses Legend-State notifications, and setting the same reference back may produce no observable change.
+
+**DO**
+
+```ts
+store$.profile.name.set("Ada");
+```
+
+**DON'T**
+
+```ts
+const profile = store$.profile.peek();
+profile.name = "Ada";
+store$.profile.set(profile);
+```
+
+**References:**
+- [Legend-State v3 — Observable](https://legendapp.com/open-source/state/v3/usage/observable/)
+
+### LEGEND-004 — Batch sibling updates with assign
+
+**Level:** SHOULD
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#LEGEND-004
+
+**Rule:** When several sibling fields change as one logical operation, prefer assign over a sequence of independent set calls.
+
+**Why:** assign batches its individual writes so observers update once and the operation is represented as one coherent state transition.
+
+**DO**
+
+```ts
+store$.assign({
+  data: response.data,
+  isLoading: false,
+});
+```
+
+**DON'T**
+
+```ts
+store$.data.set(response.data);
+store$.isLoading.set(false);
+```
+
+**References:**
+- [Legend-State v3 — Observable](https://legendapp.com/open-source/state/v3/usage/observable/)
+
+### LEGEND-005 — Subscribe at the narrowest useful observable
+
+**Level:** SHOULD
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#LEGEND-005
+
+**Rule:** Prefer fine-grained subscriptions or computed useValue selectors over reading broad trees when only a small value drives rendering.
+
+**Why:** Legend-State's performance model depends on minimizing tracked observables so unrelated changes do not rerender parent components.
+
+**DO**
+
+```tsx
+const unread = useValue(store$.notifications.unread);
+return <Badge>{unread}</Badge>;
+```
+
+**DON'T**
+
+```tsx
+const state = useValue(store$);
+return <Badge>{state.notifications.unread}</Badge>;
+```
+
+**References:**
+- [Legend-State v3 — Performance](https://legendapp.com/open-source/state/v3/guides/performance/)
+- [Legend-State v3 — Tracing](https://legendapp.com/open-source/state/v3/react/tracing/)
+
+### LEGEND-006 — Keep persisted or synchronized state serializable
+
+**Level:** MUST
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#LEGEND-006
+
+**Rule:** When observable data crosses persistence, transport, devtool, or application-specific serialization boundaries, keep that state plain and serializable.
+
+**Why:** Legend-State itself can hold functions and rich values, but serialization layers cannot reliably preserve arbitrary runtime objects or circular references.
+
+**Exceptions:**
+- Purely in-memory observables that never cross a serialization boundary may intentionally contain functions or other supported runtime values.
+
+**DO**
+
+```ts
+store$.session.set({
+  lastSeenIso: new Date().toISOString(),
+});
+```
+
+Note: Use plain values for observable nodes that are persisted, synchronized, or transported.
+
+**DON'T**
+
+```ts
+store$.session.set({
+  lastSeen: new Date(),
+  onClose: closeSession,
+});
+```
+
+**References:**
+- [Legend-State v3 — Observable](https://legendapp.com/open-source/state/v3/usage/observable/)
+
+## Next.js
+
+### NEXT-001 — Default to Server Components
+
+**Level:** SHOULD
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#NEXT-001
+
+**Rule:** In the App Router, keep components server-side unless they require state, event handlers, effects, custom client hooks, or browser-only APIs.
+
+**Why:** Server Components reduce client JavaScript and can fetch data close to its source without exposing server credentials.
+
+**DO**
+
+```tsx
+const UsersPage = async () => {
+  const users = await getUsers();
+  return <Users users={users} />;
+};
+```
+
+**DON'T**
+
+```tsx
+"use client";
+
+const UsersPage = () => {
+  const [users, setUsers] = useState([]);
+  useEffect(() => void fetch("/api/users").then(/* ... */), []);
+  return <Users users={users} />;
+};
+```
+
+**References:**
+- [Next.js — Server and Client Components](https://nextjs.org/docs/app/getting-started/server-and-client-components)
+
+### NEXT-002 — Keep use client boundaries as small as practical
+
+**Level:** SHOULD
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#NEXT-002
+
+**Rule:** Mark the client entry point that needs interactivity instead of moving an entire page or layout into the client module graph.
+
+**Why:** Everything imported below a use client boundary contributes to the client graph, so unnecessarily high boundaries increase shipped JavaScript.
+
+**DO**
+
+```tsx
+// Dashboard.tsx — Server Component
+export default function Dashboard() {
+  return <FavoriteButton />;
+}
+
+// FavoriteButton.tsx
+"use client";
+```
+
+**DON'T**
+
+```tsx
+"use client";
+
+export default function Dashboard() {
+  return <LargeDashboardWithOneInteractiveButton />;
+}
+```
+
+**References:**
+- [Next.js — use client](https://nextjs.org/docs/app/api-reference/directives/use-client)
+
+### NEXT-003 — Pass serializable props across the server-client boundary
+
+**Level:** MUST
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#NEXT-003
+
+**Rule:** Values passed from Server Components into Client Component entry points must be serializable by React.
+
+**Why:** The React Server Component payload crosses a network boundary and cannot transport arbitrary runtime values such as callbacks.
+
+**DO**
+
+```tsx
+// Server Component
+return <ClientPrice amount={12} currency="USD" />;
+```
+
+Note: Pass serializable data and keep ordinary client behavior inside the Client Component.
+
+**DON'T**
+
+```tsx
+// Server Component
+const formatPrice = (value: number) => `$${value}`;
+return <ClientPrice amount={12} formatPrice={formatPrice} />;
+```
+
+**References:**
+- [Next.js — use client](https://nextjs.org/docs/app/api-reference/directives/use-client)
+
+### NEXT-004 — Protect server-only code from client imports
+
+**Level:** MUST
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#NEXT-004
+
+**Rule:** Keep secrets, privileged data access, and server-only modules behind server boundaries and mark them server-only when accidental client import is plausible.
+
+**Why:** Shared JavaScript module graphs make accidental environment leakage possible; build-time server-only guards turn that mistake into an explicit error.
+
+**DO**
+
+```ts
+import "server-only";
+
+export const getUsers = () => db.user.findMany();
+```
+
+**DON'T**
+
+```ts
+export const getUsers = () => db.user.findMany();
+export const apiSecret = process.env.API_SECRET;
+```
+
+**References:**
+- [Next.js — Server and Client Components](https://nextjs.org/docs/app/getting-started/server-and-client-components)
+
+### NEXT-005 — Fetch server data directly from Server Components
+
+**Level:** SHOULD
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#NEXT-005
+
+**Rule:** When code already runs on the server, call the data source or shared server data function directly instead of making an HTTP request to your own Route Handler.
+
+**Why:** Calling your own server endpoint from a Server Component adds an unnecessary network hop and duplicates a boundary that is already local.
+
+**DO**
+
+```tsx
+export default async function UsersPage() {
+  const users = await getUsers();
+  return <Users users={users} />;
+}
+```
+
+**DON'T**
+
+```tsx
+export default async function UsersPage() {
+  const response = await fetch("https://my-app.test/api/users");
+  const users = await response.json();
+  return <Users users={users} />;
+}
+```
+
+**References:**
+- [Next.js — Production checklist](https://nextjs.org/docs/app/guides/production-checklist)
+
+### NEXT-006 — Avoid avoidable data-fetching waterfalls
+
+**Level:** SHOULD
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#NEXT-006
+
+**Rule:** Start independent server requests in parallel and use Suspense/streaming boundaries when slow work should not block the whole route.
+
+**Why:** Sequential independent requests accumulate latency, while parallel fetching and streaming can deliver useful UI earlier.
+
+**DO**
+
+```ts
+const [posts, user] = await Promise.all([
+  getPosts(),
+  getUser(),
+]);
+```
+
+**DON'T**
+
+```ts
+const user = await getUser();
+const posts = await getPosts();
+```
+
+**References:**
+- [Next.js — Fetching Data](https://nextjs.org/docs/app/getting-started/fetching-data)
+
+## Performance
+
+### PERF-001 — Optimize where scale exists
+
+**Level:** PREFER
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#PERF-001
+
+**Rule:** Prefer readability by default; reduce passes and allocations when scale makes the cost meaningful.
+
+**Why:** Premature micro-optimization obscures code, while repeated work over genuinely large datasets creates measurable cost.
+
+**DO**
+
+```ts
+const settingsItem = menuItems.find(
+  (item) => item.id === "settings",
+);
+```
+
+**DON'T**
+
+```ts
+let settingsItem: MenuItem | undefined;
+for (let index = 0; index < menuItems.length; index += 1) {
+  if (menuItems[index]?.id === "settings") {
+    settingsItem = menuItems[index];
+    break;
+  }
+}
+```
+
+### PERF-002 — Measure before micro-optimizing
+
+**Level:** SHOULD
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#PERF-002
+
+**Rule:** Use profiling, benchmarks, production telemetry, or a known complexity bound before sacrificing clarity for small performance gains.
+
+**Why:** Without evidence, optimization effort often targets code that is not responsible for meaningful user-visible cost.
+
+**DO**
+
+```ts
+performance.mark("normalize:start");
+const users = normalizeUsers(payload);
+performance.mark("normalize:end");
+performance.measure(
+  "normalizeUsers",
+  "normalize:start",
+  "normalize:end",
+);
+```
+
+**DON'T**
+
+```ts
+// "This looks slow."
+const cachedNormalizeUsers = memoize(normalizeUsers);
+```
+
+### PERF-003 — Prefer one pass on hot large-data paths
+
+**Level:** PREFER
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#PERF-003
+
+**Rule:** When processing large collections in a hot path, avoid chains that create avoidable intermediate arrays when one clear pass can do the work.
+
+**Why:** Repeated passes and intermediate allocations scale with dataset size and can become significant in data-heavy applications.
+
+**Exceptions:**
+- For small collections or non-hot paths, a readable map/filter chain may be the better engineering choice.
+
+**DO**
+
+```ts
+let total = 0;
+for (const row of rows) {
+  if (isBillable(row)) {
+    total += getAmount(row);
+  }
+}
+```
+
+**DON'T**
+
+```ts
+const total = rows
+  .filter(isBillable)
+  .map(getAmount)
+  .reduce((sum, amount) => sum + amount, 0);
+```
+
+### PERF-004 — Choose data structures for access patterns
+
+**Level:** SHOULD
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#PERF-004
+
+**Rule:** Use arrays, sets, maps, indexes, or other structures according to how the data is actually queried and updated.
+
+**Why:** An appropriate data structure can remove repeated linear scans and communicate the intended operations directly.
+
+**DO**
+
+```ts
+const usersById = new Map(users.map((user) => [user.id, user]));
+
+const rows = orders.map((order) => ({
+  order,
+  user: usersById.get(order.userId),
+}));
+```
+
+**DON'T**
+
+```ts
+const rows = orders.map((order) => ({
+  order,
+  user: users.find((user) => user.id === order.userId),
+}));
+```
+
+## React
+
+### REACT-001 — Keep components focused on presentation
+
+**Level:** SHOULD
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#REACT-001
+
+**Rule:** Move substantial transformation, orchestration, and business logic out of component markup.
+
+**Why:** Separating presentation from behavior keeps components readable and makes logic independently testable.
+
+**DO**
+
+```tsx
+const Checkout = ({ cart }) => {
+  const summary = useCheckoutSummary(cart);
+
+  return <CheckoutSummary summary={summary} />;
+};
+```
+
+**DON'T**
+
+```tsx
+const Checkout = ({ cart }) => {
+  const subtotal = cart.items.reduce((sum, item) => sum + item.price, 0);
+  const total = subtotal + calculateTax(subtotal);
+
+  return <CheckoutSummary total={total} />;
+};
+```
+
+### REACT-002 — Do not memoize by reflex
+
+**Level:** PREFER
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#REACT-002
+
+**Rule:** Use memoization when identity matters or profiling demonstrates a meaningful benefit.
+
+**Why:** Unnecessary memoization adds dependency management and cognitive overhead without guaranteed benefit.
+
+**DO**
+
+```tsx
+const fullName = `${firstName} ${lastName}`;
+```
+
+**DON'T**
+
+```tsx
+const fullName = useMemo(() => `${firstName} ${lastName}`, [firstName, lastName]);
+```
+
+**References:**
+- [React — useMemo](https://react.dev/reference/react/useMemo)
+- [React — React Compiler](https://react.dev/learn/react-compiler)
+
+### REACT-003 — Keep state as local as practical
+
+**Level:** PREFER
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#REACT-003
+
+**Rule:** Use explicit props and local state until multiple consumers genuinely require shared ownership.
+
+**Why:** Global state hides dependencies. Local state and explicit data flow make ownership easier to understand.
+
+**DO**
+
+```tsx
+const [isOpen, setIsOpen] = useState(false);
+```
+
+**DON'T**
+
+```tsx
+// Global store for state owned by one component
+const modalStore = createStore({ isOpen: false });
+```
+
+### REACT-004 — Do not store derived state
+
+**Level:** MUST
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#REACT-004
+
+**Rule:** If a value can be calculated from current props or state during render, derive it instead of synchronizing another state variable.
+
+**Why:** Duplicated state creates synchronization paths and can briefly or permanently disagree with its source values.
+
+**DO**
+
+```tsx
+const fullName = `${first} ${last}`;
+```
+
+**DON'T**
+
+```tsx
+const [fullName, setFullName] = useState("");
+useEffect(() => setFullName(`${first} ${last}`), [first, last]);
+```
+
+### REACT-005 — Use effects to synchronize external systems
+
+**Level:** SHOULD
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#REACT-005
+
+**Rule:** Do not reach for useEffect for synchronous derivation or event handling that can happen directly.
+
+**Why:** Effects run after render and introduce a second execution phase. Keeping synchronous logic in render or event handlers reduces timing bugs.
+
+**DO**
+
+```tsx
+const handleSave = () => {
+  saveForm(form);
+};
+```
+
+**DON'T**
+
+```tsx
+const [shouldSave, setShouldSave] = useState(false);
+
+useEffect(() => {
+  if (shouldSave) saveForm(form);
+}, [form, shouldSave]);
+```
+
+**References:**
+- [React — You Might Not Need an Effect](https://react.dev/learn/you-might-not-need-an-effect)
+
+### REACT-006 — Use stable list keys
+
+**Level:** MUST
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#REACT-006
+
+**Rule:** Keys should identify the same logical item across inserts, deletes, sorting, and re-rendering.
+
+**Why:** Unstable keys can preserve state on the wrong item or force unnecessary unmounts and remounts.
+
+**Exceptions:**
+- An index key is acceptable for a truly static list whose ordering and membership can never change.
+
+**DO**
+
+```tsx
+items.map((item) => <Row key={item.id} item={item} />)
+```
+
+**DON'T**
+
+```tsx
+items.map((item, index) => <Row key={index} item={item} />)
+```
+
+### REACT-007 — Keep render pure
+
+**Level:** MUST
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#REACT-007
+
+**Rule:** Rendering should calculate UI from current inputs without mutating external state or causing observable side effects.
+
+**Why:** React may render more than once, interrupt rendering, or discard work. Render-time side effects become unpredictable under those semantics.
+
+**DO**
+
+```tsx
+const UserCard = ({ user }) => {
+  useEffect(() => {
+    analytics.track("UserCard viewed", { userId: user.id });
+  }, [user.id]);
+
+  return <h2>{user.name}</h2>;
+};
+```
+
+**DON'T**
+
+```tsx
+const UserCard = ({ user }) => {
+  analytics.track("UserCard rendered", { userId: user.id });
+  return <h2>{user.name}</h2>;
+};
+```
+
+### REACT-008 — Move static values out of components
+
+**Level:** PREFER
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#REACT-008
+
+**Rule:** Constants and configuration that never depend on props or state should live at module scope.
+
+**Why:** Module-scope values communicate that they are invariant and avoid recreating objects or arrays on every render.
+
+**DO**
+
+```tsx
+const countryOptions = ["Canada", "France", "Japan"];
+
+const CountrySelect = () => <Select options={countryOptions} />;
+```
+
+**DON'T**
+
+```tsx
+const CountrySelect = () => {
+  const options = ["Canada", "France", "Japan"];
+  return <Select options={options} />;
+};
+```
+
+### REACT-009 — Follow the Rules of Hooks
+
+**Level:** MUST
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#REACT-009
+
+**Rule:** Call Hooks only at the top level of React components or custom Hooks, never inside loops, conditions, nested functions, or try/catch blocks.
+
+**Why:** React relies on stable Hook call order to associate state and effects with the correct component instance.
+
+**DO**
+
+```tsx
+const Counter = ({ isEnabled }) => {
+  const [count, setCount] = useState(0);
+
+  if (!isEnabled) return null;
+  return <span>{count}</span>;
+};
+```
+
+**DON'T**
+
+```tsx
+const Counter = ({ isEnabled }) => {
+  if (isEnabled) {
+    const [count, setCount] = useState(0);
+    return <span>{count}</span>;
+  }
+
+  return null;
+};
+```
+
+**References:**
+- [React — Rules of Hooks](https://react.dev/reference/rules/rules-of-hooks)
+
+### REACT-010 — Let React call components
+
+**Level:** MUST
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#REACT-010
+
+**Rule:** Render components through JSX instead of invoking component functions directly.
+
+**Why:** React must control component invocation to preserve Hook behavior, reconciliation, and component identity.
+
+**DO**
+
+```tsx
+const content = <UserCard user={user} />;
+```
+
+**DON'T**
+
+```tsx
+const UserCard = ({ user }) => <strong>{user.name}</strong>;
+const content = UserCard({ user });
+```
+
+**References:**
+- [React — Rules of React](https://react.dev/reference/rules)
+
+### REACT-011 — Treat props, state, and Hook inputs as immutable snapshots
+
+**Level:** MUST
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#REACT-011
+
+**Rule:** Do not mutate values supplied by React or values already passed into Hooks or JSX.
+
+**Why:** React assumes render inputs remain stable for the duration of a render so it can restart, reuse, and optimize work safely.
+
+**DO**
+
+```tsx
+const UserName = ({ user }) => {
+  const displayName = user.name.trim();
+  return <span>{displayName}</span>;
+};
+```
+
+**DON'T**
+
+```tsx
+const UserName = ({ user }) => {
+  user.name = user.name.trim();
+  return <span>{user.name}</span>;
+};
+```
+
+**References:**
+- [React — Components and Hooks must be pure](https://react.dev/reference/rules/components-and-hooks-must-be-pure)
+
+### REACT-012 — Do not suppress Hook dependency correctness
+
+**Level:** MUST
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#REACT-012
+
+**Rule:** Include the reactive values a Hook depends on instead of silencing exhaustive-dependency checks to preserve an intended stale closure.
+
+**Why:** Missing dependencies make Effects and memoized callbacks observe outdated values and create timing-sensitive bugs.
+
+**DO**
+
+```tsx
+const UserPanel = ({ userId }) => {
+  useEffect(() => {
+    loadUser(userId);
+  }, [userId]);
+
+  return <section />;
+};
+```
+
+**DON'T**
+
+```tsx
+const UserPanel = ({ userId }) => {
+  useEffect(() => {
+    loadUser(userId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return <section />;
+};
+```
+
+**References:**
+- [React — useMemo](https://react.dev/reference/react/useMemo)
+
+### REACT-013 — Extract coherent React responsibilities, not arbitrary line counts
+
+**Level:** SHOULD
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#REACT-013
+
+**Rule:** Split a component or custom Hook when it owns multiple independent responsibilities or becomes difficult to scan, not merely because it crossed a fixed LOC threshold.
+
+**Why:** Small focused units are easier to test and understand, but mechanical file-size limits often create fragmentation without improving cohesion.
+
+**DO**
+
+```tsx
+const Dashboard = () => (
+  <>
+    <BillingPanel />
+    <NotificationsPanel />
+    <SearchPanel />
+  </>
+);
+```
+
+Note: Split by coherent responsibility, not because a file crossed an arbitrary line count.
+
+**DON'T**
+
+```tsx
+const Dashboard = () => {
+  const billing = useBilling();
+  const notifications = useNotifications();
+  const search = useSearch();
+
+  return <DashboardView {...{ billing, notifications, search }} />;
+};
+```
+
+## Redux
+
+### REDUX-001 — Use Redux Toolkit for modern Redux
+
+**Level:** SHOULD
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#REDUX-001
+
+**Rule:** Prefer configureStore, createSlice, createAsyncThunk, RTK Query, and other Redux Toolkit APIs over hand-written legacy Redux boilerplate.
+
+**Why:** Redux Toolkit is the official recommended toolset and encodes safer defaults for immutable updates, DevTools, and store configuration.
+
+**DO**
+
+```ts
+const todosSlice = createSlice({
+  name: "todos",
+  initialState,
+  reducers: {
+    todoAdded(state, action) {
+      state.todos.push(action.payload);
+    },
+  },
+});
+```
+
+**DON'T**
+
+```ts
+const reducer = (state = initialState, action) => {
+  switch (action.type) {
+    case "todos/todoAdded":
+      return { ...state, todos: [...state.todos, action.payload] };
+    default:
+      return state;
+  }
+};
+```
+
+**References:**
+- [Redux — Style Guide](https://redux.js.org/style-guide/)
+
+### REDUX-002 — Keep reducers pure
+
+**Level:** MUST
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#REDUX-002
+
+**Rule:** Reducers must not perform async work, generate nondeterministic values, mutate external variables, or trigger side effects.
+
+**Why:** Redux may replay reducer logic for debugging and hot reload; deterministic pure reducers make state transitions reproducible.
+
+**DO**
+
+```ts
+markUpdated(state, action: PayloadAction<number>) {
+  state.lastUpdated = action.payload;
+}
+
+dispatch(markUpdated(Date.now()));
+```
+
+**DON'T**
+
+```ts
+markUpdated(state) {
+  state.lastUpdated = Date.now();
+}
+```
+
+**References:**
+- [Redux — Style Guide](https://redux.js.org/style-guide/)
+
+### REDUX-003 — Keep Redux state and normal actions serializable
+
+**Level:** MUST
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#REDUX-003
+
+**Rule:** Avoid Promises, functions, class instances, Maps/Sets, DOM nodes, and other non-serializable values in Redux state or actions that reach reducers.
+
+**Why:** Serializable data preserves DevTools, persistence, replay, predictable equality behavior, and debugging.
+
+**Exceptions:**
+- Middleware may intentionally intercept a non-serializable action before it reaches reducers.
+
+**DO**
+
+```ts
+dispatch(userLoaded({
+  loadedAtIso: new Date().toISOString(),
+  user,
+}));
+```
+
+**DON'T**
+
+```ts
+dispatch(userLoaded({
+  loadedAt: new Date(),
+  user,
+}));
+```
+
+**References:**
+- [Redux — Style Guide](https://redux.js.org/style-guide/)
+
+### REDUX-004 — Keep Redux state minimal and derive the rest
+
+**Level:** MUST
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#REDUX-004
+
+**Rule:** Store canonical source data and derive filtered, aggregated, or presentation-ready values through selectors.
+
+**Why:** Duplicated derived state introduces synchronization bugs and makes updates more complicated than recalculating from the source.
+
+**DO**
+
+```ts
+const initialState = { todos: [] };
+
+const selectVisibleTodos = (state) =>
+  state.todos.filter((todo) => !todo.completed);
+```
+
+**DON'T**
+
+```ts
+const initialState = {
+  todos: [],
+  visibleTodos: [],
+};
+```
+
+**References:**
+- [Redux — Deriving Data with Selectors](https://redux.js.org/usage/deriving-data-selectors)
+
+### REDUX-005 — Normalize complex relational collections
+
+**Level:** SHOULD
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#REDUX-005
+
+**Rule:** Store heavily relational or repeatedly updated entity data in a normalized shape, typically with createEntityAdapter.
+
+**Why:** Normalization makes entity lookup and single-item updates simpler and reduces duplicated nested copies of the same entity.
+
+**DO**
+
+```ts
+const state = {
+  authors: { byId: { u1: { id: "u1", name: "Ada" } } },
+  posts: { byId: { p1: { id: "p1", authorId: "u1" } } },
+};
+```
+
+**DON'T**
+
+```ts
+const posts = [
+  { id: "p1", author: { id: "u1", name: "Ada" } },
+  { id: "p2", author: { id: "u1", name: "Ada" } },
+];
+```
+
+**References:**
+- [Redux — Normalizing State Shape](https://redux.js.org/usage/structuring-reducers/normalizing-state-shape)
+
+### REDUX-006 — Use selectors to encapsulate state shape
+
+**Level:** SHOULD
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#REDUX-006
+
+**Rule:** Reusable consumers should ask selectors for domain values instead of spreading knowledge of deep store paths throughout the UI.
+
+**Why:** Selectors create a stable read boundary so state structure can change without rewriting every consumer.
+
+**DO**
+
+```tsx
+const selectCheckoutCurrency = (state) =>
+  state.account.preferences.checkout.currency;
+
+const currency = useSelector(selectCheckoutCurrency);
+```
+
+**DON'T**
+
+```tsx
+const currency = useSelector(
+  (state) => state.account.preferences.checkout.currency,
+);
+```
+
+**References:**
+- [Redux — Deriving Data with Selectors](https://redux.js.org/usage/deriving-data-selectors)
+
+### REDUX-007 — Memoize selectors only when they derive expensive or referentially new values
+
+**Level:** PREFER
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#REDUX-007
+
+**Rule:** Do not wrap every direct state lookup in createSelector; reserve memoization for real derivation or stable-reference needs.
+
+**Why:** Unnecessary selector memoization adds complexity without avoiding work, while derived arrays and expensive calculations can benefit substantially.
+
+**DO**
+
+```ts
+const selectUserName = (state) => state.user.name;
+```
+
+**DON'T**
+
+```ts
+const selectUserName = createSelector(
+  [(state) => state.user.name],
+  (name) => name,
+);
+```
+
+**References:**
+- [Redux — Deriving Data with Selectors](https://redux.js.org/usage/deriving-data-selectors)
+
+### REDUX-008 — Keep transient UI and form state local by default
+
+**Level:** PREFER
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#REDUX-008
+
+**Rule:** Do not put temporary form edits, hover state, or component-local interaction state in Redux without a genuine cross-application ownership need.
+
+**Why:** Local state keeps ownership close to the UI and avoids dispatching global actions for data that is neither shared nor cached.
+
+**DO**
+
+```tsx
+const [name, setName] = useState("");
+
+<input value={name} onChange={(event) => setName(event.target.value)} />
+```
+
+**DON'T**
+
+```tsx
+<input
+  value={name}
+  onChange={(event) => dispatch(nameChanged(event.target.value))}
+/>
+```
+
+**References:**
+- [Redux — Style Guide](https://redux.js.org/style-guide/)
+
+### REDUX-009 — Use one Redux store per application
+
+**Level:** MUST
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#REDUX-009
+
+**Rule:** A standard Redux application should have one configured store instance shared through the application boundary.
+
+**Why:** A single store preserves one state graph, one dispatch pipeline, and predictable DevTools/debugging behavior.
+
+**DO**
+
+```ts
+export const store = configureStore({
+  reducer: {
+    settings: settingsReducer,
+    user: userReducer,
+  },
+});
+```
+
+**DON'T**
+
+```ts
+export const userStore = configureStore({ reducer: userReducer });
+export const settingsStore = configureStore({ reducer: settingsReducer });
+```
+
+**References:**
+- [Redux — Style Guide](https://redux.js.org/style-guide/)
+
+### REDUX-010 — Organize Redux logic by feature
+
+**Level:** SHOULD
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#REDUX-010
+
+**Rule:** Keep a feature's reducer logic, actions, and selectors close together, typically in a Redux Toolkit slice, instead of separating the app into global actions/reducers folders.
+
+**Why:** Feature-oriented slices improve cohesion and make the code that changes together easier to find and maintain.
+
+**DO**
+
+```text
+src/
+  features/users/
+    usersSlice.ts
+    usersSelectors.ts
+```
+
+**DON'T**
+
+```text
+src/
+  actions/users.ts
+  reducers/users.ts
+  selectors/users.ts
+```
+
+**References:**
+- [Redux — Style Guide](https://redux.js.org/style-guide/)
+
+### REDUX-011 — Prefer RTK Query for server data in Redux applications
+
+**Level:** SHOULD
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#REDUX-011
+
+**Rule:** When Redux is already the application state platform, use RTK Query as the default server fetching and caching layer instead of hand-writing request/cache reducers.
+
+**Why:** RTK Query provides request deduplication, caching, loading state, invalidation, and generated hooks while following Redux's recommended architecture.
+
+**DO**
+
+```ts
+const api = createApi({
+  baseQuery: fetchBaseQuery({ baseUrl: "/api" }),
+  endpoints: (build) => ({
+    getTodos: build.query<Todo[], void>({ query: () => "todos" }),
+  }),
+});
+```
+
+**DON'T**
+
+```ts
+const fetchTodos = createAsyncThunk("todos/fetch", fetchTodosApi);
+
+// Slice also tracks request status, cache lifetime, and refetch logic.
+```
+
+**References:**
+- [Redux — Style Guide](https://redux.js.org/style-guide/)
+- [Redux Toolkit — Automated Re-fetching](https://redux-toolkit.js.org/rtk-query/usage/automated-refetching)
+
+## TanStack Query
+
+### TQ-001 — Put every query dependency in the query key
+
+**Level:** MUST
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#TQ-001
+
+**Rule:** If the query function changes its result based on a variable, include that variable in the query key.
+
+**Why:** The query key is TanStack Query's cache identity and dependency list; omitting an input can return or overwrite data under the wrong cache entry.
+
+**DO**
+
+```tsx
+useQuery({
+  queryKey: ["todo", todoId],
+  queryFn: () => fetchTodo(todoId),
+});
+```
+
+**DON'T**
+
+```tsx
+useQuery({
+  queryKey: ["todo"],
+  queryFn: () => fetchTodo(todoId),
+});
+```
+
+**References:**
+- [TanStack Query — Query Keys](https://tanstack.com/query/latest/docs/framework/react/guides/query-keys)
+
+### TQ-002 — Keep query keys serializable and deterministic
+
+**Level:** MUST
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#TQ-002
+
+**Rule:** Use stable serializable values that uniquely describe the requested server data.
+
+**Why:** TanStack Query hashes query keys to identify cached results; unstable or non-serializable identity makes caching unpredictable.
+
+**DO**
+
+```ts
+const queryKey = ["todos", { page, status }];
+```
+
+**DON'T**
+
+```ts
+const queryKey = ["todos", () => status];
+```
+
+**References:**
+- [TanStack Query — Query Keys](https://tanstack.com/query/latest/docs/framework/react/guides/query-keys)
+
+### TQ-003 — Configure freshness instead of fighting refetch behavior
+
+**Level:** SHOULD
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#TQ-003
+
+**Rule:** Understand staleTime and the default refetch triggers before disabling mount, focus, or reconnect refetching globally.
+
+**Why:** TanStack Query considers cached data stale by default and refetches stale queries at useful lifecycle points; staleTime is the primary control for expected freshness.
+
+**DO**
+
+```tsx
+const catalogStaleTimeMs = 5 * 60 * 1000;
+
+useQuery({
+  queryKey: ["catalog"],
+  queryFn: fetchCatalog,
+  staleTime: catalogStaleTimeMs,
+});
+```
+
+**DON'T**
+
+```ts
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnMount: false,
+      refetchOnReconnect: false,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
+```
+
+**References:**
+- [TanStack Query — Important Defaults](https://tanstack.com/query/latest/docs/framework/react/guides/important-defaults)
+
+### TQ-004 — Invalidate related queries after successful mutations
+
+**Level:** MUST
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#TQ-004
+
+**Rule:** When a mutation makes cached server data stale, invalidate the smallest relevant query-key scope after success.
+
+**Why:** Targeted invalidation lets TanStack Query mark dependent data stale and refetch active consumers without manually synchronizing duplicate server state.
+
+**DO**
+
+```tsx
+useMutation({
+  mutationFn: addTodo,
+  onSuccess: () =>
+    queryClient.invalidateQueries({ queryKey: ["todos"] }),
+});
+```
+
+**DON'T**
+
+```tsx
+useMutation({
+  mutationFn: addTodo,
+});
+```
+
+**References:**
+- [TanStack Query — Invalidations from Mutations](https://tanstack.com/query/latest/docs/framework/react/guides/invalidations-from-mutations)
+
+### TQ-005 — Make query functions reject failed requests
+
+**Level:** MUST
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#TQ-005
+
+**Rule:** A query function must throw or return a rejected Promise for failures; clients such as fetch need an explicit non-OK response check.
+
+**Why:** TanStack Query determines error state from rejected query functions. Returning an error response as successful data bypasses retry and error handling.
+
+**DO**
+
+```ts
+const fetchTodos = async () => {
+  const response = await fetch("/api/todos");
+  if (!response.ok) throw new Error("Failed to load todos");
+  return response.json();
+};
+```
+
+**DON'T**
+
+```ts
+const fetchTodos = async () => {
+  const response = await fetch("/api/todos");
+  return response.json();
+};
+```
+
+**References:**
+- [TanStack Query — Query Functions](https://tanstack.com/query/latest/docs/framework/react/guides/query-functions)
+
+## Testing
+
+### TEST-001 — Test observable behavior
+
+**Level:** MUST
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#TEST-001
+
+**Rule:** Tests should verify a unit's public responsibility rather than reproduce its internal implementation.
+
+**Why:** Behavior-focused tests survive safe refactors and fail when user-visible or contract-visible behavior actually changes.
+
+**DO**
+
+```tsx
+openModal();
+expect(screen.getByRole("dialog")).toBeVisible();
+```
+
+**DON'T**
+
+```ts
+openModal();
+expect(modalController.state.isOpen).toBe(true);
+```
+
+### TEST-002 — Test realistic states
+
+**Level:** SHOULD
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#TEST-002
+
+**Rule:** Edge cases should come from real contracts and failure modes rather than impossible values invented only to increase coverage.
+
+**Why:** Tests for impossible states add maintenance cost while distracting from failures the system can actually encounter.
+
+**DO**
+
+```ts
+expect(
+  formatUser({ firstName: "", lastName: "Lee" }),
+).toBe("Lee");
+```
+
+**DON'T**
+
+```ts
+expect(formatUser(null as never)).toBe("Unknown");
+```
+
+### TEST-003 — Mock the boundary, not its implementation
+
+**Level:** SHOULD
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#TEST-003
+
+**Rule:** Replace external collaborators with the smallest useful test double instead of recreating the library or service inside the test.
+
+**Why:** Complex mocks duplicate behavior, drift from reality, and can make tests pass against a fake system that production never runs.
+
+**DO**
+
+```ts
+const paymentGateway = {
+  charge: vi.fn().mockResolvedValue({ id: "pay_1" }),
+};
+
+await checkout(order, { paymentGateway });
+```
+
+**DON'T**
+
+```ts
+vi.mock("payment-sdk", () => ({
+  Client: class {
+    payments = { create: vi.fn().mockResolvedValue({ id: "pay_1" }) };
+  },
+}));
+```
+
+### TEST-004 — Test pure logic directly
+
+**Level:** SHOULD
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#TEST-004
+
+**Rule:** When transformation or decision logic has its own responsibility, test it at that boundary rather than only through a distant UI or controller.
+
+**Why:** Direct tests are faster, clearer about failures, and avoid coupling business assertions to unrelated rendering or infrastructure.
+
+**DO**
+
+```ts
+expect(
+  calculateDiscount({ subtotal: 100, tier: "gold" }),
+).toBe(10);
+```
+
+**DON'T**
+
+```tsx
+render(<Checkout subtotal={100} tier="gold" />);
+expect(screen.getByText("$90.00")).toBeVisible();
+```
+
+### TEST-005 — Use snapshots selectively
+
+**Level:** PREFER
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#TEST-005
+
+**Rule:** Prefer focused assertions when the behavior can be expressed directly; use snapshots when a meaningful structured output is expensive to assert piecemeal.
+
+**Why:** Large snapshots are easy to approve mechanically and often obscure which behavior was intended to change.
+
+**DO**
+
+```tsx
+render(<CheckoutPage />);
+expect(
+  screen.getByRole("heading", { name: "Checkout" }),
+).toBeVisible();
+```
+
+**DON'T**
+
+```tsx
+const { container } = render(<CheckoutPage />);
+expect(container).toMatchSnapshot();
+```
+
+### TEST-006 — Protect fixed bugs with regression tests
+
+**Level:** SHOULD
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#TEST-006
+
+**Rule:** When a bug can be reproduced deterministically, add a test that fails before the fix and passes after it.
+
+**Why:** A regression test preserves the newly learned system constraint and prevents the same defect from silently returning.
+
+**DO**
+
+```ts
+it("rejects a coupon at its exact expiry time", () => {
+  const now = new Date("2026-08-28T12:00:00Z");
+
+  expect(applyCoupon({ total: 100, expiresAt: now }, now)).toBe(100);
+});
+```
+
+**DON'T**
+
+```ts
+expect(applyCoupon({ total: 100, expiresAt: tomorrow })).toBe(90);
+```
+
+## TypeScript
+
+### TS-001 — Avoid any
+
+**Level:** MUST
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#TS-001
+
+**Rule:** Use the narrowest correct type instead of opting out of type safety.
+
+**Why:** any removes compiler guarantees at the boundary where they are most valuable and lets invalid states spread.
+
+**Exceptions:**
+- A tightly scoped third-party interoperability boundary may require a documented exception.
+
+**DO**
+
+```ts
+interface QueryParams {
+  page: number;
+  sortBy: string;
+}
+
+const buildParams = (params: QueryParams) => params;
+```
+
+**DON'T**
+
+```ts
+const buildParams = (params: any) => params;
+```
+
+### TS-002 — Keep types narrow
+
+**Level:** MUST
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#TS-002
+
+**Rule:** Model only states the runtime contract genuinely permits.
+
+**Why:** Broad unions and unnecessary optional properties force consumers to handle states that cannot occur.
+
+**DO**
+
+```ts
+type Status = "active" | "paused";
+```
+
+**DON'T**
+
+```ts
+type Status = string;
+```
+
+### TS-003 — Use type-only imports
+
+**Level:** SHOULD
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#TS-003
+
+**Rule:** Use import type when an import exists only in the type system.
+
+**Why:** Type-only imports communicate intent and prevent accidental runtime coupling or emitted imports.
+
+**DO**
+
+```ts
+import type { User } from "./types";
+```
+
+**DON'T**
+
+```ts
+import { User } from "./types";
+
+const user: User = getUser();
+```
+
+### TS-004 — Treat untrusted input as unknown
+
+**Level:** MUST
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#TS-004
+
+**Rule:** Parse and validate external data at a boundary before treating it as an internal domain type.
+
+**Why:** TypeScript types do not validate network responses, storage values, URL parameters, or other runtime input.
+
+**DO**
+
+```ts
+const payload: unknown = await response.json();
+const user = parseUser(payload);
+```
+
+**DON'T**
+
+```ts
+const user = response.json() as User;
+```
+
+### TS-005 — Optional means genuinely optional
+
+**Level:** MUST
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#TS-005
+
+**Rule:** Do not mark properties optional merely to satisfy existing call sites or silence type errors.
+
+**Why:** Unnecessary optionality pushes null checks to every consumer and permits states the runtime contract may never produce.
+
+**DO**
+
+```ts
+interface User {
+  id: string;
+  email: string;
+}
+```
+
+**DON'T**
+
+```ts
+interface User {
+  id?: string;
+  email?: string;
+}
+```
+
+### TS-006 — Model variants as discriminated unions
+
+**Level:** PREFER
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#TS-006
+
+**Rule:** When states have different valid fields, model them as explicit variants instead of combinations of unrelated booleans and optional properties.
+
+**Why:** Discriminated unions make invalid combinations unrepresentable and enable exhaustive handling.
+
+**DO**
+
+```ts
+type RequestState =
+  | { status: "loading" }
+  | { status: "error"; error: Error }
+  | { status: "success"; data: Data };
+```
+
+**DON'T**
+
+```ts
+interface RequestState {
+  error?: Error;
+  isLoading: boolean;
+  data?: Data;
+}
+```
+
+### TS-007 — Do not cast to silence the compiler
+
+**Level:** MUST
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#TS-007
+
+**Rule:** Use narrowing, validation, or a more accurate type instead of asserting a value into the shape you wish it had.
+
+**Why:** Unchecked assertions can hide a real mismatch between the runtime contract and the type model.
+
+**Exceptions:**
+- A narrow assertion is acceptable when runtime invariants are stronger than TypeScript can express and that invariant is documented or proven locally.
+
+**DO**
+
+```ts
+if (!isUser(payload)) {
+  throw new Error("Invalid user payload");
+}
+
+renderUser(payload);
+```
+
+**DON'T**
+
+```ts
+const user = payload as User;
+renderUser(user);
+```
+
+## Workflow
+
+### WORK-001 — Run the relevant checks before merge
+
+**Level:** MUST
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#WORK-001
+
+**Rule:** Type checking, linting, tests, build validation, generated artifacts, and other repository-specific checks should pass before code is merged.
+
+**Why:** Automated checks are cheaper and more consistent than asking reviewers to manually detect failures the toolchain already knows how to prove.
+
+**DO**
+
+```bash
+pnpm check
+pnpm build
+
+# Then commit and update the PR.
+```
+
+**DON'T**
+
+```bash
+git commit -am "Ship feature"
+git push
+```
+
+### WORK-002 — Keep changes scoped
+
+**Level:** SHOULD
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#WORK-002
+
+**Rule:** Avoid mixing unrelated refactors, folder moves, migrations, cleanup, and behavior changes in one change unless the coupling is explicit and necessary.
+
+**Why:** Focused diffs are easier to review, test, revert, and attribute when regressions occur.
+
+**DO**
+
+```text
+PR: Add CSV export
+- Add CSV export
+- Add export tests
+- Update export documentation
+```
+
+**DON'T**
+
+```text
+PR: Add CSV export
+- Add CSV export
+- Rename utils/ to shared/
+- Replace the test runner
+- Reformat unrelated files
+```
+
+### WORK-003 — Verify usage before deleting code
+
+**Level:** MUST
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#WORK-003
+
+**Rule:** Search static, dynamic, generated, and runtime entry points before concluding that code is unused.
+
+**Why:** Dead-code tools have blind spots around dynamic imports, reflection, configuration, and generated wiring; deleting live code is worse than temporarily keeping dead code.
+
+**DO**
+
+```bash
+rg "legacyParser|parseLegacy" src tests config
+# Inspect dynamic imports and generated/config wiring too.
+rm src/legacyParser.ts
+```
+
+**DON'T**
+
+```bash
+rm src/legacyParser.ts
+```
+
+### WORK-004 — Call out deferred or dependent work
+
+**Level:** SHOULD
+
+**Status:** stable
+
+**Source:** https://xanhast-pf.github.io/coding-bible/#WORK-004
+
+**Rule:** If tests, cleanup, migrations, or dependent changes intentionally land separately, make that dependency visible to reviewers.
+
+**Why:** Explicit follow-up boundaries prevent incomplete work from being mistaken for finished work and reduce accidental merge-order problems.
+
+**DO**
+
+```markdown
+## PR
+Adds the new parser.
+
+Follow-up: #482 removes the legacy parser after migration.
+Depends on: #479 landing first.
+```
+
+**DON'T**
+
+```markdown
+## PR
+Done.
+```

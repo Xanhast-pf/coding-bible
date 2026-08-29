@@ -1,0 +1,28 @@
+# Coding Bible agent context
+
+Canonical source: https://xanhast-pf.github.io/coding-bible/
+Rules included: 4
+
+Use the following Coding Bible rules as engineering constraints when they are relevant to the code you review, plan, generate, or modify. Apply them by intent, not by blindly matching wording. Do not invent exceptions. If project-specific requirements conflict with a rule, call out the conflict and explain the tradeoff.
+
+- WORK-001 [MUST] Run the relevant checks before merge
+  Rule: Type checking, linting, tests, build validation, generated artifacts, and other repository-specific checks should pass before code is merged.
+  Why: Automated checks are cheaper and more consistent than asking reviewers to manually detect failures the toolchain already knows how to prove.
+  Source: [WORK-001](https://xanhast-pf.github.io/coding-bible/#WORK-001)
+
+- WORK-002 [SHOULD] Keep changes scoped
+  Rule: Avoid mixing unrelated refactors, folder moves, migrations, cleanup, and behavior changes in one change unless the coupling is explicit and necessary.
+  Why: Focused diffs are easier to review, test, revert, and attribute when regressions occur.
+  Source: [WORK-002](https://xanhast-pf.github.io/coding-bible/#WORK-002)
+
+- WORK-003 [MUST] Verify usage before deleting code
+  Rule: Search static, dynamic, generated, and runtime entry points before concluding that code is unused.
+  Why: Dead-code tools have blind spots around dynamic imports, reflection, configuration, and generated wiring; deleting live code is worse than temporarily keeping dead code.
+  Source: [WORK-003](https://xanhast-pf.github.io/coding-bible/#WORK-003)
+
+- WORK-004 [SHOULD] Call out deferred or dependent work
+  Rule: If tests, cleanup, migrations, or dependent changes intentionally land separately, make that dependency visible to reviewers.
+  Why: Explicit follow-up boundaries prevent incomplete work from being mistaken for finished work and reduce accidental merge-order problems.
+  Source: [WORK-004](https://xanhast-pf.github.io/coding-bible/#WORK-004)
+
+When reporting violations, cite the rule ID and its canonical source URL.

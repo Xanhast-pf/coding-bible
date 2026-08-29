@@ -1,0 +1,226 @@
+{
+  "$id": "https://xanhast-pf.github.io/coding-bible/rules.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "canonicalSource": {
+      "format": "uri",
+      "type": "string"
+    },
+    "formatVersion": {
+      "const": 1,
+      "type": "integer"
+    },
+    "packs": {
+      "items": {
+        "$ref": "#/$defs/rulePack"
+      },
+      "type": "array"
+    },
+    "ruleCount": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "rules": {
+      "items": {
+        "$ref": "#/$defs/rule"
+      },
+      "type": "array"
+    },
+    "schema": {
+      "format": "uri",
+      "type": "string"
+    }
+  },
+  "required": [
+    "canonicalSource",
+    "formatVersion",
+    "packs",
+    "ruleCount",
+    "rules",
+    "schema"
+  ],
+  "title": "Coding Bible rule export",
+  "type": "object",
+  "$defs": {
+    "codeExample": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "language": {
+          "type": "string"
+        },
+        "note": {
+          "type": "string"
+        }
+      },
+      "required": ["code", "language"],
+      "type": "object"
+    },
+    "detection": {
+      "additionalProperties": false,
+      "properties": {
+        "autoFixable": {
+          "type": "boolean"
+        },
+        "detectable": {
+          "type": "boolean"
+        },
+        "strategy": {
+          "enum": ["ast", "lint", "semantic", "text"]
+        }
+      },
+      "required": ["autoFixable", "detectable"],
+      "type": "object"
+    },
+    "reference": {
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "type": "string"
+        },
+        "url": {
+          "format": "uri",
+          "type": "string"
+        }
+      },
+      "required": ["label", "url"],
+      "type": "object"
+    },
+    "rule": {
+      "additionalProperties": false,
+      "properties": {
+        "bad": {
+          "$ref": "#/$defs/codeExample"
+        },
+        "canonicalUrl": {
+          "format": "uri-reference",
+          "type": "string"
+        },
+        "detection": {
+          "$ref": "#/$defs/detection"
+        },
+        "exceptions": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "good": {
+          "$ref": "#/$defs/codeExample"
+        },
+        "id": {
+          "pattern": "^[A-Z][A-Z0-9]*-[0-9]{3}$",
+          "type": "string"
+        },
+        "level": {
+          "enum": ["must", "should", "prefer", "avoid"]
+        },
+        "pack": {
+          "enum": [
+            "accessibility",
+            "ai",
+            "apollo",
+            "architecture",
+            "core",
+            "css",
+            "dependencies",
+            "feature-flags",
+            "graphql",
+            "internationalization",
+            "javascript",
+            "legend-state",
+            "nextjs",
+            "performance",
+            "react",
+            "redux",
+            "tanstack-query",
+            "testing",
+            "typescript",
+            "workflow"
+          ]
+        },
+        "rationale": {
+          "type": "string"
+        },
+        "references": {
+          "items": {
+            "$ref": "#/$defs/reference"
+          },
+          "type": "array"
+        },
+        "status": {
+          "enum": ["draft", "stable", "deprecated"]
+        },
+        "summary": {
+          "type": "string"
+        },
+        "tags": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "title": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "canonicalUrl",
+        "detection",
+        "id",
+        "level",
+        "pack",
+        "rationale",
+        "status",
+        "summary",
+        "tags",
+        "title"
+      ],
+      "type": "object"
+    },
+    "rulePack": {
+      "additionalProperties": false,
+      "properties": {
+        "group": {
+          "enum": ["ecosystem", "foundation", "quality"]
+        },
+        "id": {
+          "enum": [
+            "accessibility",
+            "ai",
+            "apollo",
+            "architecture",
+            "core",
+            "css",
+            "dependencies",
+            "feature-flags",
+            "graphql",
+            "internationalization",
+            "javascript",
+            "legend-state",
+            "nextjs",
+            "performance",
+            "react",
+            "redux",
+            "tanstack-query",
+            "testing",
+            "typescript",
+            "workflow"
+          ]
+        },
+        "label": {
+          "type": "string"
+        },
+        "ruleCount": {
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": ["group", "id", "label", "ruleCount"],
+      "type": "object"
+    }
+  }
+}

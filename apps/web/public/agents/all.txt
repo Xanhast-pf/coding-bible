@@ -1,0 +1,648 @@
+# Coding Bible agent context
+
+Canonical source: https://xanhast-pf.github.io/coding-bible/
+Rules included: 128
+
+Use the following Coding Bible rules as engineering constraints when they are relevant to the code you review, plan, generate, or modify. Apply them by intent, not by blindly matching wording. Do not invent exceptions. If project-specific requirements conflict with a rule, call out the conflict and explain the tradeoff.
+
+- A11Y-001 [MUST] Prefer semantic HTML
+  Rule: Use the native element whose semantics match the interaction or content before recreating that behavior with generic elements.
+  Why: Native semantics provide keyboard behavior, accessibility information, and browser interoperability with less custom code.
+  Source: [A11Y-001](https://xanhast-pf.github.io/coding-bible/#A11Y-001)
+
+- A11Y-002 [MUST] Keyboard access is mandatory
+  Rule: Every interactive operation available with a pointer must also be operable from the keyboard when the platform interaction supports it.
+  Why: Pointer-only controls exclude keyboard and many assistive-technology users and usually indicate missing native semantics.
+  Source: [A11Y-002](https://xanhast-pf.github.io/coding-bible/#A11Y-002)
+
+- A11Y-003 [MUST] Keep focus visible
+  Rule: Interactive elements must expose a clear visible state when they receive keyboard focus.
+  Why: Keyboard users need a persistent visual indicator of where the next interaction will occur.
+  Source: [A11Y-003](https://xanhast-pf.github.io/coding-bible/#A11Y-003)
+
+- A11Y-004 [MUST] Controls need accessible names
+  Rule: Inputs and interactive controls must expose a meaningful programmatic name through visible text, a label, or appropriate accessible naming.
+  Why: A control that is visually recognizable but unnamed programmatically is ambiguous or unusable to assistive technology.
+  Source: [A11Y-004](https://xanhast-pf.github.io/coding-bible/#A11Y-004)
+
+- A11Y-005 [MUST] Do not communicate with color alone
+  Rule: When color carries status or meaning, provide another perceivable cue such as text, iconography, shape, or position.
+  Why: Color perception varies and may be unavailable entirely. Redundant cues make meaning robust for more users and environments.
+  Source: [A11Y-005](https://xanhast-pf.github.io/coding-bible/#A11Y-005)
+
+- A11Y-006 [MUST] Respect reduced motion preferences
+  Rule: Non-essential animation and smooth motion should adapt when the user requests reduced motion.
+  Why: Motion can cause discomfort or make interfaces harder to use, and operating systems expose a preference specifically for this need.
+  Source: [A11Y-006](https://xanhast-pf.github.io/coding-bible/#A11Y-006)
+
+- AI-001 [MUST] Generated code follows existing architecture
+  Rule: AI output should use established project patterns before introducing new abstractions.
+  Why: Agents can create parallel architectures and duplicate helpers when they optimize only for the local prompt.
+  Source: [AI-001](https://xanhast-pf.github.io/coding-bible/#AI-001)
+
+- AI-002 [MUST] Generated comments must add context
+  Rule: Remove AI comments that merely narrate the code.
+  Why: Generated narration adds noise quickly and creates stale text maintainers must keep synchronized.
+  Source: [AI-002](https://xanhast-pf.github.io/coding-bible/#AI-002)
+
+- AI-003 [SHOULD] Change the smallest coherent surface
+  Rule: Do not expand generated changes into unrelated cleanup or speculative refactors.
+  Why: Small coherent diffs are easier to validate, review, revert, and debug.
+  Source: [AI-003](https://xanhast-pf.github.io/coding-bible/#AI-003)
+
+- AI-004 [MUST] Inspect before creating
+  Rule: Before generating a new helper, component, type, dependency, or pattern, search for an existing solution in the project.
+  Why: Agents can generate locally correct duplicates because they do not automatically share a human maintainer's memory of the codebase.
+  Source: [AI-004](https://xanhast-pf.github.io/coding-bible/#AI-004)
+
+- AI-005 [MUST] Verify external APIs
+  Rule: Do not invent package exports, framework behavior, command flags, or platform capabilities from memory when they can be verified.
+  Why: Plausible-looking hallucinated APIs are especially expensive because generated code can appear correct until build or runtime.
+  Source: [AI-005](https://xanhast-pf.github.io/coding-bible/#AI-005)
+
+- AI-006 [SHOULD] Do not invent impossible edge cases
+  Rule: Generated defensive code and tests should reflect actual contracts, trust boundaries, and realistic failure modes.
+  Why: Speculative edge cases bloat types, branches, and tests while obscuring the conditions the system genuinely needs to handle.
+  Source: [AI-006](https://xanhast-pf.github.io/coding-bible/#AI-006)
+
+- AI-007 [MUST] Run the project's checks
+  Rule: Generated changes are not complete until the relevant type, lint, test, build, and project-specific validation commands have been run.
+  Why: AI can produce syntactically plausible changes that fail existing contracts elsewhere in the repository.
+  Source: [AI-007](https://xanhast-pf.github.io/coding-bible/#AI-007)
+
+- APOLLO-001 [MUST] Define stable cache identity
+  Rule: Ensure normalized entity types have stable identifiers, configuring keyFields when the schema does not use Apollo's default ID conventions.
+  Why: Apollo's normalized cache can only merge references to the same entity reliably when it can identify that entity consistently across operations.
+  Source: [APOLLO-001](https://xanhast-pf.github.io/coding-bible/#APOLLO-001)
+
+- APOLLO-002 [SHOULD] Choose fetch policies deliberately
+  Rule: Use cache-first, cache-and-network, network-only, no-cache, and related policies according to data freshness requirements rather than applying one policy everywhere.
+  Why: Fetch policy is a correctness and UX decision: it controls whether the UI trusts cached data, waits for the network, or persists results for future consumers.
+  Source: [APOLLO-002](https://xanhast-pf.github.io/coding-bible/#APOLLO-002)
+
+- APOLLO-003 [SHOULD] Return modified entities from mutations
+  Rule: When practical, mutation responses should include the modified entities and fields the UI/cache needs to reconcile.
+  Why: Apollo can normalize returned entities automatically, reducing manual cache manipulation and extra network requests.
+  Source: [APOLLO-003](https://xanhast-pf.github.io/coding-bible/#APOLLO-003)
+
+- APOLLO-004 [MUST] Reconcile mutation results explicitly
+  Rule: After a mutation, rely on normalized returned entities, update the cache, or selectively refetch affected queries instead of leaving stale client state.
+  Why: Server mutation success does not automatically guarantee every cached list or derived field reflects the new server state.
+  Source: [APOLLO-004](https://xanhast-pf.github.io/coding-bible/#APOLLO-004)
+
+- APOLLO-005 [SHOULD] Encode pagination and merge semantics in field policies
+  Rule: When cached fields require argument-aware identity, pagination, or custom merging, define that behavior in typePolicies instead of scattering cache repair logic across components.
+  Why: Field policies centralize how the normalized cache reads and merges a field, producing consistent behavior for every consumer.
+  Source: [APOLLO-005](https://xanhast-pf.github.io/coding-bible/#APOLLO-005)
+
+- APOLLO-006 [MUST] Handle GraphQL errors and partial data intentionally
+  Rule: Choose errorPolicy based on whether partial data is usable and distinguish GraphQL execution errors from network or transport failures.
+  Why: A GraphQL response may contain both data and errors; treating every failure as identical can discard useful data or display invalid partial state.
+  Source: [APOLLO-006](https://xanhast-pf.github.io/coding-bible/#APOLLO-006)
+
+- ARCH-001 [MUST] Separate responsibilities
+  Rule: Rendering, orchestration, transformation, persistence, and external I/O should have explicit ownership.
+  Why: Separating responsibilities makes code easier to reason about, test, replace, and review without requiring knowledge of unrelated behavior.
+  Source: [ARCH-001](https://xanhast-pf.github.io/coding-bible/#ARCH-001)
+
+- ARCH-002 [SHOULD] Keep dependencies explicit
+  Rule: A module should receive or import the dependencies it actually uses rather than reaching through unrelated layers.
+  Why: Explicit dependencies expose coupling and make ownership, testing, and replacement easier to understand.
+  Source: [ARCH-002](https://xanhast-pf.github.io/coding-bible/#ARCH-002)
+
+- ARCH-003 [PREFER] Abstract after understanding repetition
+  Rule: Do not create a shared abstraction until the repeated behavior and its stable differences are understood.
+  Why: Small duplication is cheaper than a premature abstraction that couples unrelated use cases and becomes difficult to change.
+  Source: [ARCH-003](https://xanhast-pf.github.io/coding-bible/#ARCH-003)
+
+- ARCH-004 [SHOULD] Keep side effects at boundaries
+  Rule: Prefer pure transformation logic internally and isolate network, storage, clock, DOM, and other side effects behind clear boundaries.
+  Why: Isolated side effects make behavior easier to test, replay, reason about, and replace.
+  Source: [ARCH-004](https://xanhast-pf.github.io/coding-bible/#ARCH-004)
+
+- ARCH-005 [MUST] Keep one source of truth
+  Rule: Do not maintain multiple independently writable representations of the same fact.
+  Why: Duplicated state can drift. A canonical owner with derived views removes synchronization bugs and clarifies responsibility.
+  Source: [ARCH-005](https://xanhast-pf.github.io/coding-bible/#ARCH-005)
+
+- ARCH-006 [PREFER] Do not add pass-through abstractions
+  Rule: An abstraction should add meaning, policy, transformation, or a stable boundary rather than merely forward every call unchanged.
+  Why: Pass-through layers add files and indirection without reducing coupling or complexity. Exceptions: A deliberate compatibility boundary or public facade may justify forwarding when it protects consumers from an unstable implementation.
+  Source: [ARCH-006](https://xanhast-pf.github.io/coding-bible/#ARCH-006)
+
+- ARCH-007 [SHOULD] Organize around cohesive domains
+  Rule: Prefer module boundaries that reflect product or business concepts over generic buckets that accumulate unrelated code.
+  Why: Domain-oriented structure keeps behavior that changes together physically close and makes ownership easier to discover.
+  Source: [ARCH-007](https://xanhast-pf.github.io/coding-bible/#ARCH-007)
+
+- CORE-001 [MUST] Optimize for understanding
+  Rule: Prefer code that communicates intent without requiring reconstruction by the reader.
+  Why: Code is maintained and reviewed far more often than it is initially written. Readability lowers review cost, defect risk, and onboarding time.
+  Source: [CORE-001](https://xanhast-pf.github.io/coding-bible/#CORE-001)
+
+- CORE-002 [MUST] Use descriptive names
+  Rule: Names should communicate the role of a value, function, or module.
+  Why: Descriptive names reduce the surrounding code a reader must inspect to understand behavior. Exceptions: Established mathematical notation in a clearly mathematical scope.; Conventional short names whose meaning is unambiguous in the immediate context.
+  Source: [CORE-002](https://xanhast-pf.github.io/coding-bible/#CORE-002)
+
+- CORE-003 [MUST] Prefer const
+  Rule: Declare bindings with const unless reassignment is required.
+  Why: Stable bindings reduce the number of state transitions a reader must track and prevent accidental reassignment.
+  Source: [CORE-003](https://xanhast-pf.github.io/coding-bible/#CORE-003)
+
+- CORE-004 [SHOULD] Comments explain why
+  Rule: Do not narrate obvious code. Document decisions, constraints, and workarounds.
+  Why: Narrative comments duplicate code and become stale. Decision comments preserve context the implementation cannot express.
+  Source: [CORE-004](https://xanhast-pf.github.io/coding-bible/#CORE-004)
+
+- CORE-005 [MUST] Delete dead code
+  Rule: Remove unused functions, imports, exports, files, branches, and dependencies when their last real use disappears.
+  Why: Dead code expands the surface maintainers must understand, obscures what is still supported, and creates false confidence that obsolete paths are tested.
+  Source: [CORE-005](https://xanhast-pf.github.io/coding-bible/#CORE-005)
+
+- CORE-006 [SHOULD] Name meaningful constants
+  Rule: Give unexplained values a name when their meaning, policy, or unit is not obvious from local context.
+  Why: A named value communicates why a number or string exists and makes policy changes less error-prone. Exceptions: Values whose meaning is inherent to the operation, such as 0 when checking an array length.
+  Source: [CORE-006](https://xanhast-pf.github.io/coding-bible/#CORE-006)
+
+- CORE-007 [SHOULD] Keep cohesive code together
+  Rule: Place closely related logic together instead of scattering tiny pieces across unnecessary files.
+  Why: Excessive fragmentation forces readers to jump between files to understand one behavior and can be as harmful as oversized modules.
+  Source: [CORE-007](https://xanhast-pf.github.io/coding-bible/#CORE-007)
+
+- CORE-008 [PREFER] Reduce nesting when it improves clarity
+  Rule: Prefer guard clauses and early exits when they make the main control flow easier to follow.
+  Why: Deep nesting increases the amount of state a reader must hold in mind. Early exits can make the successful path visually obvious. Exceptions: Do not introduce multiple early exits when they make cleanup or transactional behavior harder to reason about.
+  Source: [CORE-008](https://xanhast-pf.github.io/coding-bible/#CORE-008)
+
+- CORE-009 [MUST] Preserve non-obvious context during refactors
+  Rule: When moving code, preserve explanations and constraints that remain relevant to the behavior.
+  Why: Refactors should change structure without silently deleting historical context that future maintainers still need.
+  Source: [CORE-009](https://xanhast-pf.github.io/coding-bible/#CORE-009)
+
+- CORE-010 [SHOULD] Keep the public surface minimal
+  Rule: Do not export functions, types, modules, or abstractions that have no external consumer.
+  Why: Every export becomes a dependency point that constrains future refactoring and increases the surface maintainers must understand.
+  Source: [CORE-010](https://xanhast-pf.github.io/coding-bible/#CORE-010)
+
+- CORE-011 [PREFER] Hoist context-free helpers
+  Rule: If a helper does not depend on its parent function's local values, define it in a stable outer scope.
+  Why: Hoisting communicates independence, avoids needless recreation, and makes the helper easier to test or reuse locally.
+  Source: [CORE-011](https://xanhast-pf.github.io/coding-bible/#CORE-011)
+
+- CSS-001 [SHOULD] Name styles by role, not appearance
+  Rule: Class names should describe what an element is responsible for rather than its current visual treatment.
+  Why: Role-based names survive visual redesigns and communicate intent without coupling markup to presentation.
+  Source: [CSS-001](https://xanhast-pf.github.io/coding-bible/#CSS-001)
+
+- CSS-002 [SHOULD] Use tokens for shared visual decisions
+  Rule: Repeated semantic values such as colors, spacing, radii, typography, and elevation should come from a shared token source.
+  Why: Tokens keep visual decisions consistent and make system-wide changes possible without hunting through feature styles. Exceptions: A truly one-off value may stay local when promoting it would create a meaningless token.
+  Source: [CSS-002](https://xanhast-pf.github.io/coding-bible/#CSS-002)
+
+- CSS-003 [SHOULD] Prefer layout systems over manual nudges
+  Rule: Use flexbox, grid, intrinsic sizing, and normal flow before offsets or spacer elements used only to force alignment.
+  Why: Layout primitives encode relationships and adapt to content, while manual nudges are brittle across font sizes, translations, and responsive states.
+  Source: [CSS-003](https://xanhast-pf.github.io/coding-bible/#CSS-003)
+
+- CSS-004 [MUST] Keep component styles scoped
+  Rule: Component-specific styling should not leak into unrelated parts of the application through broad global selectors.
+  Why: Global leakage creates hidden coupling where changing one feature unexpectedly changes another.
+  Source: [CSS-004](https://xanhast-pf.github.io/coding-bible/#CSS-004)
+
+- DEP-001 [SHOULD] Prefer the platform before a dependency
+  Rule: Check whether the language, runtime, browser, or existing stack already solves the problem before adding a package.
+  Why: Every dependency adds bundle, security, upgrade, compatibility, and maintenance cost that native capabilities do not.
+  Source: [DEP-001](https://xanhast-pf.github.io/coding-bible/#DEP-001)
+
+- DEP-002 [MUST] Justify runtime dependencies
+  Rule: A runtime dependency should provide enough durable value to outweigh its bundle size, API surface, security surface, and upgrade cost.
+  Why: Convenient packages can become long-lived architectural commitments after their original use case disappears.
+  Source: [DEP-002](https://xanhast-pf.github.io/coding-bible/#DEP-002)
+
+- DEP-003 [MUST] Remove unused dependencies
+  Rule: Delete packages when no production, test, build, or tooling path still requires them.
+  Why: Unused packages continue to consume install time, security attention, and upgrade effort while providing no value.
+  Source: [DEP-003](https://xanhast-pf.github.io/coding-bible/#DEP-003)
+
+- DEP-004 [SHOULD] Avoid duplicate solutions
+  Rule: Do not introduce a second library for a capability the project already solves adequately.
+  Why: Multiple libraries for the same job increase bundle size, cognitive load, inconsistent conventions, and migration cost.
+  Source: [DEP-004](https://xanhast-pf.github.io/coding-bible/#DEP-004)
+
+- FLAG-001 [MUST] Every feature flag needs a removal plan
+  Rule: Create flags with an owner and a planned condition or date for removal.
+  Why: Flags are temporary branches in production code. Without an explicit end condition they become permanent complexity.
+  Source: [FLAG-001](https://xanhast-pf.github.io/coding-bible/#FLAG-001)
+
+- FLAG-002 [MUST] Delete flags after rollout
+  Rule: When rollout is complete, remove the code branches, tests that exist only for the flag, and the remote flag definition.
+  Why: Completed flags create dead branches and make maintainers reason about product states that can no longer occur.
+  Source: [FLAG-002](https://xanhast-pf.github.io/coding-bible/#FLAG-002)
+
+- FLAG-003 [SHOULD] Keep flag decisions at clear boundaries
+  Rule: Evaluate a feature flag in as few places as practical and pass the resulting behavior or state inward.
+  Why: Scattered flag checks create combinatorial states and make eventual removal much harder.
+  Source: [FLAG-003](https://xanhast-pf.github.io/coding-bible/#FLAG-003)
+
+- FLAG-004 [MUST] Test both reachable flag states
+  Rule: While a feature flag is active, test the meaningful enabled and disabled behavior that can reach production.
+  Why: A flag creates multiple production paths; only testing the preferred path leaves the fallback branch to rot.
+  Source: [FLAG-004](https://xanhast-pf.github.io/coding-bible/#FLAG-004)
+
+- GQL-001 [MUST] Name production operations
+  Rule: Give queries, mutations, and subscriptions unique meaningful operation names.
+  Why: Operation names make logs, traces, errors, persisted operations, and refetch behavior easier to identify than anonymous documents.
+  Source: [GQL-001](https://xanhast-pf.github.io/coding-bible/#GQL-001)
+
+- GQL-002 [MUST] Pass dynamic values as variables
+  Rule: Use GraphQL variables for runtime values instead of interpolating user or application data into operation strings.
+  Why: Variables preserve a stable operation document, keep values typed separately, and avoid fragile or unsafe string construction.
+  Source: [GQL-002](https://xanhast-pf.github.io/coding-bible/#GQL-002)
+
+- GQL-003 [SHOULD] Use fragments for genuinely shared selection sets
+  Rule: Extract repeated or component-owned field groups into named fragments rather than duplicating the same selection in many operations.
+  Why: Fragments keep repeated data requirements consistent and make component-level GraphQL requirements composable.
+  Source: [GQL-003](https://xanhast-pf.github.io/coding-bible/#GQL-003)
+
+- GQL-004 [MUST] Validate operations against the schema
+  Rule: Generate or check client operations against the current schema instead of relying on hand-maintained assumptions about fields and types.
+  Why: GraphQL's schema can prove invalid fields, selections, and variable types before runtime, making schema-aware validation one of its strongest safety features.
+  Source: [GQL-004](https://xanhast-pf.github.io/coding-bible/#GQL-004)
+
+- GQL-005 [MUST] Treat nullability as part of the contract
+  Rule: Model nullable fields and variables exactly as the schema declares them rather than erasing nullability in client types.
+  Why: GraphQL nullability expresses real response and input guarantees; weakening or strengthening it locally creates impossible assumptions.
+  Source: [GQL-005](https://xanhast-pf.github.io/coding-bible/#GQL-005)
+
+- GQL-006 [MUST] Paginate collections that can grow without bound
+  Rule: Do not design clients or schemas around fetching an ever-growing collection in one operation; use an appropriate pagination model.
+  Why: Unbounded lists create unpredictable latency, payload size, memory pressure, and rendering cost.
+  Source: [GQL-006](https://xanhast-pf.github.io/coding-bible/#GQL-006)
+
+- I18N-001 [MUST] Localize user-visible text
+  Rule: Labels, messages, placeholders, tooltips, empty states, and other user-visible copy should come from the application's localization system.
+  Why: Hardcoded interface strings create inaccessible translation boundaries and are expensive to find after a product expands to more locales.
+  Source: [I18N-001](https://xanhast-pf.github.io/coding-bible/#I18N-001)
+
+- I18N-002 [MUST] Parameterize messages instead of concatenating sentences
+  Rule: Use the localization system's placeholders and plural/select features rather than assembling human sentences from fragments.
+  Why: Word order, plural rules, gender, and punctuation vary by language; concatenation assumes English-like grammar.
+  Source: [I18N-002](https://xanhast-pf.github.io/coding-bible/#I18N-002)
+
+- I18N-003 [SHOULD] Use Intl for locale-sensitive formatting
+  Rule: Prefer Intl.DateTimeFormat, Intl.NumberFormat, and related platform APIs for dates, numbers, currencies, lists, and relative time.
+  Why: Intl encodes locale-specific formatting rules and avoids shipping another library for capabilities already provided by the platform.
+  Source: [I18N-003](https://xanhast-pf.github.io/coding-bible/#I18N-003)
+
+- I18N-004 [SHOULD] Design layouts for text expansion and direction
+  Rule: Avoid UI assumptions that only hold for short English text or left-to-right content.
+  Why: Translated labels can grow substantially, and RTL locales invert directional relationships that fixed-width or left/right-specific layouts may encode incorrectly.
+  Source: [I18N-004](https://xanhast-pf.github.io/coding-bible/#I18N-004)
+
+- JS-001 [MUST] Use async only for Promise semantics
+  Rule: Do not mark a function async unless it awaits work or intentionally exposes a Promise-returning contract.
+  Why: async changes the function's return contract and error behavior. Adding it without Promise semantics misleads callers and readers.
+  Source: [JS-001](https://xanhast-pf.github.io/coding-bible/#JS-001)
+
+- JS-002 [SHOULD] Use optional chaining for genuine nullish access
+  Rule: Prefer optional chaining when a value may legitimately be nullish, and avoid it when the contract guarantees the value exists.
+  Why: Correct optional chaining makes uncertainty explicit. Defensive chaining on guaranteed values hides incorrect types and weakens reasoning.
+  Source: [JS-002](https://xanhast-pf.github.io/coding-bible/#JS-002)
+
+- JS-003 [PREFER] Prefer default parameters for default inputs
+  Rule: When undefined should map to a stable default, express that contract in the function signature.
+  Why: Default parameters centralize input normalization and avoid mutation or guard boilerplate inside the function body.
+  Source: [JS-003](https://xanhast-pf.github.io/coding-bible/#JS-003)
+
+- JS-004 [SHOULD] Prefer namespace-safe built-ins
+  Rule: Use Number.parseInt, Number.isNaN, Object.hasOwn, and other precise modern built-ins instead of ambiguous legacy globals.
+  Why: Namespaced APIs communicate intent and avoid historical coercion or prototype pitfalls.
+  Source: [JS-004](https://xanhast-pf.github.io/coding-bible/#JS-004)
+
+- JS-005 [SHOULD] Scope try/catch to the operation that can fail
+  Rule: Keep setup and unrelated transformation outside a try block unless those operations are intentionally part of the same failure boundary.
+  Why: A narrow catch boundary makes it clear what failed and prevents unrelated programming errors from being mistaken for expected operational failures.
+  Source: [JS-005](https://xanhast-pf.github.io/coding-bible/#JS-005)
+
+- JS-006 [PREFER] Prefer non-mutating collection APIs when mutation is not intended
+  Rule: Use APIs such as toSorted, toReversed, and toSpliced when callers should retain the original collection.
+  Why: Non-mutating operations make ownership explicit and prevent changes from leaking through shared references.
+  Source: [JS-006](https://xanhast-pf.github.io/coding-bible/#JS-006)
+
+- JS-007 [PREFER] Use an options object when positional parameters stop being obvious
+  Rule: When a function has several same-shaped or optional arguments, prefer one named options object over a long positional signature.
+  Why: Named arguments make call sites self-documenting and allow the API to evolve without argument-order traps.
+  Source: [JS-007](https://xanhast-pf.github.io/coding-bible/#JS-007)
+
+- LEGEND-001 [MUST] Use useValue for React subscriptions
+  Rule: In new React code, read observables reactively through useValue instead of relying on observer plus get() tracking.
+  Why: Legend-State v3 recommends useValue for React Compiler compatibility because Hook calls remain visible to the compiler while arbitrary get() calls may be memoized.
+  Source: [LEGEND-001](https://xanhast-pf.github.io/coding-bible/#LEGEND-001)
+
+- LEGEND-002 [MUST] Use peek only when non-reactive access is intentional
+  Rule: Use get() in tracking contexts when changes should be observed and peek() when the read deliberately must not subscribe.
+  Why: get() participates in Legend-State dependency tracking while peek() explicitly opts out, so the choice communicates reactivity intent.
+  Source: [LEGEND-002](https://xanhast-pf.github.io/coding-bible/#LEGEND-002)
+
+- LEGEND-003 [MUST] Update observable state through observable APIs
+  Rule: Do not mutate raw objects returned from an observable and then set the same reference back; update the observable node with set, assign, or another notifying API.
+  Why: Mutating raw data bypasses Legend-State notifications, and setting the same reference back may produce no observable change.
+  Source: [LEGEND-003](https://xanhast-pf.github.io/coding-bible/#LEGEND-003)
+
+- LEGEND-004 [SHOULD] Batch sibling updates with assign
+  Rule: When several sibling fields change as one logical operation, prefer assign over a sequence of independent set calls.
+  Why: assign batches its individual writes so observers update once and the operation is represented as one coherent state transition.
+  Source: [LEGEND-004](https://xanhast-pf.github.io/coding-bible/#LEGEND-004)
+
+- LEGEND-005 [SHOULD] Subscribe at the narrowest useful observable
+  Rule: Prefer fine-grained subscriptions or computed useValue selectors over reading broad trees when only a small value drives rendering.
+  Why: Legend-State's performance model depends on minimizing tracked observables so unrelated changes do not rerender parent components.
+  Source: [LEGEND-005](https://xanhast-pf.github.io/coding-bible/#LEGEND-005)
+
+- LEGEND-006 [MUST] Keep persisted or synchronized state serializable
+  Rule: When observable data crosses persistence, transport, devtool, or application-specific serialization boundaries, keep that state plain and serializable.
+  Why: Legend-State itself can hold functions and rich values, but serialization layers cannot reliably preserve arbitrary runtime objects or circular references. Exceptions: Purely in-memory observables that never cross a serialization boundary may intentionally contain functions or other supported runtime values.
+  Source: [LEGEND-006](https://xanhast-pf.github.io/coding-bible/#LEGEND-006)
+
+- NEXT-001 [SHOULD] Default to Server Components
+  Rule: In the App Router, keep components server-side unless they require state, event handlers, effects, custom client hooks, or browser-only APIs.
+  Why: Server Components reduce client JavaScript and can fetch data close to its source without exposing server credentials.
+  Source: [NEXT-001](https://xanhast-pf.github.io/coding-bible/#NEXT-001)
+
+- NEXT-002 [SHOULD] Keep use client boundaries as small as practical
+  Rule: Mark the client entry point that needs interactivity instead of moving an entire page or layout into the client module graph.
+  Why: Everything imported below a use client boundary contributes to the client graph, so unnecessarily high boundaries increase shipped JavaScript.
+  Source: [NEXT-002](https://xanhast-pf.github.io/coding-bible/#NEXT-002)
+
+- NEXT-003 [MUST] Pass serializable props across the server-client boundary
+  Rule: Values passed from Server Components into Client Component entry points must be serializable by React.
+  Why: The React Server Component payload crosses a network boundary and cannot transport arbitrary runtime values such as callbacks.
+  Source: [NEXT-003](https://xanhast-pf.github.io/coding-bible/#NEXT-003)
+
+- NEXT-004 [MUST] Protect server-only code from client imports
+  Rule: Keep secrets, privileged data access, and server-only modules behind server boundaries and mark them server-only when accidental client import is plausible.
+  Why: Shared JavaScript module graphs make accidental environment leakage possible; build-time server-only guards turn that mistake into an explicit error.
+  Source: [NEXT-004](https://xanhast-pf.github.io/coding-bible/#NEXT-004)
+
+- NEXT-005 [SHOULD] Fetch server data directly from Server Components
+  Rule: When code already runs on the server, call the data source or shared server data function directly instead of making an HTTP request to your own Route Handler.
+  Why: Calling your own server endpoint from a Server Component adds an unnecessary network hop and duplicates a boundary that is already local.
+  Source: [NEXT-005](https://xanhast-pf.github.io/coding-bible/#NEXT-005)
+
+- NEXT-006 [SHOULD] Avoid avoidable data-fetching waterfalls
+  Rule: Start independent server requests in parallel and use Suspense/streaming boundaries when slow work should not block the whole route.
+  Why: Sequential independent requests accumulate latency, while parallel fetching and streaming can deliver useful UI earlier.
+  Source: [NEXT-006](https://xanhast-pf.github.io/coding-bible/#NEXT-006)
+
+- PERF-001 [PREFER] Optimize where scale exists
+  Rule: Prefer readability by default; reduce passes and allocations when scale makes the cost meaningful.
+  Why: Premature micro-optimization obscures code, while repeated work over genuinely large datasets creates measurable cost.
+  Source: [PERF-001](https://xanhast-pf.github.io/coding-bible/#PERF-001)
+
+- PERF-002 [SHOULD] Measure before micro-optimizing
+  Rule: Use profiling, benchmarks, production telemetry, or a known complexity bound before sacrificing clarity for small performance gains.
+  Why: Without evidence, optimization effort often targets code that is not responsible for meaningful user-visible cost.
+  Source: [PERF-002](https://xanhast-pf.github.io/coding-bible/#PERF-002)
+
+- PERF-003 [PREFER] Prefer one pass on hot large-data paths
+  Rule: When processing large collections in a hot path, avoid chains that create avoidable intermediate arrays when one clear pass can do the work.
+  Why: Repeated passes and intermediate allocations scale with dataset size and can become significant in data-heavy applications. Exceptions: For small collections or non-hot paths, a readable map/filter chain may be the better engineering choice.
+  Source: [PERF-003](https://xanhast-pf.github.io/coding-bible/#PERF-003)
+
+- PERF-004 [SHOULD] Choose data structures for access patterns
+  Rule: Use arrays, sets, maps, indexes, or other structures according to how the data is actually queried and updated.
+  Why: An appropriate data structure can remove repeated linear scans and communicate the intended operations directly.
+  Source: [PERF-004](https://xanhast-pf.github.io/coding-bible/#PERF-004)
+
+- REACT-001 [SHOULD] Keep components focused on presentation
+  Rule: Move substantial transformation, orchestration, and business logic out of component markup.
+  Why: Separating presentation from behavior keeps components readable and makes logic independently testable.
+  Source: [REACT-001](https://xanhast-pf.github.io/coding-bible/#REACT-001)
+
+- REACT-002 [PREFER] Do not memoize by reflex
+  Rule: Use memoization when identity matters or profiling demonstrates a meaningful benefit.
+  Why: Unnecessary memoization adds dependency management and cognitive overhead without guaranteed benefit.
+  Source: [REACT-002](https://xanhast-pf.github.io/coding-bible/#REACT-002)
+
+- REACT-003 [PREFER] Keep state as local as practical
+  Rule: Use explicit props and local state until multiple consumers genuinely require shared ownership.
+  Why: Global state hides dependencies. Local state and explicit data flow make ownership easier to understand.
+  Source: [REACT-003](https://xanhast-pf.github.io/coding-bible/#REACT-003)
+
+- REACT-004 [MUST] Do not store derived state
+  Rule: If a value can be calculated from current props or state during render, derive it instead of synchronizing another state variable.
+  Why: Duplicated state creates synchronization paths and can briefly or permanently disagree with its source values.
+  Source: [REACT-004](https://xanhast-pf.github.io/coding-bible/#REACT-004)
+
+- REACT-005 [SHOULD] Use effects to synchronize external systems
+  Rule: Do not reach for useEffect for synchronous derivation or event handling that can happen directly.
+  Why: Effects run after render and introduce a second execution phase. Keeping synchronous logic in render or event handlers reduces timing bugs.
+  Source: [REACT-005](https://xanhast-pf.github.io/coding-bible/#REACT-005)
+
+- REACT-006 [MUST] Use stable list keys
+  Rule: Keys should identify the same logical item across inserts, deletes, sorting, and re-rendering.
+  Why: Unstable keys can preserve state on the wrong item or force unnecessary unmounts and remounts. Exceptions: An index key is acceptable for a truly static list whose ordering and membership can never change.
+  Source: [REACT-006](https://xanhast-pf.github.io/coding-bible/#REACT-006)
+
+- REACT-007 [MUST] Keep render pure
+  Rule: Rendering should calculate UI from current inputs without mutating external state or causing observable side effects.
+  Why: React may render more than once, interrupt rendering, or discard work. Render-time side effects become unpredictable under those semantics.
+  Source: [REACT-007](https://xanhast-pf.github.io/coding-bible/#REACT-007)
+
+- REACT-008 [PREFER] Move static values out of components
+  Rule: Constants and configuration that never depend on props or state should live at module scope.
+  Why: Module-scope values communicate that they are invariant and avoid recreating objects or arrays on every render.
+  Source: [REACT-008](https://xanhast-pf.github.io/coding-bible/#REACT-008)
+
+- REACT-009 [MUST] Follow the Rules of Hooks
+  Rule: Call Hooks only at the top level of React components or custom Hooks, never inside loops, conditions, nested functions, or try/catch blocks.
+  Why: React relies on stable Hook call order to associate state and effects with the correct component instance.
+  Source: [REACT-009](https://xanhast-pf.github.io/coding-bible/#REACT-009)
+
+- REACT-010 [MUST] Let React call components
+  Rule: Render components through JSX instead of invoking component functions directly.
+  Why: React must control component invocation to preserve Hook behavior, reconciliation, and component identity.
+  Source: [REACT-010](https://xanhast-pf.github.io/coding-bible/#REACT-010)
+
+- REACT-011 [MUST] Treat props, state, and Hook inputs as immutable snapshots
+  Rule: Do not mutate values supplied by React or values already passed into Hooks or JSX.
+  Why: React assumes render inputs remain stable for the duration of a render so it can restart, reuse, and optimize work safely.
+  Source: [REACT-011](https://xanhast-pf.github.io/coding-bible/#REACT-011)
+
+- REACT-012 [MUST] Do not suppress Hook dependency correctness
+  Rule: Include the reactive values a Hook depends on instead of silencing exhaustive-dependency checks to preserve an intended stale closure.
+  Why: Missing dependencies make Effects and memoized callbacks observe outdated values and create timing-sensitive bugs.
+  Source: [REACT-012](https://xanhast-pf.github.io/coding-bible/#REACT-012)
+
+- REACT-013 [SHOULD] Extract coherent React responsibilities, not arbitrary line counts
+  Rule: Split a component or custom Hook when it owns multiple independent responsibilities or becomes difficult to scan, not merely because it crossed a fixed LOC threshold.
+  Why: Small focused units are easier to test and understand, but mechanical file-size limits often create fragmentation without improving cohesion.
+  Source: [REACT-013](https://xanhast-pf.github.io/coding-bible/#REACT-013)
+
+- REDUX-001 [SHOULD] Use Redux Toolkit for modern Redux
+  Rule: Prefer configureStore, createSlice, createAsyncThunk, RTK Query, and other Redux Toolkit APIs over hand-written legacy Redux boilerplate.
+  Why: Redux Toolkit is the official recommended toolset and encodes safer defaults for immutable updates, DevTools, and store configuration.
+  Source: [REDUX-001](https://xanhast-pf.github.io/coding-bible/#REDUX-001)
+
+- REDUX-002 [MUST] Keep reducers pure
+  Rule: Reducers must not perform async work, generate nondeterministic values, mutate external variables, or trigger side effects.
+  Why: Redux may replay reducer logic for debugging and hot reload; deterministic pure reducers make state transitions reproducible.
+  Source: [REDUX-002](https://xanhast-pf.github.io/coding-bible/#REDUX-002)
+
+- REDUX-003 [MUST] Keep Redux state and normal actions serializable
+  Rule: Avoid Promises, functions, class instances, Maps/Sets, DOM nodes, and other non-serializable values in Redux state or actions that reach reducers.
+  Why: Serializable data preserves DevTools, persistence, replay, predictable equality behavior, and debugging. Exceptions: Middleware may intentionally intercept a non-serializable action before it reaches reducers.
+  Source: [REDUX-003](https://xanhast-pf.github.io/coding-bible/#REDUX-003)
+
+- REDUX-004 [MUST] Keep Redux state minimal and derive the rest
+  Rule: Store canonical source data and derive filtered, aggregated, or presentation-ready values through selectors.
+  Why: Duplicated derived state introduces synchronization bugs and makes updates more complicated than recalculating from the source.
+  Source: [REDUX-004](https://xanhast-pf.github.io/coding-bible/#REDUX-004)
+
+- REDUX-005 [SHOULD] Normalize complex relational collections
+  Rule: Store heavily relational or repeatedly updated entity data in a normalized shape, typically with createEntityAdapter.
+  Why: Normalization makes entity lookup and single-item updates simpler and reduces duplicated nested copies of the same entity.
+  Source: [REDUX-005](https://xanhast-pf.github.io/coding-bible/#REDUX-005)
+
+- REDUX-006 [SHOULD] Use selectors to encapsulate state shape
+  Rule: Reusable consumers should ask selectors for domain values instead of spreading knowledge of deep store paths throughout the UI.
+  Why: Selectors create a stable read boundary so state structure can change without rewriting every consumer.
+  Source: [REDUX-006](https://xanhast-pf.github.io/coding-bible/#REDUX-006)
+
+- REDUX-007 [PREFER] Memoize selectors only when they derive expensive or referentially new values
+  Rule: Do not wrap every direct state lookup in createSelector; reserve memoization for real derivation or stable-reference needs.
+  Why: Unnecessary selector memoization adds complexity without avoiding work, while derived arrays and expensive calculations can benefit substantially.
+  Source: [REDUX-007](https://xanhast-pf.github.io/coding-bible/#REDUX-007)
+
+- REDUX-008 [PREFER] Keep transient UI and form state local by default
+  Rule: Do not put temporary form edits, hover state, or component-local interaction state in Redux without a genuine cross-application ownership need.
+  Why: Local state keeps ownership close to the UI and avoids dispatching global actions for data that is neither shared nor cached.
+  Source: [REDUX-008](https://xanhast-pf.github.io/coding-bible/#REDUX-008)
+
+- REDUX-009 [MUST] Use one Redux store per application
+  Rule: A standard Redux application should have one configured store instance shared through the application boundary.
+  Why: A single store preserves one state graph, one dispatch pipeline, and predictable DevTools/debugging behavior.
+  Source: [REDUX-009](https://xanhast-pf.github.io/coding-bible/#REDUX-009)
+
+- REDUX-010 [SHOULD] Organize Redux logic by feature
+  Rule: Keep a feature's reducer logic, actions, and selectors close together, typically in a Redux Toolkit slice, instead of separating the app into global actions/reducers folders.
+  Why: Feature-oriented slices improve cohesion and make the code that changes together easier to find and maintain.
+  Source: [REDUX-010](https://xanhast-pf.github.io/coding-bible/#REDUX-010)
+
+- REDUX-011 [SHOULD] Prefer RTK Query for server data in Redux applications
+  Rule: When Redux is already the application state platform, use RTK Query as the default server fetching and caching layer instead of hand-writing request/cache reducers.
+  Why: RTK Query provides request deduplication, caching, loading state, invalidation, and generated hooks while following Redux's recommended architecture.
+  Source: [REDUX-011](https://xanhast-pf.github.io/coding-bible/#REDUX-011)
+
+- TQ-001 [MUST] Put every query dependency in the query key
+  Rule: If the query function changes its result based on a variable, include that variable in the query key.
+  Why: The query key is TanStack Query's cache identity and dependency list; omitting an input can return or overwrite data under the wrong cache entry.
+  Source: [TQ-001](https://xanhast-pf.github.io/coding-bible/#TQ-001)
+
+- TQ-002 [MUST] Keep query keys serializable and deterministic
+  Rule: Use stable serializable values that uniquely describe the requested server data.
+  Why: TanStack Query hashes query keys to identify cached results; unstable or non-serializable identity makes caching unpredictable.
+  Source: [TQ-002](https://xanhast-pf.github.io/coding-bible/#TQ-002)
+
+- TQ-003 [SHOULD] Configure freshness instead of fighting refetch behavior
+  Rule: Understand staleTime and the default refetch triggers before disabling mount, focus, or reconnect refetching globally.
+  Why: TanStack Query considers cached data stale by default and refetches stale queries at useful lifecycle points; staleTime is the primary control for expected freshness.
+  Source: [TQ-003](https://xanhast-pf.github.io/coding-bible/#TQ-003)
+
+- TQ-004 [MUST] Invalidate related queries after successful mutations
+  Rule: When a mutation makes cached server data stale, invalidate the smallest relevant query-key scope after success.
+  Why: Targeted invalidation lets TanStack Query mark dependent data stale and refetch active consumers without manually synchronizing duplicate server state.
+  Source: [TQ-004](https://xanhast-pf.github.io/coding-bible/#TQ-004)
+
+- TQ-005 [MUST] Make query functions reject failed requests
+  Rule: A query function must throw or return a rejected Promise for failures; clients such as fetch need an explicit non-OK response check.
+  Why: TanStack Query determines error state from rejected query functions. Returning an error response as successful data bypasses retry and error handling.
+  Source: [TQ-005](https://xanhast-pf.github.io/coding-bible/#TQ-005)
+
+- TEST-001 [MUST] Test observable behavior
+  Rule: Tests should verify a unit's public responsibility rather than reproduce its internal implementation.
+  Why: Behavior-focused tests survive safe refactors and fail when user-visible or contract-visible behavior actually changes.
+  Source: [TEST-001](https://xanhast-pf.github.io/coding-bible/#TEST-001)
+
+- TEST-002 [SHOULD] Test realistic states
+  Rule: Edge cases should come from real contracts and failure modes rather than impossible values invented only to increase coverage.
+  Why: Tests for impossible states add maintenance cost while distracting from failures the system can actually encounter.
+  Source: [TEST-002](https://xanhast-pf.github.io/coding-bible/#TEST-002)
+
+- TEST-003 [SHOULD] Mock the boundary, not its implementation
+  Rule: Replace external collaborators with the smallest useful test double instead of recreating the library or service inside the test.
+  Why: Complex mocks duplicate behavior, drift from reality, and can make tests pass against a fake system that production never runs.
+  Source: [TEST-003](https://xanhast-pf.github.io/coding-bible/#TEST-003)
+
+- TEST-004 [SHOULD] Test pure logic directly
+  Rule: When transformation or decision logic has its own responsibility, test it at that boundary rather than only through a distant UI or controller.
+  Why: Direct tests are faster, clearer about failures, and avoid coupling business assertions to unrelated rendering or infrastructure.
+  Source: [TEST-004](https://xanhast-pf.github.io/coding-bible/#TEST-004)
+
+- TEST-005 [PREFER] Use snapshots selectively
+  Rule: Prefer focused assertions when the behavior can be expressed directly; use snapshots when a meaningful structured output is expensive to assert piecemeal.
+  Why: Large snapshots are easy to approve mechanically and often obscure which behavior was intended to change.
+  Source: [TEST-005](https://xanhast-pf.github.io/coding-bible/#TEST-005)
+
+- TEST-006 [SHOULD] Protect fixed bugs with regression tests
+  Rule: When a bug can be reproduced deterministically, add a test that fails before the fix and passes after it.
+  Why: A regression test preserves the newly learned system constraint and prevents the same defect from silently returning.
+  Source: [TEST-006](https://xanhast-pf.github.io/coding-bible/#TEST-006)
+
+- TS-001 [MUST] Avoid any
+  Rule: Use the narrowest correct type instead of opting out of type safety.
+  Why: any removes compiler guarantees at the boundary where they are most valuable and lets invalid states spread. Exceptions: A tightly scoped third-party interoperability boundary may require a documented exception.
+  Source: [TS-001](https://xanhast-pf.github.io/coding-bible/#TS-001)
+
+- TS-002 [MUST] Keep types narrow
+  Rule: Model only states the runtime contract genuinely permits.
+  Why: Broad unions and unnecessary optional properties force consumers to handle states that cannot occur.
+  Source: [TS-002](https://xanhast-pf.github.io/coding-bible/#TS-002)
+
+- TS-003 [SHOULD] Use type-only imports
+  Rule: Use import type when an import exists only in the type system.
+  Why: Type-only imports communicate intent and prevent accidental runtime coupling or emitted imports.
+  Source: [TS-003](https://xanhast-pf.github.io/coding-bible/#TS-003)
+
+- TS-004 [MUST] Treat untrusted input as unknown
+  Rule: Parse and validate external data at a boundary before treating it as an internal domain type.
+  Why: TypeScript types do not validate network responses, storage values, URL parameters, or other runtime input.
+  Source: [TS-004](https://xanhast-pf.github.io/coding-bible/#TS-004)
+
+- TS-005 [MUST] Optional means genuinely optional
+  Rule: Do not mark properties optional merely to satisfy existing call sites or silence type errors.
+  Why: Unnecessary optionality pushes null checks to every consumer and permits states the runtime contract may never produce.
+  Source: [TS-005](https://xanhast-pf.github.io/coding-bible/#TS-005)
+
+- TS-006 [PREFER] Model variants as discriminated unions
+  Rule: When states have different valid fields, model them as explicit variants instead of combinations of unrelated booleans and optional properties.
+  Why: Discriminated unions make invalid combinations unrepresentable and enable exhaustive handling.
+  Source: [TS-006](https://xanhast-pf.github.io/coding-bible/#TS-006)
+
+- TS-007 [MUST] Do not cast to silence the compiler
+  Rule: Use narrowing, validation, or a more accurate type instead of asserting a value into the shape you wish it had.
+  Why: Unchecked assertions can hide a real mismatch between the runtime contract and the type model. Exceptions: A narrow assertion is acceptable when runtime invariants are stronger than TypeScript can express and that invariant is documented or proven locally.
+  Source: [TS-007](https://xanhast-pf.github.io/coding-bible/#TS-007)
+
+- WORK-001 [MUST] Run the relevant checks before merge
+  Rule: Type checking, linting, tests, build validation, generated artifacts, and other repository-specific checks should pass before code is merged.
+  Why: Automated checks are cheaper and more consistent than asking reviewers to manually detect failures the toolchain already knows how to prove.
+  Source: [WORK-001](https://xanhast-pf.github.io/coding-bible/#WORK-001)
+
+- WORK-002 [SHOULD] Keep changes scoped
+  Rule: Avoid mixing unrelated refactors, folder moves, migrations, cleanup, and behavior changes in one change unless the coupling is explicit and necessary.
+  Why: Focused diffs are easier to review, test, revert, and attribute when regressions occur.
+  Source: [WORK-002](https://xanhast-pf.github.io/coding-bible/#WORK-002)
+
+- WORK-003 [MUST] Verify usage before deleting code
+  Rule: Search static, dynamic, generated, and runtime entry points before concluding that code is unused.
+  Why: Dead-code tools have blind spots around dynamic imports, reflection, configuration, and generated wiring; deleting live code is worse than temporarily keeping dead code.
+  Source: [WORK-003](https://xanhast-pf.github.io/coding-bible/#WORK-003)
+
+- WORK-004 [SHOULD] Call out deferred or dependent work
+  Rule: If tests, cleanup, migrations, or dependent changes intentionally land separately, make that dependency visible to reviewers.
+  Why: Explicit follow-up boundaries prevent incomplete work from being mistaken for finished work and reduce accidental merge-order problems.
+  Source: [WORK-004](https://xanhast-pf.github.io/coding-bible/#WORK-004)
+
+When reporting violations, cite the rule ID and its canonical source URL.

@@ -1,0 +1,43 @@
+# Coding Bible agent context
+
+Canonical source: https://xanhast-pf.github.io/coding-bible/
+Rules included: 7
+
+Use the following Coding Bible rules as engineering constraints when they are relevant to the code you review, plan, generate, or modify. Apply them by intent, not by blindly matching wording. Do not invent exceptions. If project-specific requirements conflict with a rule, call out the conflict and explain the tradeoff.
+
+- JS-001 [MUST] Use async only for Promise semantics
+  Rule: Do not mark a function async unless it awaits work or intentionally exposes a Promise-returning contract.
+  Why: async changes the function's return contract and error behavior. Adding it without Promise semantics misleads callers and readers.
+  Source: [JS-001](https://xanhast-pf.github.io/coding-bible/#JS-001)
+
+- JS-002 [SHOULD] Use optional chaining for genuine nullish access
+  Rule: Prefer optional chaining when a value may legitimately be nullish, and avoid it when the contract guarantees the value exists.
+  Why: Correct optional chaining makes uncertainty explicit. Defensive chaining on guaranteed values hides incorrect types and weakens reasoning.
+  Source: [JS-002](https://xanhast-pf.github.io/coding-bible/#JS-002)
+
+- JS-003 [PREFER] Prefer default parameters for default inputs
+  Rule: When undefined should map to a stable default, express that contract in the function signature.
+  Why: Default parameters centralize input normalization and avoid mutation or guard boilerplate inside the function body.
+  Source: [JS-003](https://xanhast-pf.github.io/coding-bible/#JS-003)
+
+- JS-004 [SHOULD] Prefer namespace-safe built-ins
+  Rule: Use Number.parseInt, Number.isNaN, Object.hasOwn, and other precise modern built-ins instead of ambiguous legacy globals.
+  Why: Namespaced APIs communicate intent and avoid historical coercion or prototype pitfalls.
+  Source: [JS-004](https://xanhast-pf.github.io/coding-bible/#JS-004)
+
+- JS-005 [SHOULD] Scope try/catch to the operation that can fail
+  Rule: Keep setup and unrelated transformation outside a try block unless those operations are intentionally part of the same failure boundary.
+  Why: A narrow catch boundary makes it clear what failed and prevents unrelated programming errors from being mistaken for expected operational failures.
+  Source: [JS-005](https://xanhast-pf.github.io/coding-bible/#JS-005)
+
+- JS-006 [PREFER] Prefer non-mutating collection APIs when mutation is not intended
+  Rule: Use APIs such as toSorted, toReversed, and toSpliced when callers should retain the original collection.
+  Why: Non-mutating operations make ownership explicit and prevent changes from leaking through shared references.
+  Source: [JS-006](https://xanhast-pf.github.io/coding-bible/#JS-006)
+
+- JS-007 [PREFER] Use an options object when positional parameters stop being obvious
+  Rule: When a function has several same-shaped or optional arguments, prefer one named options object over a long positional signature.
+  Why: Named arguments make call sites self-documenting and allow the API to evolve without argument-order traps.
+  Source: [JS-007](https://xanhast-pf.github.io/coding-bible/#JS-007)
+
+When reporting violations, cite the rule ID and its canonical source URL.

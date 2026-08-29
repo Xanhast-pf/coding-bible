@@ -1,0 +1,43 @@
+# Coding Bible agent context
+
+Canonical source: https://xanhast-pf.github.io/coding-bible/
+Rules included: 7
+
+Use the following Coding Bible rules as engineering constraints when they are relevant to the code you review, plan, generate, or modify. Apply them by intent, not by blindly matching wording. Do not invent exceptions. If project-specific requirements conflict with a rule, call out the conflict and explain the tradeoff.
+
+- TS-001 [MUST] Avoid any
+  Rule: Use the narrowest correct type instead of opting out of type safety.
+  Why: any removes compiler guarantees at the boundary where they are most valuable and lets invalid states spread. Exceptions: A tightly scoped third-party interoperability boundary may require a documented exception.
+  Source: [TS-001](https://xanhast-pf.github.io/coding-bible/#TS-001)
+
+- TS-002 [MUST] Keep types narrow
+  Rule: Model only states the runtime contract genuinely permits.
+  Why: Broad unions and unnecessary optional properties force consumers to handle states that cannot occur.
+  Source: [TS-002](https://xanhast-pf.github.io/coding-bible/#TS-002)
+
+- TS-003 [SHOULD] Use type-only imports
+  Rule: Use import type when an import exists only in the type system.
+  Why: Type-only imports communicate intent and prevent accidental runtime coupling or emitted imports.
+  Source: [TS-003](https://xanhast-pf.github.io/coding-bible/#TS-003)
+
+- TS-004 [MUST] Treat untrusted input as unknown
+  Rule: Parse and validate external data at a boundary before treating it as an internal domain type.
+  Why: TypeScript types do not validate network responses, storage values, URL parameters, or other runtime input.
+  Source: [TS-004](https://xanhast-pf.github.io/coding-bible/#TS-004)
+
+- TS-005 [MUST] Optional means genuinely optional
+  Rule: Do not mark properties optional merely to satisfy existing call sites or silence type errors.
+  Why: Unnecessary optionality pushes null checks to every consumer and permits states the runtime contract may never produce.
+  Source: [TS-005](https://xanhast-pf.github.io/coding-bible/#TS-005)
+
+- TS-006 [PREFER] Model variants as discriminated unions
+  Rule: When states have different valid fields, model them as explicit variants instead of combinations of unrelated booleans and optional properties.
+  Why: Discriminated unions make invalid combinations unrepresentable and enable exhaustive handling.
+  Source: [TS-006](https://xanhast-pf.github.io/coding-bible/#TS-006)
+
+- TS-007 [MUST] Do not cast to silence the compiler
+  Rule: Use narrowing, validation, or a more accurate type instead of asserting a value into the shape you wish it had.
+  Why: Unchecked assertions can hide a real mismatch between the runtime contract and the type model. Exceptions: A narrow assertion is acceptable when runtime invariants are stronger than TypeScript can express and that invariant is documented or proven locally.
+  Source: [TS-007](https://xanhast-pf.github.io/coding-bible/#TS-007)
+
+When reporting violations, cite the rule ID and its canonical source URL.
