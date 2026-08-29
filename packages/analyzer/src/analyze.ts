@@ -3,16 +3,19 @@ import ts from "typescript";
 import {
   createDetectorContext,
   createDetectorContexts,
+  createDetectorContextsFromProgram,
   type ResolvedAnalyzeInput,
 } from "./context.ts";
 import { detectors } from "./detectors/index.ts";
 import type {
   AnalyzeInput,
+  AnalyzeOptions,
   AnalyzeResult,
   AnalyzerDiagnostic,
   AnalyzerLanguage,
   Detector,
   DetectorContext,
+  ProgramAnalyzeInput,
 } from "./types.ts";
 
 const defaultFileNameByLanguage = {
@@ -24,9 +27,13 @@ const defaultFileNameByLanguage = {
 
 const getApplicableDetectors = (
   language: AnalyzerLanguage,
+  fileName: string,
+  options: AnalyzeOptions,
 ): readonly Detector[] =>
   detectors.filter(
-    (detector) => !detector.languages || detector.languages.includes(language),
+    (detector) =>
+      (!detector.languages || detector.languages.includes(language)) &&
+      (options.isRuleEnabled?.(detector.ruleId, fileName) ?? true),
   );
 
 const createDiagnostic = (
@@ -78,8 +85,16 @@ const dedupeFindings = (findings: AnalyzeResult["findings"]) => {
   });
 };
 
-const analyzeContext = (context: DetectorContext): AnalyzeResult => {
-  const applicableDetectors = getApplicableDetectors(context.language);
+const analyzeContext = (
+  context: DetectorContext,
+  options: AnalyzeOptions,
+): AnalyzeResult => {
+  options.signal?.throwIfAborted();
+  const applicableDetectors = getApplicableDetectors(
+    context.language,
+    context.sourceFile.fileName,
+    options,
+  );
   const applicableRuleIds = [
     ...new Set(applicableDetectors.map((detector) => detector.ruleId)),
   ].sort();
@@ -96,9 +111,12 @@ const analyzeContext = (context: DetectorContext): AnalyzeResult => {
     };
   }
 
-  const findings = dedupeFindings(
-    applicableDetectors.flatMap((detector) => detector.analyze(context)),
-  );
+  const rawFindings = [];
+  for (const detector of applicableDetectors) {
+    options.signal?.throwIfAborted();
+    rawFindings.push(...detector.analyze(context));
+  }
+  const findings = dedupeFindings(rawFindings);
 
   findings.sort(
     (left, right) =>
@@ -126,8 +144,26 @@ const resolveInput = (input: AnalyzeInput, index = 0): ResolvedAnalyzeInput => (
   source: input.source,
 });
 
+const emptyResult = (
+  language: AnalyzerLanguage,
+  fileName: string,
+  options: AnalyzeOptions,
+): AnalyzeResult => {
+  const applicableDetectors = getApplicableDetectors(language, fileName, options);
+
+  return {
+    checksRun: applicableDetectors.length,
+    diagnostics: [],
+    findings: [],
+    ruleIdsChecked: [
+      ...new Set(applicableDetectors.map((detector) => detector.ruleId)),
+    ].sort(),
+  };
+};
+
 export const analyzeMany = (
   inputs: readonly AnalyzeInput[],
+  options: AnalyzeOptions = {},
 ): readonly AnalyzeResult[] => {
   if (!inputs.length) {
     return [];
@@ -138,48 +174,68 @@ export const analyzeMany = (
   const nonEmptyIndexes: number[] = [];
 
   inputs.forEach((input, index) => {
-    const applicableDetectors = getApplicableDetectors(input.language);
-    const applicableRuleIds = [
-      ...new Set(applicableDetectors.map((detector) => detector.ruleId)),
-    ].sort();
+    const resolved = resolveInput(input, index);
 
     if (!input.source.trim()) {
-      results[index] = {
-        checksRun: applicableDetectors.length,
-        diagnostics: [],
-        findings: [],
-        ruleIdsChecked: applicableRuleIds,
-      };
+      results[index] = emptyResult(resolved.language, resolved.fileName, options);
       return;
     }
 
-    nonEmptyInputs.push(resolveInput(input, index));
+    nonEmptyInputs.push(resolved);
     nonEmptyIndexes.push(index);
   });
 
+  options.signal?.throwIfAborted();
   const contexts = createDetectorContexts(nonEmptyInputs);
   contexts.forEach((context, contextIndex) => {
+    options.signal?.throwIfAborted();
     const resultIndex = nonEmptyIndexes[contextIndex];
     if (resultIndex !== undefined) {
-      results[resultIndex] = analyzeContext(context);
+      results[resultIndex] = analyzeContext(context, options);
     }
   });
 
   return results;
 };
 
-export const analyze = (input: AnalyzeInput): AnalyzeResult => {
-  if (!input.source.trim()) {
-    const applicableDetectors = getApplicableDetectors(input.language);
-    return {
-      checksRun: applicableDetectors.length,
-      diagnostics: [],
-      findings: [],
-      ruleIdsChecked: [
-        ...new Set(applicableDetectors.map((detector) => detector.ruleId)),
-      ].sort(),
-    };
+export const analyzeProgram = (
+  program: ts.Program,
+  inputs: readonly ProgramAnalyzeInput[],
+  options: AnalyzeOptions = {},
+): readonly AnalyzeResult[] => {
+  if (!inputs.length) {
+    return [];
   }
 
-  return analyzeContext(createDetectorContext(resolveInput(input)));
+  options.signal?.throwIfAborted();
+  const resolvedInputs = inputs.map((input): ResolvedAnalyzeInput => {
+    const sourceFile = program.getSourceFile(input.fileName);
+    if (!sourceFile) {
+      throw new Error(`Analyzer could not find ${input.fileName} in the TypeScript project.`);
+    }
+
+    return {
+      fileName: input.fileName,
+      language: input.language,
+      source: sourceFile.text,
+    };
+  });
+
+  return createDetectorContextsFromProgram(resolvedInputs, program).map((context) => {
+    options.signal?.throwIfAborted();
+    return analyzeContext(context, options);
+  });
+};
+
+export const analyze = (
+  input: AnalyzeInput,
+  options: AnalyzeOptions = {},
+): AnalyzeResult => {
+  const resolved = resolveInput(input);
+
+  if (!input.source.trim()) {
+    return emptyResult(resolved.language, resolved.fileName, options);
+  }
+
+  return analyzeContext(createDetectorContext(resolved), options);
 };

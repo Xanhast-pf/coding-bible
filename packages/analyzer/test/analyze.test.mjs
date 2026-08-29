@@ -307,3 +307,13 @@ test("detects Legend-State observer aliases without requiring a dollar-sign loca
     [],
   );
 });
+
+test("analysis can be cancelled before detector execution", () => {
+  const controller = new AbortController();
+  controller.abort();
+
+  assert.throws(
+    () => analyze({ source: "const value: any = 1;", language: "ts" }, { signal: controller.signal }),
+    /aborted/i,
+  );
+});

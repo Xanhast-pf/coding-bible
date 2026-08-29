@@ -16,7 +16,7 @@ That single source can eventually power:
 - full-text search
 - AI context files
 - the browser code analyzer
-- a CLI
+- a project-aware CLI / CI scanner
 - editor integrations
 - PR review tooling
 - framework-specific rule packs
@@ -85,7 +85,21 @@ Search can be focused with `⌘/Ctrl+K`. Search and filters are reflected in the
 
 The **Analyze** mode accepts TypeScript, TSX, JavaScript, and JSX snippets and
 runs supported checks locally in the browser. The analyzer is lazy-loaded so the
-TypeScript parser does not increase the initial Learn-page bundle.
+TypeScript parser does not increase the initial Learn-page bundle. The same
+engine powers a tsconfig-aware project scanner:
+
+```bash
+coding-bible check src
+coding-bible check . --changed
+coding-bible check . --staged
+coding-bible check . --since origin/main
+```
+
+Projects can add `coding-bible.config.ts` to choose include/ignore patterns,
+enable or disable automated packs/rules, set error versus warning severity, and
+apply file-specific overrides. Git-aware scopes report only requested changes
+while retaining project context for analysis. `--profile` exposes scanner phase
+timings and memory use.
 
 Each rule also exposes a `tldr;` action that copies an AI-optimized prompt with
 the rule rationale, examples, exceptions, and canonical deep link. The rule-list
@@ -108,13 +122,13 @@ The Coding Bible follows its own applicable `stable` rules.
 The rule registry validates itself at runtime without an additional dependency,
 and pure behavior is covered with Node's built-in test runner. The analyzer is a
 separate AST-backed, symbol-aware package with regression tests, paired clean /
-violation fixtures, syntax diagnostics, and rule-example contracts for every
-supported detector. Semantic rules remain a human-review responsibility.
+violation fixtures, syntax diagnostics, rule-example contracts, config/scoping
+tests, multi-tsconfig project context, cancellation, and profiling. Semantic
+rules remain a human-review responsibility.
 
 A self-violation is treated as useful feedback: either the implementation is
 wrong or the rule needs better scope, severity, or exceptions.
 
 ## Status
 
-Pre-alpha. The rule library and Learn experience are established; the first
-AST-backed analyzer is now the second product surface.
+Pre-alpha. The rule library and Learn experience are established; the analyzer now supports both browser snippets and configurable project-scale CLI scans.

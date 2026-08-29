@@ -49,3 +49,11 @@ For every detector change:
 5. Run the analyzer against Coding Bible itself before merging. Do not weaken a
    detector solely to make dogfooding green; fix the code or document a genuine
    exception.
+6. Keep project scans deterministic: stable file ordering, stable finding
+   ordering, and stable exit-code semantics are public behavior.
+7. Do not bypass shared TypeScript Programs or indexes from a detector. Project
+   scale must not multiply parser/compiler work by detector count.
+8. Add scanner regression coverage for config, Git scope, or tsconfig behavior
+   when changing those boundaries.
+9. Use `--profile` and the synthetic benchmark before accepting analyzer changes
+   that materially affect project-scale work.

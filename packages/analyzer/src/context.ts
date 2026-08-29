@@ -176,6 +176,18 @@ const buildContext = (
   };
 };
 
+export const createDetectorContextsFromProgram = (
+  inputs: readonly ResolvedAnalyzeInput[],
+  program: ts.Program,
+): readonly DetectorContext[] => {
+  if (!inputs.length) {
+    return [];
+  }
+
+  const checker = program.getTypeChecker();
+  return inputs.map((input) => buildContext(input, program, checker));
+};
+
 export const createDetectorContexts = (
   inputs: readonly ResolvedAnalyzeInput[],
 ): readonly DetectorContext[] => {
@@ -183,9 +195,7 @@ export const createDetectorContexts = (
     return [];
   }
 
-  const program = buildProgram(inputs);
-  const checker = program.getTypeChecker();
-  return inputs.map((input) => buildContext(input, program, checker));
+  return createDetectorContextsFromProgram(inputs, buildProgram(inputs));
 };
 
 export const createDetectorContext = (input: ResolvedAnalyzeInput) => {
