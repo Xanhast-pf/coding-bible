@@ -187,10 +187,18 @@ In the GitHub repository, set **Settings → Pages → Source** to **GitHub Acti
 
 Search can be focused with `⌘/Ctrl+K`. Search and filters are reflected in the URL so useful rule views can be bookmarked or shared.
 
-The **Analyze** mode accepts TypeScript, TSX, JavaScript, and JSX snippets and
-runs supported checks locally in the browser. The analyzer is lazy-loaded so the
-TypeScript parser does not increase the initial Learn-page bundle. The same
-engine powers a tsconfig-aware project scanner:
+The **Analyze** mode runs the same deterministic detector engine locally in a
+Web Worker. Snippet mode builds a one-file virtual TypeScript project with real
+standard libraries; Project mode can read a local folder, group files by their
+nearest `tsconfig.json`, honor compiler options, resolve cross-file symbols, and
+apply `coding-bible.config.json` include/ignore, pack/rule, severity, override,
+and `tsconfig` settings without uploading source. Executable
+`coding-bible.config.*` modules are detected but never executed from a selected
+folder; use the CLI or GitHub Action when those configs are required. The
+compiler remains lazy-loaded so the initial Learn-page bundle does not pay that
+cost. Installed `node_modules` are intentionally not fetched by the browser, so
+the CLI remains the highest-fidelity option when dependency declarations are
+required. The same engine powers the tsconfig-aware project scanner:
 
 ```bash
 coding-bible check src
@@ -305,4 +313,4 @@ wrong or the rule needs better scope, severity, or exceptions.
 
 ## Status
 
-Pre-alpha. The rule library and Learn experience are established; the analyzer now supports both browser snippets and configurable project-scale CLI scans.
+Pre-alpha. The rule library and Learn experience are established; the analyzer now supports project-aware browser analysis, configurable CLI scans, MCP tooling, and a versioned GitHub Action.
