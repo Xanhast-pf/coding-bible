@@ -316,7 +316,7 @@ export const AnalyzeView = () => {
             <p className={styles.hint}>
               {mode === "snippet"
                 ? "Real TypeScript standard libraries; imports without matching local files remain unresolved."
-                : "Uses selected project files and tsconfig compiler options; generated/vendor folders are skipped."}
+                : "Uses selected files, tsconfig options, and coding-bible.config.json when present; generated/vendor folders are skipped."}
             </p>
             <div className={styles.actionButtons}>
               {status === "analyzing" ? (
