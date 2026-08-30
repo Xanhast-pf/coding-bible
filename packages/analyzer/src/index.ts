@@ -1,6 +1,16 @@
 export { analyze, analyzeMany, analyzeProgram } from "./analyze.ts";
-export { defineConfig } from "./config.ts";
+export {
+  analyzerConfigFileNames,
+  createAnalyzerConfigResolver,
+  createAnalyzerFileSelector,
+  defaultAnalyzerIgnorePatterns,
+  defineConfig,
+  getAnalyzerPack,
+  resolveAnalyzerConfigDefaults,
+  validateAnalyzerConfig,
+} from "./config.ts";
 export { detectors } from "./detectors/index.ts";
+export { compileGlobs, matchesAnyGlob, normalizeGlobPath } from "./glob.ts";
 export { analyzerLanguages, analyzerPacks } from "./types.ts";
 export type {
   AnalyzeInput,
