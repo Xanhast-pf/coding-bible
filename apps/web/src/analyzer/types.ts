@@ -1,4 +1,9 @@
-import type { AnalyzeResult, AnalyzerLanguage } from "@coding-bible/analyzer";
+import type {
+  AnalyzeResult,
+  AnalyzerFinding,
+  AnalyzerLanguage,
+  AnalyzerRuleSetting,
+} from "@coding-bible/analyzer";
 
 export type BrowserAnalyzerMode = "snippet" | "project";
 
@@ -12,13 +17,25 @@ export interface BrowserAnalyzeInput {
   mode: BrowserAnalyzerMode;
 }
 
+export interface BrowserAnalyzerFinding extends AnalyzerFinding {
+  severity: Exclude<AnalyzerRuleSetting, "off">;
+}
+
+export interface BrowserFileAnalyzeResult extends Omit<
+  AnalyzeResult,
+  "findings"
+> {
+  findings: readonly BrowserAnalyzerFinding[];
+}
+
 export interface BrowserFileResult {
   fileName: string;
   language: AnalyzerLanguage;
-  result: AnalyzeResult;
+  result: BrowserFileAnalyzeResult;
 }
 
 export interface BrowserAnalyzeResult {
+  configFileName: string | null;
   configurationDiagnostics: readonly string[];
   durationMs: number;
   files: readonly BrowserFileResult[];

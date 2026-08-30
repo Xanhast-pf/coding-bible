@@ -163,3 +163,19 @@ test("virtual project plans mirror nearest-tsconfig monorepo grouping", () => {
     { fileNames: ["scripts/release.ts"], tsconfigFileName: "tsconfig.json" },
   ]);
 });
+
+test("virtual project plans support config-driven source selection and tsconfig opt-out", () => {
+  const files = [
+    { fileName: "tsconfig.json", source: "{}" },
+    { fileName: "src/include.ts", source: "export const include = 1;" },
+    { fileName: "src/skip.ts", source: "export const skip = 1;" },
+  ];
+
+  assert.deepEqual(
+    createVirtualProjectPlans(files, {
+      shouldAnalyzeFile: (fileName) => fileName !== "src/skip.ts",
+      tsconfig: false,
+    }),
+    [{ fileNames: ["src/include.ts"] }],
+  );
+});
