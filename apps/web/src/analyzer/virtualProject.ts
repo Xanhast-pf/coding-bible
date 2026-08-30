@@ -314,10 +314,20 @@ export interface VirtualProjectPlan {
   tsconfigFileName?: string;
 }
 
+export interface VirtualProjectPlanOptions {
+  shouldAnalyzeFile?: (fileName: string) => boolean;
+  tsconfig?: string | false;
+}
+
 export const createVirtualProjectPlans = (
   files: readonly BrowserProjectFile[],
+  options: VirtualProjectPlanOptions = {},
 ): readonly VirtualProjectPlan[] => {
   const tsconfigFileNames = getProjectTsconfigFiles(files);
+  const configuredTsconfig =
+    typeof options.tsconfig === "string"
+      ? normalizeRelativeFileName(options.tsconfig)
+      : undefined;
   const groups = new Map<string | undefined, string[]>();
 
   for (const { fileName } of files) {
@@ -327,10 +337,15 @@ export const createVirtualProjectPlans = (
     }
 
     const normalizedFileName = normalizeRelativeFileName(fileName);
-    const tsconfigFileName = findNearestTsconfig(
-      normalizedFileName,
-      tsconfigFileNames,
-    );
+    if (options.shouldAnalyzeFile?.(normalizedFileName) === false) {
+      continue;
+    }
+
+    const tsconfigFileName =
+      options.tsconfig === false
+        ? undefined
+        : (configuredTsconfig ??
+          findNearestTsconfig(normalizedFileName, tsconfigFileNames));
     const group = groups.get(tsconfigFileName);
     if (group) {
       group.push(normalizedFileName);

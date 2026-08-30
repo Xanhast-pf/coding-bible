@@ -39,17 +39,23 @@ virtual TypeScript project.
    the TypeScript compiler API, including local `extends` resolution. Browser-safe
    defaults fill missing options, while `noEmit` remains forced because analysis
    never writes build output.
-5. **Resolve from the virtual filesystem.** Relative modules, path aliases, local
+5. **Honor browser-safe Coding Bible config.** Project mode loads a root
+   `coding-bible.config.json` through the analyzer package's shared config
+   validation, glob matching, rule enablement, severity, override, and `tsconfig`
+   resolution logic. Executable config modules are detected but are never
+   evaluated from a selected local folder; the UI reports that limitation instead
+   of silently pretending the config was applied.
+6. **Resolve from the virtual filesystem.** Relative modules, path aliases, local
    declarations, and package metadata present in the selected files can
    participate in TypeScript module resolution. Installed dependencies are not
    fetched from a registry and `node_modules` is skipped by default.
-6. **Move heavy work off the main thread.** Each analysis run creates a Worker,
+7. **Move heavy work off the main thread.** Each analysis run creates a Worker,
    reports coarse progress, and terminates after completion. Canceling a run
    terminates the worker immediately and releases its compiler state.
-7. **Keep source private.** No source file, tsconfig, or analysis request is sent
+8. **Keep source private.** No source file, tsconfig, config, or analysis request is sent
    to Coding Bible or another service. The only network activity is loading the
    already-deployed static application assets.
-8. **Bound browser resource use.** Project selection ignores common generated and
+9. **Bound browser resource use.** Project selection ignores common generated and
    vendor directories and applies a per-run file/byte cap. The CLI and GitHub
    Action remain the right tools for repositories beyond those browser limits.
 
@@ -59,8 +65,9 @@ virtual TypeScript project.
   upload workflow.
 - Project mode can reproduce much of the analyzer context available to the CLI
   while remaining a static GitHub Pages application.
-- Browser results and CLI results share detector code, so new deterministic rules
-  benefit both surfaces automatically.
+- Browser results and CLI results share detector and config-resolution code, so
+  new deterministic rules and JSON config behavior benefit both surfaces
+  automatically.
 - The analyzer worker is a larger lazy-loaded asset because it contains the
   TypeScript compiler and standard library declarations. The Learn page remains
   unaffected until Analyze is used.
