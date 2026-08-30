@@ -194,10 +194,14 @@ nearest `tsconfig.json`, honor compiler options, resolve cross-file symbols, and
 apply `coding-bible.config.json` include/ignore, pack/rule, severity, override,
 and `tsconfig` settings without uploading source. Executable
 `coding-bible.config.*` modules are detected but never executed from a selected
-folder; use the CLI or GitHub Action when those configs are required. The
-compiler remains lazy-loaded so the initial Learn-page bundle does not pay that
-cost. Installed `node_modules` are intentionally not fetched by the browser, so
-the CLI remains the highest-fidelity option when dependency declarations are
+folder; use the CLI or GitHub Action when those configs are required. Completed
+browser runs can export a local JSON report plus separate `safe-fixes.patch` and
+`review-fixes.patch` files when detectors provide structured edits. Patch
+generation uses the same shared edit/diff implementation as the CLI; review
+patches are intentionally separated because they can require an intent decision.
+The compiler remains lazy-loaded so the initial Learn-page bundle does not pay
+that cost. Installed `node_modules` are intentionally not fetched by the browser,
+so the CLI remains the highest-fidelity option when dependency declarations are
 required. The same engine powers the tsconfig-aware project scanner:
 
 ```bash

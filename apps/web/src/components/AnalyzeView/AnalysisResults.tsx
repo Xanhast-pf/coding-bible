@@ -1,9 +1,17 @@
 import type { AnalyzerDiagnostic } from "@coding-bible/analyzer";
 import { rulePackLabels, rules } from "@coding-bible/rules";
+import { useEffect, useState } from "react";
 
+import {
+  countBrowserFixes,
+  createBrowserAnalyzerReport,
+  createBrowserFixPatch,
+} from "../../analyzer/artifacts";
+import { downloadTextArtifact } from "../../analyzer/downloadArtifact";
 import type {
   BrowserAnalyzeResult,
   BrowserAnalyzerFinding,
+  BrowserProjectFile,
 } from "../../analyzer/types";
 import styles from "./AnalyzeView.module.css";
 
@@ -48,6 +56,7 @@ const FindingCard = ({
   finding: BrowserAnalyzerFinding;
 }) => {
   const rule = rulesById.get(finding.ruleId);
+  const fix = finding.fix;
 
   return (
     <article className={styles.finding} data-level={rule?.level ?? "should"}>
@@ -82,6 +91,22 @@ const FindingCard = ({
       </pre>
 
       <p className={styles.suggestion}>{finding.suggestion}</p>
+
+      {fix ? (
+        <div className={styles.fixNotice} data-safety={fix.safety}>
+          <div className={styles.fixHeading}>
+            <span>{fix.safety === "safe" ? "Safe fix" : "Review fix"}</span>
+            {fix.edits?.length ? (
+              <span>
+                {fix.edits.length} edit{fix.edits.length === 1 ? "" : "s"}
+              </span>
+            ) : null}
+          </div>
+          <strong>{fix.title}</strong>
+          <p>{fix.description}</p>
+        </div>
+      ) : null}
+
       <a className={styles.viewRule} href={`./#${finding.ruleId}`}>
         View rule →
       </a>
@@ -91,13 +116,23 @@ const FindingCard = ({
 
 interface AnalysisResultsProps {
   errorMessage: string | null;
+  files: readonly BrowserProjectFile[];
+  projectName?: string;
   result: BrowserAnalyzeResult | null;
 }
 
 export const AnalysisResults = ({
   errorMessage,
+  files,
+  projectName,
   result,
 }: AnalysisResultsProps) => {
+  const [artifactError, setArtifactError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setArtifactError(null);
+  }, [result]);
+
   if (errorMessage) {
     return (
       <div className={styles.errorState} role="alert">
@@ -137,6 +172,8 @@ export const AnalysisResults = ({
     ({ finding }) => finding.severity === "error",
   ).length;
   const warningCount = findings.length - errorCount;
+  const safeFixCount = countBrowserFixes(result, "safe");
+  const reviewFixCount = countBrowserFixes(result, "review");
   const issueCount = diagnostics.length + findings.length;
   const issueLabel =
     diagnostics.length && findings.length
@@ -153,6 +190,53 @@ export const AnalysisResults = ({
       ? `${Math.round(result.durationMs)} ms`
       : `${(result.durationMs / 1_000).toFixed(1)} s`;
 
+  const downloadReport = () => {
+    setArtifactError(null);
+
+    try {
+      const report = createBrowserAnalyzerReport(
+        result,
+        projectName ? { projectName } : {},
+      );
+      downloadTextArtifact(
+        "coding-bible-report.json",
+        `${JSON.stringify(report, null, 2)}\n`,
+        "application/json",
+      );
+    } catch (error: unknown) {
+      console.error("Could not create Coding Bible browser report.", error);
+      setArtifactError(
+        error instanceof Error
+          ? error.message
+          : "Could not create the analyzer report.",
+      );
+    }
+  };
+
+  const downloadPatch = (safety: "safe" | "review") => {
+    setArtifactError(null);
+
+    try {
+      const patch = createBrowserFixPatch(result, files, safety);
+      if (!patch.patch) {
+        throw new Error(`No ${safety} fixes are available for this result.`);
+      }
+
+      downloadTextArtifact(
+        safety === "safe" ? "safe-fixes.patch" : "review-fixes.patch",
+        patch.patch,
+        "text/x-diff",
+      );
+    } catch (error: unknown) {
+      console.error(`Could not create Coding Bible ${safety} patch.`, error);
+      setArtifactError(
+        error instanceof Error
+          ? error.message
+          : `Could not create the ${safety} fix patch.`,
+      );
+    }
+  };
+
   return (
     <>
       <div className={styles.resultSummary}>
@@ -166,6 +250,55 @@ export const AnalysisResults = ({
           {result.configFileName ? ` · ${result.configFileName}` : ""}
         </span>
       </div>
+
+      <div className={styles.artifactBar}>
+        <div>
+          <strong>Export analysis</strong>
+          <span>Report and detector-authored patches stay local.</span>
+        </div>
+        <div className={styles.artifactButtons}>
+          <button onClick={downloadReport} type="button">
+            Report JSON
+          </button>
+          {safeFixCount ? (
+            <button onClick={() => downloadPatch("safe")} type="button">
+              Safe patch · {safeFixCount}
+            </button>
+          ) : null}
+          {reviewFixCount ? (
+            <button
+              className={styles.reviewPatchButton}
+              onClick={() => downloadPatch("review")}
+              type="button"
+            >
+              Review patch · {reviewFixCount}
+            </button>
+          ) : null}
+        </div>
+      </div>
+
+      {artifactError ? (
+        <div className={styles.artifactError} role="alert">
+          {artifactError}
+        </div>
+      ) : null}
+
+      {safeFixCount || reviewFixCount ? (
+        <div className={styles.fixSummary}>
+          {safeFixCount ? (
+            <span>
+              {safeFixCount} mechanically safe{" "}
+              {safeFixCount === 1 ? "fix" : "fixes"}
+            </span>
+          ) : null}
+          {reviewFixCount ? (
+            <span>
+              {reviewFixCount}{" "}
+              {reviewFixCount === 1 ? "fix needs" : "fixes need"} review
+            </span>
+          ) : null}
+        </div>
+      ) : null}
 
       {findings.length ? (
         <div className={styles.severitySummary}>
