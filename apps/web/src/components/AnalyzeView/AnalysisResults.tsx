@@ -1,10 +1,10 @@
-import type {
-  AnalyzerDiagnostic,
-  AnalyzerFinding,
-} from "@coding-bible/analyzer";
+import type { AnalyzerDiagnostic } from "@coding-bible/analyzer";
 import { rulePackLabels, rules } from "@coding-bible/rules";
 
-import type { BrowserAnalyzeResult } from "../../analyzer/types";
+import type {
+  BrowserAnalyzeResult,
+  BrowserAnalyzerFinding,
+} from "../../analyzer/types";
 import styles from "./AnalyzeView.module.css";
 
 const rulesById = new Map(rules.map((rule) => [rule.id, rule]));
@@ -45,7 +45,7 @@ const FindingCard = ({
   finding,
 }: {
   fileName: string;
-  finding: AnalyzerFinding;
+  finding: BrowserAnalyzerFinding;
 }) => {
   const rule = rulesById.get(finding.ruleId);
 
@@ -55,6 +55,9 @@ const FindingCard = ({
         <a className={styles.ruleId} href={`./#${finding.ruleId}`}>
           {finding.ruleId}
         </a>
+        <span className={styles.severity} data-severity={finding.severity}>
+          {finding.severity}
+        </span>
         {rule ? (
           <>
             <span className={styles.level}>{rule.level}</span>
@@ -130,6 +133,10 @@ export const AnalysisResults = ({
   const ruleIdsChecked = new Set(
     result.files.flatMap(({ result: fileResult }) => fileResult.ruleIdsChecked),
   );
+  const errorCount = findings.filter(
+    ({ finding }) => finding.severity === "error",
+  ).length;
+  const warningCount = findings.length - errorCount;
   const issueCount = diagnostics.length + findings.length;
   const issueLabel =
     diagnostics.length && findings.length
@@ -156,8 +163,17 @@ export const AnalysisResults = ({
         <span>
           {result.sourceFileCount} files · {ruleIdsChecked.size} rules ·{" "}
           {elapsed}
+          {result.configFileName ? ` · ${result.configFileName}` : ""}
         </span>
       </div>
+
+      {findings.length ? (
+        <div className={styles.severitySummary}>
+          <span>{errorCount} errors</span>
+          <span>{warningCount} warnings</span>
+          {diagnostics.length ? <span>{diagnostics.length} syntax</span> : null}
+        </div>
+      ) : null}
 
       {result.configurationDiagnostics.length ? (
         <div className={styles.configWarnings} role="status">

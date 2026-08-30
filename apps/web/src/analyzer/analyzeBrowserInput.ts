@@ -1,5 +1,7 @@
 import { analyzeProgram } from "@coding-bible/analyzer";
 
+import { loadBrowserAnalyzerConfig } from "./browserConfig.ts";
+import { normalizeRelativeFileName } from "./fileTypes.ts";
 import {
   createVirtualProject,
   createVirtualProjectPlans,
@@ -18,12 +20,37 @@ export const analyzeBrowserInput = (
   onProgress: (progress: BrowserAnalyzerProgress) => void = () => {},
 ): BrowserAnalyzeResult => {
   const startedAt = performance.now();
-  const plans = createVirtualProjectPlans(input.files);
+  const browserConfig =
+    input.mode === "project"
+      ? loadBrowserAnalyzerConfig(input.files)
+      : loadBrowserAnalyzerConfig([]);
+
+  if (typeof browserConfig.tsconfig === "string") {
+    const configuredTsconfig = normalizeRelativeFileName(
+      browserConfig.tsconfig,
+    );
+    const hasConfiguredTsconfig = input.files.some(
+      ({ fileName }) =>
+        normalizeRelativeFileName(fileName) === configuredTsconfig,
+    );
+    if (!hasConfiguredTsconfig) {
+      throw new Error(
+        `Configured tsconfig not found: ${browserConfig.tsconfig}`,
+      );
+    }
+  }
+
+  const plans = createVirtualProjectPlans(input.files, {
+    shouldAnalyzeFile: browserConfig.shouldAnalyzeFile,
+    ...(browserConfig.tsconfig === undefined
+      ? {}
+      : { tsconfig: browserConfig.tsconfig }),
+  });
   const sourceFileCount = plans.reduce(
     (total, plan) => total + plan.fileNames.length,
     0,
   );
-  const configurationDiagnostics: string[] = [];
+  const configurationDiagnostics = [...browserConfig.configurationDiagnostics];
   const fileResults: BrowserFileResult[] = [];
   const tsconfigFileNames = plans.flatMap((plan) =>
     plan.tsconfigFileName ? [plan.tsconfigFileName] : [],
@@ -62,23 +89,44 @@ export const analyzeBrowserInput = (
         total: sourceFileCount,
       });
 
-      const result = analyzeProgram(project.program, [programInput])[0];
+      const result = analyzeProgram(project.program, [programInput], {
+        isRuleEnabled: browserConfig.resolver.isRuleEnabled,
+      })[0];
       if (!result) {
         throw new Error(
           `Analyzer returned no result for ${programInput.fileName}.`,
         );
       }
 
+      const fileName = toDisplayFileName(programInput.fileName);
       fileResults.push({
-        fileName: toDisplayFileName(programInput.fileName),
+        fileName,
         language: programInput.language,
-        result,
+        result: {
+          ...result,
+          findings: result.findings.map((finding) => {
+            const severity = browserConfig.resolver.getRuleSetting(
+              finding.ruleId,
+              fileName,
+            );
+
+            return {
+              ...finding,
+              severity: severity === "warning" ? "warning" : "error",
+            };
+          }),
+        },
       });
       completed += 1;
     }
   }
 
+  fileResults.sort((left, right) =>
+    left.fileName.localeCompare(right.fileName),
+  );
+
   return {
+    configFileName: browserConfig.configFileName,
     configurationDiagnostics,
     durationMs: performance.now() - startedAt,
     files: fileResults,
