@@ -183,6 +183,15 @@ export const AnalyzeView = () => {
   const canAnalyze =
     status === "idle" &&
     (mode === "snippet" ? Boolean(source.trim()) : Boolean(project));
+  const analysisFiles =
+    mode === "snippet"
+      ? [
+          {
+            fileName: snippetFileNameByLanguage[language],
+            source,
+          },
+        ]
+      : (project?.files ?? []);
 
   return (
     <section aria-labelledby="analyzer-heading" className={styles.analyzer}>
@@ -347,7 +356,14 @@ export const AnalyzeView = () => {
         </section>
 
         <section aria-live="polite" className={styles.resultsPanel}>
-          <AnalysisResults errorMessage={errorMessage} result={result} />
+          <AnalysisResults
+            errorMessage={errorMessage}
+            files={analysisFiles}
+            {...(project?.projectName
+              ? { projectName: project.projectName }
+              : {})}
+            result={result}
+          />
         </section>
       </div>
     </section>

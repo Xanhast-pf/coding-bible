@@ -10,6 +10,12 @@ export {
   validateAnalyzerConfig,
 } from "./config.ts";
 export { detectors } from "./detectors/index.ts";
+export {
+  applyAnalyzerTextEdits,
+  createAnalyzerFilePatch,
+  normalizeAnalyzerPatchPath,
+  prepareAnalyzerTextEdits,
+} from "./fixes.ts";
 export { compileGlobs, matchesAnyGlob, normalizeGlobPath } from "./glob.ts";
 export { analyzerLanguages, analyzerPacks } from "./types.ts";
 export type {

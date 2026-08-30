@@ -58,6 +58,11 @@ virtual TypeScript project.
 9. **Bound browser resource use.** Project selection ignores common generated and
    vendor directories and applies a per-run file/byte cap. The CLI and GitHub
    Action remain the right tools for repositories beyond those browser limits.
+10. **Export actionable artifacts locally.** Completed browser runs can download a
+    versioned JSON report and separate safe/review patch files. Structured text
+    edits and unified-diff generation live in `@coding-bible/analyzer`, so CLI
+    and browser patch semantics cannot drift. Review-required edits are never
+    mixed into the safe patch.
 
 ## Consequences
 
@@ -65,9 +70,12 @@ virtual TypeScript project.
   upload workflow.
 - Project mode can reproduce much of the analyzer context available to the CLI
   while remaining a static GitHub Pages application.
-- Browser results and CLI results share detector and config-resolution code, so
-  new deterministic rules and JSON config behavior benefit both surfaces
-  automatically.
+- Browser results and CLI results share detector, config-resolution, and patch
+  generation code, so new deterministic rules, JSON config behavior, and
+  structured fixes benefit both surfaces automatically.
+- The browser report intentionally identifies itself as a browser-runtime report.
+  It does not claim CLI-only baseline/cache/profile metadata or stable baseline
+  fingerprints.
 - The analyzer worker is a larger lazy-loaded asset because it contains the
   TypeScript compiler and standard library declarations. The Learn page remains
   unaffected until Analyze is used.
