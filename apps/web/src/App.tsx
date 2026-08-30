@@ -110,8 +110,8 @@ const AnalyzerPage = () => (
       <p className={styles.eyebrow}>CODING BIBLE · ANALYZER BETA</p>
       <h1>Find the rule. Fix the code.</h1>
       <p className={styles.intro}>
-        AST-backed checks for violations we can prove from a snippet—without
-        pretending engineering judgment can be reduced to regex.
+        Project-aware TypeScript analysis in your browser—real compiler context
+        for deterministic rules, without uploading your source.
       </p>
     </header>
 

@@ -15,8 +15,14 @@
       ],
     },
     "apps/web": {
-      "entry": ["src/main.tsx", "vite.config.ts", "test/*.test.mjs"],
+      "entry": [
+        "src/main.tsx",
+        "src/workers/*.ts",
+        "vite.config.ts",
+        "test/*.test.mjs",
+      ],
       "project": ["src/**/*.{ts,tsx}", "vite.config.ts", "test/*.test.mjs"],
+      "ignoreUnresolved": ["virtual:coding-bible-typescript-libs"],
     },
     "packages/action": {
       "entry": ["build.mjs", "src/index.mjs", "test/*.test.mjs"],
