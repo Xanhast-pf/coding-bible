@@ -1768,15 +1768,23 @@ query UsersQuery {
 **DO**
 
 ```tsx
-<button type="button">
-  {t("actions.saveChanges")}
-</button>
+import { FormattedMessage } from "react-intl";
+
+export const SaveButton = () => (
+  <button type="button">
+    <FormattedMessage id="actions.saveChanges" defaultMessage="Save changes" />
+  </button>
+);
 ```
 
 **DON'T**
 
 ```tsx
-<button type="button">Save changes</button>
+import { FormattedMessage } from "react-intl";
+
+export const SaveButton = () => (
+  <button type="button">Save changes</button>
+);
 ```
 
 ### I18N-002 — Parameterize messages instead of concatenating sentences

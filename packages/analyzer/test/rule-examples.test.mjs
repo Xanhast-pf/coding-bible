@@ -4,6 +4,7 @@ import test from "node:test";
 import { accessibilityRules } from "../../rules/src/rules/accessibility.ts";
 import { coreRules } from "../../rules/src/rules/core.ts";
 import { graphqlRules } from "../../rules/src/rules/graphql.ts";
+import { internationalizationRules } from "../../rules/src/rules/internationalization.ts";
 import { javascriptRules } from "../../rules/src/rules/javascript.ts";
 import { legendStateRules } from "../../rules/src/rules/legendState.ts";
 import { reactRules } from "../../rules/src/rules/react.ts";
@@ -23,6 +24,7 @@ const rules = [
   ...accessibilityRules,
   ...coreRules,
   ...graphqlRules,
+  ...internationalizationRules,
   ...javascriptRules,
   ...legendStateRules,
   ...reactRules,
@@ -34,7 +36,7 @@ const automatedRuleIds = [
 ].sort();
 
 test("every automated rule catches its own DON'T example", () => {
-  assert.equal(automatedRuleIds.length, 21);
+  assert.equal(automatedRuleIds.length, 22);
 
   for (const ruleId of automatedRuleIds) {
     const rule = rulesById.get(ruleId);

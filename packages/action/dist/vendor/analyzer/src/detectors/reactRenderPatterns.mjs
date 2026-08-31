@@ -44,8 +44,16 @@ const isStaticExpression = (expression) => {
         return candidate.elements.every((element) => !ts.isSpreadElement(element) && isStaticExpression(element));
     }
     if (ts.isObjectLiteralExpression(candidate)) {
-        return candidate.properties.every((property) => ts.isPropertyAssignment(property) &&
-            isStaticExpression(property.initializer));
+        return candidate.properties.every((property) => {
+            if (!ts.isPropertyAssignment(property)) {
+                return false;
+            }
+            if (ts.isComputedPropertyName(property.name) &&
+                !isStaticExpression(property.name.expression)) {
+                return false;
+            }
+            return isStaticExpression(property.initializer);
+        });
     }
     return false;
 };

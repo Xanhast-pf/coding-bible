@@ -189,7 +189,7 @@ path to force one config. Otherwise selected files are grouped by their nearest
 
 ## Automated coverage
 
-The current pass runs 22 detector functions covering 21 Bible rules:
+The current pass runs 23 detector functions covering 22 Bible rules:
 
 JSX-aware React, accessibility, and Legend-State detectors also run on legacy `.js` sources because many established React codebases use JSX without the `.jsx` extension.
 
@@ -206,6 +206,7 @@ JSX-aware React, accessibility, and Legend-State detectors also run on legacy `.
 - `A11Y-002` custom buttons without equivalent keyboard handling
 - `A11Y-004` buttons without a detectable accessible name
 - `GQL-002` runtime interpolation inside `gql`/`graphql` templates
+- `I18N-001` hardcoded user-visible JSX text in files that already import a supported localization API
 - `LEGEND-001` Legend-State `get()` subscriptions inside `observer` renders
 - `REACT-004` state that is only synchronized from Effect dependencies
 - `REACT-006` missing list keys

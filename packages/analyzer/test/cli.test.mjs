@@ -190,7 +190,7 @@ test("CLI reports the union of rules actually applicable to scanned languages", 
 
     const result = await checkPaths(["."], { cwd: directory });
 
-    assert.equal(result.ruleIdsChecked.length, 21);
+    assert.equal(result.ruleIdsChecked.length, 22);
     assert.equal(result.diagnostics.length, 0);
   });
 });
