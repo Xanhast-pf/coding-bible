@@ -335,6 +335,11 @@ export const AnalysisResults = ({
           <span>Report and detector-authored patches stay local.</span>
         </div>
         <div className={styles.artifactButtons}>
+          {findings.length ? (
+            <a className={styles.reviewChangesLink} href="#analyzer-review">
+              Review code · {findings.length}
+            </a>
+          ) : null}
           <button onClick={downloadReport} type="button">
             Report JSON
           </button>

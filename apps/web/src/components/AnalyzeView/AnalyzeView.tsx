@@ -14,6 +14,7 @@ import type {
 import { AnalysisResults } from "./AnalysisResults";
 import styles from "./AnalyzeView.module.css";
 import { ProjectPicker } from "./ProjectPicker";
+import { ReviewWorkspace } from "./ReviewWorkspace";
 
 const sampleSource = `import { User } from "./types";
 
@@ -389,6 +390,14 @@ export const AnalyzeView = () => {
           />
         </section>
       </div>
+
+      {result ? (
+        <ReviewWorkspace
+          files={analysisFiles}
+          onApplySnippetFix={handleApplySnippetFix}
+          result={result}
+        />
+      ) : null}
     </section>
   );
 };
