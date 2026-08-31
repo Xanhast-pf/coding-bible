@@ -1268,8 +1268,7 @@
 
 .reviewCodePre {
   margin: 0;
-  max-height: 34rem;
-  overflow: auto;
+  overflow-x: auto;
   padding-block: 0.75rem;
 }
 
@@ -1343,8 +1342,7 @@
 }
 
 .reviewGuidanceBody {
-  max-height: 34rem;
-  overflow-y: auto;
+  overflow: visible;
 }
 
 .reviewGuidanceSection {
@@ -1504,11 +1502,6 @@
 
   .reviewPanes {
     grid-template-columns: 1fr;
-  }
-
-  .reviewCodePre,
-  .reviewGuidanceBody {
-    max-height: 24rem;
   }
 }
 

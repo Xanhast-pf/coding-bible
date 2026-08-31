@@ -131,14 +131,16 @@ export const ReviewCodePane = ({
       return;
     }
 
-    const preRect = pre.getBoundingClientRect();
     const activeLineRect = activeLine.getBoundingClientRect();
-    pre.scrollTop = calculateCenteredReviewScrollTop({
-      containerHeight: pre.clientHeight,
-      containerTop: preRect.top,
-      currentScrollTop: pre.scrollTop,
-      itemHeight: activeLineRect.height,
-      itemTop: activeLineRect.top,
+    window.scrollTo({
+      behavior: "auto",
+      top: calculateCenteredReviewScrollTop({
+        containerHeight: window.innerHeight,
+        containerTop: 0,
+        currentScrollTop: window.scrollY,
+        itemHeight: activeLineRect.height,
+        itemTop: activeLineRect.top,
+      }),
     });
   }, [ranges, source]);
 
