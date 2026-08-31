@@ -5,6 +5,7 @@ import {
   semanticInteractiveElementDetector,
 } from "./accessibilityJsx.ts";
 import { directComponentCallsDetector } from "./directComponentCalls.ts";
+import { derivedStateEffectDetector } from "./derivedStateEffects.ts";
 import { graphqlInterpolationDetector } from "./graphqlTemplates.ts";
 import { hookDependencySuppressionsDetector } from "./hookDependencySuppressions.ts";
 import {
@@ -47,6 +48,7 @@ export const detectors = [
   staticComponentValueDetector,
   reactHookPlacementDetector,
   directComponentCallsDetector,
+  derivedStateEffectDetector,
   reactInputMutationDetector,
   hookDependencySuppressionsDetector,
 ] satisfies readonly Detector[];
