@@ -11,6 +11,7 @@
     "agent:check": "node scripts/generate-agent-interface.mjs --check",
     "agent:generate": "node scripts/generate-agent-interface.mjs",
     "bible:baseline": "node packages/analyzer/bin/coding-bible.mjs baseline create .",
+    "bible:bench": "node packages/analyzer/bench/project-benchmark.mjs",
     "bible:check": "node packages/analyzer/bin/coding-bible.mjs check .",
     "bible:staged": "node packages/analyzer/bin/coding-bible.mjs check . --staged",
     "build": "pnpm agent:generate && pnpm -r --if-present build",

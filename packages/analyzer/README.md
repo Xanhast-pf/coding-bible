@@ -157,8 +157,8 @@ export default defineConfig({
 Individual rule settings override pack settings. File overrides are applied in
 order after the project-wide settings. Default ignores cover dependencies, build output, coverage, declarations, and
 common generated-code paths. Set `ignoreDefaults: false` to opt out explicitly.
-Unknown config keys and invalid settings fail with exit code `2` rather than
-being silently ignored.
+Unknown config keys, unknown/non-automated rule IDs, and invalid settings fail
+with exit code `2` rather than being silently ignored.
 
 Use `coding-bible config` or `coding-bible config --json` to inspect the resolved
 configuration. Set `tsconfig: false` to disable tsconfig discovery, or provide a
@@ -198,9 +198,11 @@ file.
 
 ## Analysis model
 
-Snippet analysis builds one TypeScript program and shared
-symbol/import/reference indexes. Project scans reuse real project Programs: when
-a workspace has multiple tsconfigs, selected files are grouped by the nearest
+Snippet analysis builds one TypeScript program and a shared syntax index. Symbol
+and reference resolution is lazy, so detectors only pay TypeScript checker cost
+for identifiers they actually inspect. Project scans reuse real project
+Programs: when a workspace has multiple tsconfigs, selected files are grouped by
+the nearest
 config instead of being forced through an invented root compiler setup.
 
 Disabled rules are removed before detector execution. Analysis accepts an
@@ -213,9 +215,9 @@ construction, detector runtime, total wall time, and resident memory.
 Run the optional synthetic project benchmark with:
 
 ```bash
-node packages/analyzer/bench/project-benchmark.mjs
-CODING_BIBLE_BENCH_FILES=5000 node packages/analyzer/bench/project-benchmark.mjs
-CODING_BIBLE_BENCH_MAX_MS=2500 CODING_BIBLE_BENCH_MAX_WARM_MS=500 CODING_BIBLE_BENCH_MAX_RSS_MB=512 node packages/analyzer/bench/project-benchmark.mjs
+pnpm bible:bench
+CODING_BIBLE_BENCH_FILES=5000 pnpm bible:bench
+CODING_BIBLE_BENCH_MAX_MS=2500 CODING_BIBLE_BENCH_MAX_WARM_MS=500 CODING_BIBLE_BENCH_MAX_RSS_MB=512 pnpm bible:bench
 ```
 
 Every automated rule is contract-tested against the registry: its exact DON'T

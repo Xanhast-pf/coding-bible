@@ -141,22 +141,42 @@ const isInside = (parent, candidate) => {
   );
 };
 
-const findNearestTsconfig = (filePath, cwd) => {
-  let directory = path.dirname(filePath);
+const createNearestTsconfigFinder = (cwd) => {
+  const cache = new Map();
 
-  while (isInside(cwd, directory)) {
-    const candidate = path.join(directory, "tsconfig.json");
-    if (ts.sys.fileExists(candidate)) {
-      return candidate;
+  return (filePath) => {
+    const visited = [];
+    let directory = path.dirname(filePath);
+
+    while (isInside(cwd, directory)) {
+      if (cache.has(directory)) {
+        const cached = cache.get(directory) ?? null;
+        for (const visitedDirectory of visited) {
+          cache.set(visitedDirectory, cached);
+        }
+        return cached;
+      }
+
+      visited.push(directory);
+      const candidate = path.join(directory, "tsconfig.json");
+      if (ts.sys.fileExists(candidate)) {
+        for (const visitedDirectory of visited) {
+          cache.set(visitedDirectory, candidate);
+        }
+        return candidate;
+      }
+
+      if (directory === cwd) {
+        break;
+      }
+      directory = path.dirname(directory);
     }
 
-    if (directory === cwd) {
-      break;
+    for (const visitedDirectory of visited) {
+      cache.set(visitedDirectory, null);
     }
-    directory = path.dirname(directory);
-  }
-
-  return null;
+    return null;
+  };
 };
 
 const groupFilesByProject = (selectedFiles, cwd, tsconfig) => {
@@ -169,8 +189,9 @@ const groupFilesByProject = (selectedFiles, cwd, tsconfig) => {
   }
 
   const groups = new Map();
+  const findNearestTsconfig = createNearestTsconfigFinder(cwd);
   for (const filePath of selectedFiles) {
-    const configPath = findNearestTsconfig(filePath, cwd);
+    const configPath = findNearestTsconfig(filePath);
     const files = groups.get(configPath);
     if (files) {
       files.push(filePath);

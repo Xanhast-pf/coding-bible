@@ -1,4 +1,4 @@
-import { createHash } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import {
   access,
   mkdir,
@@ -47,19 +47,61 @@ const stableValue = (value) => {
 
 const stableStringify = (value) => JSON.stringify(stableValue(value));
 
-const updateFileHash = async (hash, filePath, rootDir) => {
-  hash.update(normalizePath(path.relative(rootDir, filePath)));
-  hash.update("\0");
+const hashReadConcurrency = 32;
+
+const readHashInput = async (filePath, rootDir, signal) => {
+  signal?.throwIfAborted();
+  let contents;
   try {
-    hash.update(await readFile(filePath));
+    contents = await readFile(filePath, signal ? { signal } : undefined);
   } catch (error) {
     if (error && typeof error === "object" && error.code === "ENOENT") {
-      hash.update("<missing>");
+      contents = "<missing>";
     } else {
       throw error;
     }
   }
+
+  return {
+    contents,
+    relativePath: normalizePath(path.relative(rootDir, filePath)),
+  };
+};
+
+const updateHashWithInput = (hash, input) => {
+  hash.update(input.relativePath);
   hash.update("\0");
+  hash.update(input.contents);
+  hash.update("\0");
+};
+
+const readHashInputs = async (filePaths, rootDir, signal) => {
+  const inputs = Array(filePaths.length);
+  let nextIndex = 0;
+
+  const worker = async () => {
+    while (nextIndex < filePaths.length) {
+      signal?.throwIfAborted();
+      const index = nextIndex;
+      nextIndex += 1;
+      const filePath = filePaths[index];
+      if (filePath) {
+        inputs[index] = await readHashInput(filePath, rootDir, signal);
+      }
+    }
+  };
+
+  await Promise.all(
+    Array.from(
+      { length: Math.min(hashReadConcurrency, filePaths.length) },
+      worker,
+    ),
+  );
+  return inputs;
+};
+
+const updateFileHash = async (hash, filePath, rootDir, signal) => {
+  updateHashWithInput(hash, await readHashInput(filePath, rootDir, signal));
 };
 
 let implementationSignaturePromise;
@@ -192,9 +234,12 @@ export const createProjectSignature = async (
   const sourceFiles = [
     ...new Set(project.rootNames.map((filePath) => path.resolve(filePath))),
   ].sort((left, right) => left.localeCompare(right));
-  for (const filePath of sourceFiles) {
+  const sourceInputs = await readHashInputs(sourceFiles, rootDir, signal);
+  for (const input of sourceInputs) {
     signal?.throwIfAborted();
-    await updateFileHash(hash, filePath, rootDir);
+    if (input) {
+      updateHashWithInput(hash, input);
+    }
   }
 
   const projectDirectory = project.tsconfigPath
@@ -206,7 +251,7 @@ export const createProjectSignature = async (
   );
   for (const filePath of metadataFiles) {
     signal?.throwIfAborted();
-    await updateFileHash(hash, filePath, rootDir);
+    await updateFileHash(hash, filePath, rootDir, signal);
   }
 
   return {
@@ -258,7 +303,7 @@ export const writeProjectCache = async (
   }
   await mkdir(cacheDirectory, { recursive: true });
   const filePath = getCacheFilePath(cacheDirectory, projectIdentity);
-  const temporaryPath = `${filePath}.${process.pid}.tmp`;
+  const temporaryPath = `${filePath}.${process.pid}.${randomUUID()}.tmp`;
   await writeFile(
     temporaryPath,
     `${JSON.stringify(

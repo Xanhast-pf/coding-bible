@@ -611,6 +611,30 @@ test("config rejects unknown keys instead of silently ignoring typos", async () 
   });
 });
 
+test("config rejects unknown automated rule IDs", async () => {
+  await withFixture(async (directory) => {
+    await writeFile(path.join(directory, "good.ts"), "const value = 1;\n");
+    await writeFile(
+      path.join(directory, "coding-bible.config.mjs"),
+      `export default { rules: { "TS-999": "off" } };\n`,
+    );
+    const stdout = createWriter();
+    const stderr = createWriter();
+
+    const exitCode = await runCli(["check", "."], {
+      cwd: directory,
+      stderr,
+      stdout,
+    });
+
+    assert.equal(exitCode, 2);
+    assert.match(
+      stderr.value,
+      /rules contains unknown automated rule "TS-999"/,
+    );
+  });
+});
+
 test("JSON output uses the versioned report schema with stable finding fingerprints", async () => {
   await withFixture(async (directory) => {
     const filePath = path.join(directory, "bad.ts");
@@ -775,6 +799,37 @@ test("project cache skips Program construction on an unchanged warm scan", async
     assert.equal(second.cache.misses, 0);
     assert.equal(second.profile.programMs, 0);
     assert.equal(second.findings[0]?.ruleId, "TS-001");
+  });
+});
+
+test("concurrent project scans do not race cache temp files", async () => {
+  await withFixture(async (directory) => {
+    await mkdir(path.join(directory, "src"), { recursive: true });
+    await writeFile(
+      path.join(directory, "tsconfig.json"),
+      JSON.stringify({ compilerOptions: { strict: true }, include: ["src"] }),
+    );
+    await Promise.all(
+      Array.from({ length: 24 }, (_, index) =>
+        writeFile(
+          path.join(directory, "src", `module-${index}.ts`),
+          `export const value${index}: any = ${index};\n`,
+        ),
+      ),
+    );
+
+    const [left, right] = await Promise.all([
+      checkPaths(["src"], { cwd: directory }),
+      checkPaths(["src"], { cwd: directory }),
+    ]);
+
+    assert.equal(left.findings.length, 24);
+    assert.equal(right.findings.length, 24);
+
+    const warm = await checkPaths(["src"], { cwd: directory, profile: true });
+    assert.equal(warm.cache.hits, 24);
+    assert.equal(warm.cache.misses, 0);
+    assert.equal(warm.profile.programMs, 0);
   });
 });
 

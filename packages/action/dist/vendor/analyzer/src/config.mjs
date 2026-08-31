@@ -1,4 +1,5 @@
 import { analyzerPacks, } from "./types.mjs";
+import { detectors } from "./detectors/index.mjs";
 import { compileGlobs, matchesAnyGlob, normalizeGlobPath } from "./glob.mjs";
 export const analyzerConfigFileNames = [
     "coding-bible.config.ts",
@@ -40,6 +41,7 @@ const validConfigKeys = new Set([
 ]);
 const validOverrideKeys = new Set(["files", "packs", "rules"]);
 const validPacks = new Set(analyzerPacks);
+const validRuleIds = new Set(detectors.map((detector) => detector.ruleId));
 const toRecord = (value, message) => {
     if (!value || typeof value !== "object" || Array.isArray(value)) {
         throw new Error(message);
@@ -55,7 +57,7 @@ const assertStringArray = (value, name) => {
         throw new Error(`${name} must be an array of non-empty strings.`);
     }
 };
-const assertSettings = (value, name, { validatePacks = false } = {}) => {
+const assertSettings = (value, name, { validatePacks = false, validateRules = false, } = {}) => {
     if (value === undefined) {
         return;
     }
@@ -66,6 +68,9 @@ const assertSettings = (value, name, { validatePacks = false } = {}) => {
         }
         if (validatePacks && !validPacks.has(key)) {
             throw new Error(`${name} contains unknown analyzer pack "${key}".`);
+        }
+        if (validateRules && !validRuleIds.has(key)) {
+            throw new Error(`${name} contains unknown automated rule "${key}".`);
         }
         if (!validRuleSettings.has(setting)) {
             throw new Error(`${name}.${key} must be "error", "warning", or "off".`);
@@ -97,7 +102,7 @@ export const validateAnalyzerConfig = (value) => {
         throw new Error("ignoreDefaults must be a boolean.");
     }
     assertSettings(config.packs, "packs", { validatePacks: true });
-    assertSettings(config.rules, "rules");
+    assertSettings(config.rules, "rules", { validateRules: true });
     if (config.tsconfig !== undefined &&
         config.tsconfig !== false &&
         typeof config.tsconfig !== "string") {
@@ -121,7 +126,9 @@ export const validateAnalyzerConfig = (value) => {
             assertSettings(item.packs, `overrides[${index}].packs`, {
                 validatePacks: true,
             });
-            assertSettings(item.rules, `overrides[${index}].rules`);
+            assertSettings(item.rules, `overrides[${index}].rules`, {
+                validateRules: true,
+            });
         });
     }
     return config;
