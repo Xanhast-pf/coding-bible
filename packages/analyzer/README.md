@@ -191,6 +191,8 @@ path to force one config. Otherwise selected files are grouped by their nearest
 
 The current pass runs 22 detector functions covering 21 Bible rules:
 
+JSX-aware React, accessibility, and Legend-State detectors also run on legacy `.js` sources because many established React codebases use JSX without the `.jsx` extension.
+
 - `CORE-003` bindings that can be `const`
 - `JS-001` clearly redundant `async` functions without asynchronous or Promise-returning semantics
 - `JS-002` repeated nullish guard chains suited to optional chaining
