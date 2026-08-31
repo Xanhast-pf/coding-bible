@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  calculateCenteredReviewScrollTop,
   createBrowserReviewComparison,
   rangesIntersect,
   sourceLocationToReviewRange,
@@ -102,4 +103,28 @@ test("source locations map to absolute source offsets", () => {
     true,
   );
   assert.equal(rangesIntersect(range, { end: 3, start: 0 }), false);
+});
+
+test("review scrolling centers the active line relative to the code viewport", () => {
+  assert.equal(
+    calculateCenteredReviewScrollTop({
+      containerHeight: 400,
+      containerTop: 200,
+      currentScrollTop: 600,
+      itemHeight: 20,
+      itemTop: 350,
+    }),
+    560,
+  );
+
+  assert.equal(
+    calculateCenteredReviewScrollTop({
+      containerHeight: 400,
+      containerTop: 200,
+      currentScrollTop: 0,
+      itemHeight: 20,
+      itemTop: 210,
+    }),
+    0,
+  );
 });

@@ -1,7 +1,10 @@
 import { useEffect, useMemo, useRef } from "react";
 
 import type { BrowserReviewRange } from "../../analyzer/review";
-import { rangesIntersect } from "../../analyzer/review";
+import {
+  calculateCenteredReviewScrollTop,
+  rangesIntersect,
+} from "../../analyzer/review";
 import { highlightCodeLine } from "../../utils/highlightCode";
 import codeStyles from "../CodeSnippet/CodeSnippet.module.css";
 import styles from "./AnalyzeView.module.css";
@@ -10,7 +13,6 @@ interface ReviewCodePaneProps {
   label: string;
   ranges: readonly BrowserReviewRange[];
   source: string;
-  tone: "neutral" | "original" | "proposed";
 }
 
 interface SourceLine {
@@ -116,7 +118,6 @@ export const ReviewCodePane = ({
   label,
   ranges,
   source,
-  tone,
 }: ReviewCodePaneProps) => {
   const preRef = useRef<HTMLPreElement>(null);
   const lines = useMemo(() => createSourceLines(source), [source]);
@@ -126,18 +127,23 @@ export const ReviewCodePane = ({
     const activeLine = pre?.querySelector<HTMLElement>(
       '[data-review-line="active"]',
     );
-    if (pre && activeLine) {
-      pre.scrollTop = Math.max(
-        0,
-        activeLine.offsetTop -
-          pre.clientHeight / 2 +
-          activeLine.clientHeight / 2,
-      );
+    if (!pre || !activeLine) {
+      return;
     }
+
+    const preRect = pre.getBoundingClientRect();
+    const activeLineRect = activeLine.getBoundingClientRect();
+    pre.scrollTop = calculateCenteredReviewScrollTop({
+      containerHeight: pre.clientHeight,
+      containerTop: preRect.top,
+      currentScrollTop: pre.scrollTop,
+      itemHeight: activeLineRect.height,
+      itemTop: activeLineRect.top,
+    });
   }, [ranges, source]);
 
   return (
-    <section className={styles.reviewCodePane} data-tone={tone}>
+    <section className={styles.reviewCodePane}>
       <header className={styles.reviewCodeHeader}>
         <span aria-hidden="true" className={styles.reviewStatusDot} />
         <strong>{label}</strong>

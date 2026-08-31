@@ -12,6 +12,29 @@ export interface BrowserReviewRange {
   start: number;
 }
 
+export interface ReviewScrollMetrics {
+  containerHeight: number;
+  containerTop: number;
+  currentScrollTop: number;
+  itemHeight: number;
+  itemTop: number;
+}
+
+export const calculateCenteredReviewScrollTop = ({
+  containerHeight,
+  containerTop,
+  currentScrollTop,
+  itemHeight,
+  itemTop,
+}: ReviewScrollMetrics) =>
+  Math.max(
+    0,
+    currentScrollTop +
+      (itemTop - containerTop) +
+      itemHeight / 2 -
+      containerHeight / 2,
+  );
+
 export interface BrowserReviewComparison {
   originalRanges: readonly BrowserReviewRange[];
   originalSource: string;
