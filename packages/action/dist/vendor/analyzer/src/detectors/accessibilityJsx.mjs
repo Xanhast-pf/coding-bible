@@ -43,7 +43,7 @@ const isNativeInteractive = (node) => {
 export const semanticInteractiveElementDetector = {
     dependencyScope: "source-file",
     id: "semantic-interactive-element",
-    languages: ["jsx", "tsx"],
+    languages: ["js", "jsx", "tsx"],
     ruleId: "A11Y-001",
     analyze: (context) => {
         const findings = [];
@@ -72,7 +72,7 @@ export const semanticInteractiveElementDetector = {
 export const keyboardInteractionDetector = {
     dependencyScope: "source-file",
     id: "keyboard-interaction",
-    languages: ["jsx", "tsx"],
+    languages: ["js", "jsx", "tsx"],
     ruleId: "A11Y-002",
     analyze: (context) => {
         const findings = [];
@@ -148,7 +148,7 @@ const hasPotentialTextContent = (node) => node.children.some(childMayNameControl
 export const accessibleControlNameDetector = {
     dependencyScope: "source-file",
     id: "accessible-control-name",
-    languages: ["jsx", "tsx"],
+    languages: ["js", "jsx", "tsx"],
     ruleId: "A11Y-004",
     analyze: (context) => {
         const findings = [];

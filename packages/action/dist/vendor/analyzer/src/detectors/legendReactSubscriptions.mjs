@@ -76,7 +76,7 @@ const visitRenderBody = (node, root, visitor) => {
 export const legendReactSubscriptionDetector = {
     dependencyScope: "source-file",
     id: "legend-react-use-value",
-    languages: ["jsx", "tsx"],
+    languages: ["js", "jsx", "tsx"],
     ruleId: "LEGEND-001",
     analyze: (context) => {
         const findings = [];

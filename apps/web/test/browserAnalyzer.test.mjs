@@ -56,6 +56,30 @@ test("browser analysis preserves the canonical clean/violation detector contract
   );
 });
 
+test("browser analysis runs JSX detectors for legacy .js React files", () => {
+  const result = analyzeBrowserInput(
+    {
+      files: [
+        {
+          fileName: "src/LegacyView.js",
+          source: `export const LegacyView = ({ items }) => (
+  <div onClick={() => {}}>
+    {items.map((item) => <span>{item.name}</span>)}
+  </div>
+);`,
+        },
+      ],
+      mode: "snippet",
+    },
+    libraryFiles,
+  );
+
+  assert.deepEqual(
+    result.files[0]?.result.findings.map(({ ruleId }) => ruleId),
+    ["A11Y-001", "REACT-006"],
+  );
+});
+
 test("browser analysis applies independent tsconfigs inside a monorepo", () => {
   const result = analyzeBrowserInput(
     {

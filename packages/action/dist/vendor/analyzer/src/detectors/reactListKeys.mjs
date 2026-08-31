@@ -166,14 +166,14 @@ const findUnstableKeys = (context) => {
 export const missingReactListKeyDetector = {
     dependencyScope: "source-file",
     id: "react-list-missing-key",
-    languages: ["jsx", "tsx"],
+    languages: ["js", "jsx", "tsx"],
     ruleId: "REACT-006",
     analyze: findMissingKeys,
 };
 export const unstableReactListKeyDetector = {
     dependencyScope: "source-file",
     id: "react-list-unstable-key",
-    languages: ["jsx", "tsx"],
+    languages: ["js", "jsx", "tsx"],
     ruleId: "REACT-006",
     analyze: findUnstableKeys,
 };

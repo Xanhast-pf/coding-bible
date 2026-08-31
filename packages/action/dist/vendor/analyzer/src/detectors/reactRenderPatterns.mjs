@@ -101,7 +101,7 @@ const identifierIsMutated = (context, identifier) => {
 export const staticComponentValueDetector = {
     dependencyScope: "source-file",
     id: "react-static-component-value",
-    languages: ["jsx", "tsx"],
+    languages: ["js", "jsx", "tsx"],
     ruleId: "REACT-008",
     analyze: (context) => {
         const findings = [];
@@ -233,6 +233,23 @@ const collectProtectedSymbols = (context, component) => {
     }
     return protectedSymbols;
 };
+const refLikeIdentifierPattern = /(?:Refs?$|^ref(?:[A-Z_]|$))/;
+const isRefCurrentMutation = (target) => {
+    const root = getRootIdentifier(target);
+    if (!root || !refLikeIdentifierPattern.test(root.text)) {
+        return false;
+    }
+    let current = target;
+    while (ts.isPropertyAccessExpression(current) ||
+        ts.isElementAccessExpression(current)) {
+        if (ts.isPropertyAccessExpression(current) &&
+            current.name.text === "current") {
+            return true;
+        }
+        current = current.expression;
+    }
+    return false;
+};
 const assignmentOperatorKinds = new Set([
     ts.SyntaxKind.EqualsToken,
     ts.SyntaxKind.PlusEqualsToken,
@@ -247,7 +264,7 @@ const assignmentOperatorKinds = new Set([
 export const reactInputMutationDetector = {
     dependencyScope: "source-file",
     id: "react-input-mutation",
-    languages: ["jsx", "tsx"],
+    languages: ["js", "jsx", "tsx"],
     ruleId: "REACT-011",
     analyze: (context) => {
         const findings = [];
@@ -263,6 +280,9 @@ export const reactInputMutationDetector = {
             }
             visit(node.body, (child) => {
                 const report = (target) => {
+                    if (isRefCurrentMutation(target)) {
+                        return;
+                    }
                     const root = getRootIdentifier(target);
                     const symbol = root ? getSymbol(context, root) : null;
                     if (!root || !symbol || !protectedSymbols.has(symbol)) {

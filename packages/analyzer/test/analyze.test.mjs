@@ -497,6 +497,37 @@ test("detects prop/state mutation through aliases and mutating methods", () => {
   );
 });
 
+test("treats React ref current containers as intentionally mutable", () => {
+  assert.deepEqual(
+    ruleIds(
+      `const View = ({ inputRef }) => { inputRef.current = node; inputRef.current.value = null; return <div />; };`,
+      "js",
+    ),
+    [],
+  );
+  assert.deepEqual(
+    ruleIds(
+      `const View = ({ pagination }) => { pagination.current = 2; return <div />; };`,
+      "js",
+    ),
+    ["REACT-011"],
+  );
+});
+
+test("runs JSX-specific detectors for legacy .js React source", () => {
+  assert.deepEqual(
+    uniqueRuleIds(
+      `const View = ({ items, user }) => (
+        <div onClick={() => { user.name = "next"; }}>
+          {items.map((item) => <span>{item.name}</span>)}
+        </div>
+      );`,
+      "js",
+    ),
+    ["A11Y-001", "REACT-006", "REACT-011"],
+  );
+});
+
 test("detects common JSX accessibility violations conservatively", () => {
   assert.deepEqual(ruleIds(`<div onClick={handleSave}>Save</div>`), [
     "A11Y-001",
