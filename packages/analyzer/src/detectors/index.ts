@@ -4,6 +4,7 @@ import {
   keyboardInteractionDetector,
   semanticInteractiveElementDetector,
 } from "./accessibilityJsx.ts";
+import { redundantAsyncDetector } from "./asyncFunctions.ts";
 import { directComponentCallsDetector } from "./directComponentCalls.ts";
 import { derivedStateEffectDetector } from "./derivedStateEffects.ts";
 import { graphqlInterpolationDetector } from "./graphqlTemplates.ts";
@@ -31,6 +32,7 @@ import { untrustedAssertionsDetector } from "./untrustedAssertions.ts";
 
 export const detectors = [
   preferConstDetector,
+  redundantAsyncDetector,
   noExplicitAnyDetector,
   typeOnlyImportsDetector,
   untrustedAssertionsDetector,

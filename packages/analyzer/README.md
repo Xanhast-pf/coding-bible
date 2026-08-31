@@ -189,9 +189,10 @@ path to force one config. Otherwise selected files are grouped by their nearest
 
 ## Automated coverage
 
-The current pass runs 21 detector functions covering 20 Bible rules:
+The current pass runs 22 detector functions covering 21 Bible rules:
 
 - `CORE-003` bindings that can be `const`
+- `JS-001` clearly redundant `async` functions without asynchronous or Promise-returning semantics
 - `JS-002` repeated nullish guard chains suited to optional chaining
 - `JS-003` body-level undefined defaults suited to default parameters
 - `JS-004` legacy global/prototype built-ins
