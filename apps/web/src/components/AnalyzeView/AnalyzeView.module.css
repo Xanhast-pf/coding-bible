@@ -791,6 +791,98 @@
   margin: 0.25rem 0 0;
 }
 
+.fixActions {
+  align-items: flex-start;
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.fixActions > button,
+.fixPreview summary {
+  border-radius: 0.25rem;
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  font-weight: 700;
+  min-height: 2rem;
+  text-transform: uppercase;
+}
+
+.fixActions > button {
+  background: color-mix(in srgb, var(--matrix) 8%, transparent);
+  border: 1px solid var(--matrixDim);
+  color: var(--matrix);
+  cursor: pointer;
+  flex: none;
+  padding-inline: 0.75rem;
+}
+
+.fixActions > button:hover {
+  background: color-mix(in srgb, var(--matrix) 13%, transparent);
+  border-color: var(--matrixBright);
+}
+
+.fixPreview {
+  min-width: 0;
+  flex: 1;
+}
+
+.fixPreview summary {
+  align-items: center;
+  border: 1px solid var(--borderStrong);
+  color: var(--text);
+  cursor: pointer;
+  display: inline-flex;
+  list-style: none;
+  padding-inline: 0.75rem;
+  user-select: none;
+}
+
+.fixPreview summary::-webkit-details-marker {
+  display: none;
+}
+
+.fixPreview summary::before {
+  color: var(--matrixDim);
+  content: "+";
+  margin-right: 0.375rem;
+}
+
+.fixPreview[open] summary::before {
+  content: "−";
+}
+
+.fixPreview pre {
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 0.25rem;
+  color: var(--syntaxText);
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  line-height: 1.6;
+  margin: 0.5rem 0 0;
+  max-height: 18rem;
+  overflow: auto;
+  padding: 0.625rem 0.75rem;
+  white-space: pre;
+}
+
+.fixPreview > span,
+.fixPreview .fixError {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  margin: 0.5rem 0 0;
+}
+
+.fixPreview > span {
+  color: var(--placeholder);
+}
+
+.fixPreview .fixError {
+  color: var(--danger);
+}
+
 @keyframes analyzerPulse {
   from {
     opacity: 0.4;
@@ -836,5 +928,16 @@
   .fixSummary {
     flex-direction: column;
     gap: 0.25rem;
+  }
+
+  .fixActions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .fixActions > button,
+  .fixPreview summary {
+    justify-content: center;
+    width: 100%;
   }
 }

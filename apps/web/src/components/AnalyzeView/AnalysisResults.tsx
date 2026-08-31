@@ -1,10 +1,11 @@
 import type { AnalyzerDiagnostic } from "@coding-bible/analyzer";
 import { rulePackLabels, rules } from "@coding-bible/rules";
-import { useEffect, useState } from "react";
+import { type SyntheticEvent, useEffect, useState } from "react";
 
 import {
   countBrowserFixes,
   createBrowserAnalyzerReport,
+  createBrowserFindingFix,
   createBrowserFixPatch,
 } from "../../analyzer/artifacts";
 import { downloadTextArtifact } from "../../analyzer/downloadArtifact";
@@ -49,14 +50,62 @@ const DiagnosticCard = ({
 );
 
 const FindingCard = ({
+  canApplySafeFix,
   fileName,
   finding,
+  onApplySafeFix,
+  source,
 }: {
+  canApplySafeFix: boolean;
   fileName: string;
   finding: BrowserAnalyzerFinding;
+  onApplySafeFix?: (source: string) => void;
+  source?: string;
 }) => {
   const rule = rulesById.get(finding.ruleId);
   const fix = finding.fix;
+  const [fixError, setFixError] = useState<string | null>(null);
+  const [fixPatch, setFixPatch] = useState<string | null>(null);
+
+  const prepareFix = () => {
+    if (!fix?.edits?.length || source === undefined) {
+      return null;
+    }
+
+    try {
+      const prepared = createBrowserFindingFix(fileName, source, finding);
+      setFixError(null);
+      return prepared;
+    } catch (error: unknown) {
+      console.error("Could not prepare Coding Bible finding fix.", error);
+      setFixError(
+        error instanceof Error ? error.message : "Could not prepare this fix.",
+      );
+      return null;
+    }
+  };
+
+  const handlePreviewToggle = (event: SyntheticEvent<HTMLDetailsElement>) => {
+    if (!event.currentTarget.open || fixPatch !== null) {
+      return;
+    }
+
+    const prepared = prepareFix();
+    if (prepared) {
+      setFixPatch(prepared.patch);
+    }
+  };
+
+  const handleApplySafeFix = () => {
+    if (!canApplySafeFix || !onApplySafeFix) {
+      return;
+    }
+
+    const prepared = prepareFix();
+    if (prepared) {
+      onApplySafeFix(prepared.source);
+    }
+  };
 
   return (
     <article className={styles.finding} data-level={rule?.level ?? "should"}>
@@ -104,6 +153,32 @@ const FindingCard = ({
           </div>
           <strong>{fix.title}</strong>
           <p>{fix.description}</p>
+          {fix.edits?.length && source !== undefined ? (
+            <div className={styles.fixActions}>
+              <details
+                className={styles.fixPreview}
+                onToggle={handlePreviewToggle}
+              >
+                <summary>Preview diff</summary>
+                {fixError ? (
+                  <p className={styles.fixError} role="alert">
+                    {fixError}
+                  </p>
+                ) : fixPatch !== null ? (
+                  <pre>
+                    <code>{fixPatch}</code>
+                  </pre>
+                ) : (
+                  <span>Preparing diff…</span>
+                )}
+              </details>
+              {fix.safety === "safe" && canApplySafeFix ? (
+                <button onClick={handleApplySafeFix} type="button">
+                  Apply fix
+                </button>
+              ) : null}
+            </div>
+          ) : null}
         </div>
       ) : null}
 
@@ -117,6 +192,7 @@ const FindingCard = ({
 interface AnalysisResultsProps {
   errorMessage: string | null;
   files: readonly BrowserProjectFile[];
+  onApplySnippetFix?: (source: string) => void;
   projectName?: string;
   result: BrowserAnalyzeResult | null;
 }
@@ -124,6 +200,7 @@ interface AnalysisResultsProps {
 export const AnalysisResults = ({
   errorMessage,
   files,
+  onApplySnippetFix,
   projectName,
   result,
 }: AnalysisResultsProps) => {
@@ -161,6 +238,7 @@ export const AnalysisResults = ({
   const findings = result.files.flatMap(({ fileName, result: fileResult }) =>
     fileResult.findings.map((finding) => ({ fileName, finding })),
   );
+  const sources = new Map(files.map((file) => [file.fileName, file.source]));
   const checksRun = result.files.reduce(
     (total, { result: fileResult }) => total + fileResult.checksRun,
     0,
@@ -333,18 +411,29 @@ export const AnalysisResults = ({
               ].join("-")}
             />
           ))}
-          {findings.map(({ fileName, finding }) => (
-            <FindingCard
-              fileName={fileName}
-              finding={finding}
-              key={[
-                fileName,
-                finding.detectorId,
-                finding.location.line,
-                finding.location.column,
-              ].join("-")}
-            />
-          ))}
+          {findings.map(({ fileName, finding }) => {
+            const source = sources.get(fileName);
+
+            return (
+              <FindingCard
+                canApplySafeFix={
+                  result.mode === "snippet" && Boolean(onApplySnippetFix)
+                }
+                fileName={fileName}
+                finding={finding}
+                key={[
+                  fileName,
+                  finding.detectorId,
+                  finding.location.line,
+                  finding.location.column,
+                ].join("-")}
+                {...(onApplySnippetFix
+                  ? { onApplySafeFix: onApplySnippetFix }
+                  : {})}
+                {...(source === undefined ? {} : { source })}
+              />
+            );
+          })}
         </div>
       ) : (
         <div className={styles.cleanState}>
