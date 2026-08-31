@@ -50,9 +50,26 @@ Use `scope: project` when a full scan is desired:
 | `base-ref` | auto | Explicit Git comparison base for changed scope |
 | `fail-on` | `error` | `error`, `warning`, or `none` |
 | `config` | auto | Optional Coding Bible config path |
+| `rules` | all | Optional comma/space-separated automated-rule allowlist |
+| `exclude-rules` | none | Optional comma/space-separated automated rules to skip |
 | `baseline` | `true` | Honor an existing Coding Bible baseline |
 | `annotations` | `true` | Emit GitHub error/warning annotations |
 | `sarif` | `true` | Write `.coding-bible/coding-bible.sarif` |
+
+Rule selection is an extra filter on top of the repository config. For example:
+
+```yaml
+- uses: Xanhast-pf/coding-bible@v0.25.0
+  with:
+    rules: TS-001, REACT-006, LEGEND-001
+    exclude-rules: REACT-006
+```
+
+The allowlist is applied first and exclusions win afterward. Unknown or
+non-automated IDs fail the Action instead of being ignored. Omit both inputs to
+run every automated rule enabled by repository config. Coding Bible's own
+dogfood workflow intentionally omits both, and the canary workflow should do the
+same so those repositories always exercise the complete applicable catalog.
 
 The action also writes a GitHub Step Summary and exposes counts through outputs.
 The committed runtime caps log annotations at 50; complete results remain

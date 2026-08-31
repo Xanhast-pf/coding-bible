@@ -2,6 +2,7 @@ import type {
   AnalyzeResult,
   AnalyzerFinding,
   AnalyzerLanguage,
+  AnalyzerRuleSelection,
   AnalyzerRuleSetting,
 } from "@coding-bible/analyzer";
 
@@ -15,6 +16,7 @@ export interface BrowserProjectFile {
 export interface BrowserAnalyzeInput {
   files: readonly BrowserProjectFile[];
   mode: BrowserAnalyzerMode;
+  ruleSelection?: AnalyzerRuleSelection;
 }
 
 export interface BrowserAnalyzerFinding extends AnalyzerFinding {
@@ -40,6 +42,7 @@ export interface BrowserAnalyzeResult {
   durationMs: number;
   files: readonly BrowserFileResult[];
   mode: BrowserAnalyzerMode;
+  ruleSelection: AnalyzerRuleSelection;
   sourceFileCount: number;
   tsconfigFileNames: readonly string[];
 }

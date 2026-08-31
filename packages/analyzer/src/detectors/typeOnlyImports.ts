@@ -34,6 +34,7 @@ const isTypeOnlyUsage = (identifier: ts.Identifier) => {
 };
 
 export const typeOnlyImportsDetector: Detector = {
+  dependencyScope: "source-file",
   id: "type-only-imports",
   languages: ["ts", "tsx"],
   ruleId: "TS-003",

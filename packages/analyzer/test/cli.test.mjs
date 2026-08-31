@@ -833,7 +833,7 @@ test("concurrent project scans do not race cache temp files", async () => {
   });
 });
 
-test("project cache invalidates when another file in the same tsconfig project changes", async () => {
+test("source-file cache survives an unrelated sibling edit", async () => {
   await withFixture(async (directory) => {
     await mkdir(path.join(directory, "src"), { recursive: true });
     await writeFile(
@@ -863,9 +863,124 @@ test("project cache invalidates when another file in the same tsconfig project c
       profile: true,
     });
 
-    assert.equal(invalidated.cache.hits, 0);
-    assert.equal(invalidated.cache.misses, 1);
-    assert.ok(invalidated.profile.programMs > 0);
+    assert.equal(invalidated.cache.hits, 1);
+    assert.equal(invalidated.cache.misses, 0);
+    assert.equal(invalidated.profile.programMs, 0);
+  });
+});
+
+test("one-file edits reuse unaffected source-file cache entries", async () => {
+  await withFixture(async (directory) => {
+    await mkdir(path.join(directory, "src"), { recursive: true });
+    await writeFile(
+      path.join(directory, "tsconfig.json"),
+      JSON.stringify({ compilerOptions: { strict: true }, include: ["src"] }),
+    );
+    const changedPath = path.join(directory, "src", "changed.ts");
+    await writeFile(changedPath, "export const changed: any = 1;\n");
+    await writeFile(
+      path.join(directory, "src", "stable.ts"),
+      "export const stable: any = 1;\n",
+    );
+
+    await checkPaths(["src"], { cwd: directory, profile: true });
+    const warm = await checkPaths(["src"], { cwd: directory, profile: true });
+    assert.equal(warm.cache.hits, 2);
+
+    await writeFile(changedPath, "export const changed: unknown = 1;\n");
+    const incremental = await checkPaths(["src"], {
+      cwd: directory,
+      profile: true,
+    });
+
+    assert.equal(incremental.cache.hits, 1);
+    assert.equal(incremental.cache.misses, 1);
+    assert.equal(incremental.profile.sourceCacheHits, 1);
+    assert.equal(incremental.profile.sourceCacheMisses, 1);
+    assert.equal(incremental.findings.length, 1);
+    assert.equal(
+      incremental.findings[0]?.filePath,
+      path.join("src", "stable.ts"),
+    );
+  });
+});
+
+test("targeted scans preserve warm cache entries for unselected files", async () => {
+  await withFixture(async (directory) => {
+    await mkdir(path.join(directory, "src"), { recursive: true });
+    await writeFile(
+      path.join(directory, "tsconfig.json"),
+      JSON.stringify({ compilerOptions: { strict: true }, include: ["src"] }),
+    );
+    const targetPath = path.join(directory, "src", "target.ts");
+    await writeFile(targetPath, "export const target: any = 1;\n");
+    await writeFile(
+      path.join(directory, "src", "stable.ts"),
+      "export const stable: any = 1;\n",
+    );
+
+    await checkPaths(["src"], { cwd: directory });
+    const warm = await checkPaths(["src"], { cwd: directory, profile: true });
+    assert.equal(warm.cache.hits, 2);
+
+    await writeFile(targetPath, "export const target: unknown = 1;\n");
+    const targeted = await checkPaths([path.join("src", "target.ts")], {
+      cwd: directory,
+      profile: true,
+    });
+    assert.equal(targeted.cache.hits, 0);
+    assert.equal(targeted.cache.misses, 1);
+
+    const full = await checkPaths(["src"], { cwd: directory, profile: true });
+    assert.equal(full.cache.hits, 2);
+    assert.equal(full.cache.misses, 0);
+    assert.equal(full.profile.programMs, 0);
+  });
+});
+
+test("CLI rule selection supports allowlists and exclusions", async () => {
+  await withFixture(async (directory) => {
+    await writeFile(
+      path.join(directory, "bad.ts"),
+      "const value: any = 1;\nconst page = parseInt(raw);\n",
+    );
+
+    const onlyTypes = createWriter();
+    const onlyTypesExit = await runCli(["check", ".", "--rules", "TS-001"], {
+      cwd: directory,
+      stderr: createWriter(),
+      stdout: onlyTypes,
+    });
+    assert.equal(onlyTypesExit, 1);
+    assert.match(onlyTypes.value, /TS-001/);
+    assert.doesNotMatch(onlyTypes.value, /JS-004/);
+
+    const excludedTypes = createWriter();
+    const excludedExit = await runCli(
+      ["check", ".", "--exclude-rules", "TS-001"],
+      { cwd: directory, stderr: createWriter(), stdout: excludedTypes },
+    );
+    assert.equal(excludedExit, 1);
+    assert.doesNotMatch(excludedTypes.value, /TS-001/);
+    assert.match(excludedTypes.value, /JS-004/);
+  });
+});
+
+test("CLI rule selection rejects unknown automated rule IDs", async () => {
+  await withFixture(async (directory) => {
+    await writeFile(
+      path.join(directory, "good.ts"),
+      "export const value = 1;\n",
+    );
+    const stderr = createWriter();
+    const exitCode = await runCli(["check", ".", "--rules", "TS-999"], {
+      cwd: directory,
+      stderr,
+      stdout: createWriter(),
+    });
+
+    assert.equal(exitCode, 2);
+    assert.match(stderr.value, /unknown automated rule "TS-999"/i);
   });
 });
 

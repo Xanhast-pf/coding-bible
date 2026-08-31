@@ -18,6 +18,7 @@ const isTypeOnlyUsage = (identifier) => {
     return false;
 };
 export const typeOnlyImportsDetector = {
+    dependencyScope: "source-file",
     id: "type-only-imports",
     languages: ["ts", "tsx"],
     ruleId: "TS-003",

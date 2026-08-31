@@ -192,7 +192,10 @@ Web Worker. Snippet mode builds a one-file virtual TypeScript project with real
 standard libraries; Project mode can read a local folder, group files by their
 nearest `tsconfig.json`, honor compiler options, resolve cross-file symbols, and
 apply `coding-bible.config.json` include/ignore, pack/rule, severity, override,
-and `tsconfig` settings without uploading source. Executable
+and `tsconfig` settings without uploading source. Analyze also has a local rule
+selector that can search, enable, disable, and toggle packs; the selection is
+persisted only in that browser via `localStorage` and acts as an additional
+filter on project config. Executable
 `coding-bible.config.*` modules are detected but never executed from a selected
 folder; use the CLI or GitHub Action when those configs are required. Completed
 browser runs can export a local JSON report plus separate `safe-fixes.patch` and
@@ -223,10 +226,16 @@ coding-bible check . --since origin/main
 
 Projects can add `coding-bible.config.ts` to choose include/ignore patterns,
 enable or disable automated packs/rules, set error versus warning severity, and
-apply file-specific overrides. Git-aware scopes report only requested changes
-while retaining project context for analysis. Project-result caching is enabled by
-default under the ignored `.coding-bible/cache/` directory; unchanged projects
-can reuse validated file results without rebuilding a TypeScript Program. Use
+apply file-specific overrides. One-off CLI scans can additionally use `--rules`
+or `--exclude-rules`, and the GitHub Action exposes equivalent `rules` /
+`exclude-rules` inputs. Omitting those selectors means all rules enabled by
+project config; Coding Bible dogfood intentionally uses that full-catalog
+default. Git-aware scopes report only requested changes while retaining project
+context for analysis. Incremental caching is enabled by default under the ignored
+`.coding-bible/cache/` directory. Source-file detector results use independent
+content fingerprints, so an edit can reuse unaffected findings and build a tiny
+Program for only cache misses; project-sensitive detectors remain tied to a full
+project signature. Use
 `--no-cache` for a cold run or `--clear-cache` to reset it. `--profile` exposes
 cache hit/miss counts alongside scanner phase timings and memory use.
 

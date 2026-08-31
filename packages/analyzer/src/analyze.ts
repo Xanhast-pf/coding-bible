@@ -33,6 +33,8 @@ const getApplicableDetectors = (
   detectors.filter(
     (detector) =>
       (!detector.languages || detector.languages.includes(language)) &&
+      (!options.dependencyScope ||
+        detector.dependencyScope === options.dependencyScope) &&
       (options.isRuleEnabled?.(detector.ruleId, fileName) ?? true),
   );
 

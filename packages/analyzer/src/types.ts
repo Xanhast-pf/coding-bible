@@ -45,7 +45,15 @@ export interface ProgramAnalyzeInput {
   language: AnalyzerLanguage;
 }
 
+export type AnalyzerDetectorDependencyScope = "source-file" | "project";
+
+export interface AnalyzerRuleSelection {
+  exclude?: readonly string[];
+  include?: readonly string[];
+}
+
 export interface AnalyzeOptions {
+  dependencyScope?: AnalyzerDetectorDependencyScope;
   isRuleEnabled?: (ruleId: string, fileName: string) => boolean;
   signal?: AbortSignal;
 }
@@ -116,6 +124,7 @@ export interface DetectorContext {
 }
 
 export interface Detector {
+  dependencyScope: AnalyzerDetectorDependencyScope;
   id: string;
   ruleId: string;
   languages?: readonly AnalyzerLanguage[];

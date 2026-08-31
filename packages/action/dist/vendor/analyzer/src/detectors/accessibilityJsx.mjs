@@ -41,6 +41,7 @@ const isNativeInteractive = (node) => {
     return tagName === "a" && hasAttribute(node, "href");
 };
 export const semanticInteractiveElementDetector = {
+    dependencyScope: "source-file",
     id: "semantic-interactive-element",
     languages: ["jsx", "tsx"],
     ruleId: "A11Y-001",
@@ -69,6 +70,7 @@ export const semanticInteractiveElementDetector = {
     },
 };
 export const keyboardInteractionDetector = {
+    dependencyScope: "source-file",
     id: "keyboard-interaction",
     languages: ["jsx", "tsx"],
     ruleId: "A11Y-002",
@@ -144,6 +146,7 @@ const childMayNameControl = (child) => {
 };
 const hasPotentialTextContent = (node) => node.children.some(childMayNameControl);
 export const accessibleControlNameDetector = {
+    dependencyScope: "source-file",
     id: "accessible-control-name",
     languages: ["jsx", "tsx"],
     ruleId: "A11Y-004",

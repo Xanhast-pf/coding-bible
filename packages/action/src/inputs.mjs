@@ -3,8 +3,18 @@ const booleanValues = new Map([
   ["false", false],
 ]);
 
-const readInput = (environment, name) =>
-  environment[`INPUT_${name.replaceAll("-", "_").toUpperCase()}`]?.trim() ?? "";
+// GitHub's runner uppercases input names and replaces spaces only; hyphens remain.
+const inputEnvironmentKey = (name) =>
+  `INPUT_${name.replaceAll(" ", "_").toUpperCase()}`;
+
+const legacyInputEnvironmentKey = (name) =>
+  inputEnvironmentKey(name).replaceAll("-", "_");
+
+const readInput = (environment, name) => {
+  const key = inputEnvironmentKey(name);
+  const legacyKey = legacyInputEnvironmentKey(name);
+  return (environment[key] ?? environment[legacyKey] ?? "").trim();
+};
 
 const readBooleanInput = (environment, name, fallback) => {
   const raw = readInput(environment, name);
@@ -19,6 +29,23 @@ const readBooleanInput = (environment, name, fallback) => {
   return value;
 };
 
+const readRuleListInput = (environment, name) => {
+  const raw = readInput(environment, name);
+  if (!raw) {
+    return undefined;
+  }
+
+  const ruleIds = [
+    ...new Set(
+      raw
+        .split(/[\s,]+/)
+        .map((value) => value.trim())
+        .filter(Boolean),
+    ),
+  ];
+  return ruleIds.length ? ruleIds : undefined;
+};
+
 const readEnumInput = (environment, name, allowed, fallback) => {
   const raw = readInput(environment, name) || fallback;
   if (!allowed.includes(raw)) {
@@ -27,18 +54,32 @@ const readEnumInput = (environment, name, allowed, fallback) => {
   return raw;
 };
 
-export const readActionInputs = (environment = process.env) => ({
-  annotations: readBooleanInput(environment, "annotations", true),
-  baseRef: readInput(environment, "base-ref") || null,
-  baseline: readBooleanInput(environment, "baseline", true),
-  configPath: readInput(environment, "config") || null,
-  failOn: readEnumInput(
-    environment,
-    "fail-on",
-    ["error", "warning", "none"],
-    "error",
-  ),
-  path: readInput(environment, "path") || ".",
-  sarif: readBooleanInput(environment, "sarif", true),
-  scope: readEnumInput(environment, "scope", ["changed", "project"], "changed"),
-});
+export const readActionInputs = (environment = process.env) => {
+  const include = readRuleListInput(environment, "rules");
+  const exclude = readRuleListInput(environment, "exclude-rules");
+
+  return {
+    annotations: readBooleanInput(environment, "annotations", true),
+    baseRef: readInput(environment, "base-ref") || null,
+    baseline: readBooleanInput(environment, "baseline", true),
+    configPath: readInput(environment, "config") || null,
+    failOn: readEnumInput(
+      environment,
+      "fail-on",
+      ["error", "warning", "none"],
+      "error",
+    ),
+    path: readInput(environment, "path") || ".",
+    ruleSelection: {
+      ...(exclude ? { exclude } : {}),
+      ...(include ? { include } : {}),
+    },
+    sarif: readBooleanInput(environment, "sarif", true),
+    scope: readEnumInput(
+      environment,
+      "scope",
+      ["changed", "project"],
+      "changed",
+    ),
+  };
+};

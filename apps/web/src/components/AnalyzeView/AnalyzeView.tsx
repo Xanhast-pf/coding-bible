@@ -1,8 +1,15 @@
-import type { AnalyzerLanguage } from "@coding-bible/analyzer";
+import type {
+  AnalyzerLanguage,
+  AnalyzerRuleSelection,
+} from "@coding-bible/analyzer";
 import { useEffect, useRef, useState } from "react";
 
 import type { BrowserAnalysisTask } from "../../analyzer/runBrowserAnalysis";
 import { runBrowserAnalysis } from "../../analyzer/runBrowserAnalysis";
+import {
+  readBrowserRuleSelection,
+  writeBrowserRuleSelection,
+} from "../../analyzer/ruleSelection";
 import type { BrowserProjectSelection } from "../../analyzer/projectSelection";
 import { readProjectSelection } from "../../analyzer/projectSelection";
 import type {
@@ -14,6 +21,7 @@ import type {
 import { AnalysisResults } from "./AnalysisResults";
 import styles from "./AnalyzeView.module.css";
 import { ProjectPicker } from "./ProjectPicker";
+import { RuleSelectionPanel } from "./RuleSelectionPanel";
 import { ReviewWorkspace } from "./ReviewWorkspace";
 
 const sampleSource = `import { User } from "./types";
@@ -58,6 +66,9 @@ export const AnalyzeView = () => {
   const [mode, setMode] = useState<BrowserAnalyzerMode>("snippet");
   const [language, setLanguage] = useState<AnalyzerLanguage>("tsx");
   const [source, setSource] = useState("");
+  const [ruleSelection, setRuleSelection] = useState<AnalyzerRuleSelection>(
+    () => readBrowserRuleSelection(),
+  );
   const [project, setProject] = useState<BrowserProjectSelection | null>(null);
   const [projectError, setProjectError] = useState<string | null>(null);
   const [result, setResult] = useState<BrowserAnalyzeResult | null>(null);
@@ -132,6 +143,12 @@ export const AnalyzeView = () => {
     }
   };
 
+  const handleRuleSelectionChange = (nextSelection: AnalyzerRuleSelection) => {
+    setRuleSelection(nextSelection);
+    writeBrowserRuleSelection(nextSelection);
+    resetResult();
+  };
+
   const handleAnalyze = async () => {
     const input =
       mode === "snippet"
@@ -144,12 +161,14 @@ export const AnalyzeView = () => {
                 },
               ],
               mode,
+              ruleSelection,
             }
           : null
         : project
           ? {
               files: project.files,
               mode,
+              ruleSelection,
             }
           : null;
 
@@ -174,6 +193,7 @@ export const AnalyzeView = () => {
         },
       ],
       mode: "snippet",
+      ruleSelection,
     });
   };
 
@@ -258,6 +278,12 @@ export const AnalyzeView = () => {
           <span>Folder + tsconfig context</span>
         </button>
       </div>
+
+      <RuleSelectionPanel
+        disabled={status !== "idle"}
+        onChange={handleRuleSelectionChange}
+        selection={ruleSelection}
+      />
 
       <div className={styles.workspace}>
         <section className={styles.editorPanel}>

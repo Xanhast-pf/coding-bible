@@ -5,6 +5,7 @@ import {
   createFinding,
   getImportBinding,
   getSymbol,
+  hasSourceFileDeclaration,
   isExecutableFunction,
   nodesOfKind,
 } from "../utils.ts";
@@ -50,7 +51,7 @@ const isObserverCall = (context: DetectorContext, node: ts.CallExpression) => {
   return (
     ts.isIdentifier(node.expression) &&
     node.expression.text === "observer" &&
-    !getSymbol(context, node.expression)
+    !hasSourceFileDeclaration(context, node.expression)
   );
 };
 
@@ -137,6 +138,7 @@ const visitRenderBody = (
 };
 
 export const legendReactSubscriptionDetector: Detector = {
+  dependencyScope: "source-file",
   id: "legend-react-use-value",
   languages: ["jsx", "tsx"],
   ruleId: "LEGEND-001",

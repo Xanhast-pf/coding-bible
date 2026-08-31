@@ -206,3 +206,27 @@ test("browser project analysis honors a configured tsconfig path", () => {
   assert.deepEqual(result.tsconfigFileNames, ["tsconfig.browser.json"]);
   assert.equal(result.configurationDiagnostics.length, 0);
 });
+
+test("browser analysis applies the persistent local rule selection as an extra filter", () => {
+  const result = analyzeBrowserInput(
+    {
+      files: [
+        {
+          fileName: "sample.ts",
+          source: "const unsafe: any = 1;\nconst page = parseInt(raw);\n",
+        },
+      ],
+      mode: "snippet",
+      ruleSelection: { include: ["TS-001"] },
+    },
+    libraryFiles,
+  );
+
+  const fileResult = result.files[0]?.result;
+  assert.deepEqual(result.ruleSelection, { include: ["TS-001"] });
+  assert.deepEqual(fileResult?.ruleIdsChecked, ["TS-001"]);
+  assert.deepEqual(
+    fileResult?.findings.map(({ ruleId }) => ruleId),
+    ["TS-001"],
+  );
+});

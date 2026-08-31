@@ -13,7 +13,7 @@ import { fileURLToPath } from "node:url";
 
 import ts from "../../typescript/typescript.cjs";
 
-const cacheSchemaVersion = 1;
+const cacheSchemaVersion = 2;
 const analyzerRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   "..",
@@ -215,32 +215,30 @@ export const createProjectCacheIdentity = ({ rootDir, tsconfigPath }) => {
   return createHash("sha256").update(projectKey).digest("hex").slice(0, 20);
 };
 
-export const createProjectSignature = async (
+export const createProjectCacheSignatures = async (
   project,
-  { config, rootDir, signal } = {},
+  {
+    config,
+    includeProjectSignature = true,
+    rootDir,
+    ruleSelection,
+    signal,
+    sourceFilePaths,
+  } = {},
 ) => {
   const startedAt = performance.now();
   signal?.throwIfAborted();
-  const hash = createHash("sha256");
-  hash.update(`cache-schema:${cacheSchemaVersion}\0`);
-  hash.update(`typescript:${ts.version}\0`);
-  hash.update(`analyzer:${await getImplementationSignature()}\0`);
-  hash.update(`compiler:${stableStringify(project.options)}\0`);
-  hash.update(
+
+  const baseHash = createHash("sha256");
+  baseHash.update(`cache-schema:${cacheSchemaVersion}\0`);
+  baseHash.update(`typescript:${ts.version}\0`);
+  baseHash.update(`analyzer:${await getImplementationSignature()}\0`);
+  baseHash.update(`compiler:${stableStringify(project.options)}\0`);
+  baseHash.update(
     `references:${stableStringify(project.projectReferences ?? [])}\0`,
   );
-  hash.update(`config:${stableStringify(config)}\0`);
-
-  const sourceFiles = [
-    ...new Set(project.rootNames.map((filePath) => path.resolve(filePath))),
-  ].sort((left, right) => left.localeCompare(right));
-  const sourceInputs = await readHashInputs(sourceFiles, rootDir, signal);
-  for (const input of sourceInputs) {
-    signal?.throwIfAborted();
-    if (input) {
-      updateHashWithInput(hash, input);
-    }
-  }
+  baseHash.update(`config:${stableStringify(config)}\0`);
+  baseHash.update(`selection:${stableStringify(ruleSelection ?? {})}\0`);
 
   const projectDirectory = project.tsconfigPath
     ? path.dirname(project.tsconfigPath)
@@ -251,23 +249,78 @@ export const createProjectSignature = async (
   );
   for (const filePath of metadataFiles) {
     signal?.throwIfAborted();
-    await updateFileHash(hash, filePath, rootDir, signal);
+    await updateFileHash(baseHash, filePath, rootDir, signal);
+  }
+
+  const baseSignature = baseHash.digest("hex");
+  const selectedSourceFiles = [
+    ...new Set(
+      (sourceFilePaths ?? project.rootNames).map((filePath) =>
+        path.resolve(filePath),
+      ),
+    ),
+  ].sort((left, right) => left.localeCompare(right));
+  const projectSourceFiles = includeProjectSignature
+    ? [
+        ...new Set(project.rootNames.map((filePath) => path.resolve(filePath))),
+      ].sort((left, right) => left.localeCompare(right))
+    : [];
+  const filesToRead = [
+    ...new Set([...selectedSourceFiles, ...projectSourceFiles]),
+  ].sort((left, right) => left.localeCompare(right));
+  const sourceInputs = await readHashInputs(filesToRead, rootDir, signal);
+  const selectedRelativePaths = new Set(
+    selectedSourceFiles.map((filePath) =>
+      normalizePath(path.relative(rootDir, filePath)),
+    ),
+  );
+  const projectRelativePaths = new Set(
+    projectSourceFiles.map((filePath) =>
+      normalizePath(path.relative(rootDir, filePath)),
+    ),
+  );
+  const projectHash = includeProjectSignature
+    ? createHash("sha256").update(baseSignature)
+    : null;
+  const sourceSignatures = {};
+
+  for (const input of sourceInputs) {
+    signal?.throwIfAborted();
+    if (!input) {
+      continue;
+    }
+
+    if (projectHash && projectRelativePaths.has(input.relativePath)) {
+      updateHashWithInput(projectHash, input);
+    }
+    if (selectedRelativePaths.has(input.relativePath)) {
+      const fileHash = createHash("sha256").update(baseSignature);
+      updateHashWithInput(fileHash, input);
+      sourceSignatures[input.relativePath] = fileHash.digest("hex");
+    }
   }
 
   return {
     cacheMs: performance.now() - startedAt,
-    signature: hash.digest("hex"),
+    projectSignature: projectHash?.digest("hex") ?? null,
+    sourceSignatures,
+  };
+};
+
+// Backward-compatible helper for callers that only need the conservative
+// whole-project signature.
+export const createProjectSignature = async (project, options = {}) => {
+  const result = await createProjectCacheSignatures(project, options);
+  return {
+    cacheMs: result.cacheMs,
+    signature: result.projectSignature,
   };
 };
 
 const getCacheFilePath = (cacheDirectory, projectIdentity) =>
   path.join(cacheDirectory, `${projectIdentity}.json`);
 
-export const readProjectCache = async (
-  cacheDirectory,
-  projectIdentity,
-  signature,
-) => {
+export const readProjectCache = async (cacheDirectory, projectIdentity) => {
   if (!cacheDirectory) {
     return null;
   }
@@ -277,9 +330,10 @@ export const readProjectCache = async (
     );
     if (
       parsed?.schemaVersion !== cacheSchemaVersion ||
-      parsed.signature !== signature ||
-      !parsed.results ||
-      typeof parsed.results !== "object"
+      !parsed.sourceResults ||
+      typeof parsed.sourceResults !== "object" ||
+      !parsed.projectResults ||
+      typeof parsed.projectResults !== "object"
     ) {
       return null;
     }
@@ -295,8 +349,7 @@ export const readProjectCache = async (
 export const writeProjectCache = async (
   cacheDirectory,
   projectIdentity,
-  signature,
-  results,
+  { projectResults, sourceResults },
 ) => {
   if (!cacheDirectory) {
     return;
@@ -308,9 +361,9 @@ export const writeProjectCache = async (
     temporaryPath,
     `${JSON.stringify(
       {
+        projectResults,
         schemaVersion: cacheSchemaVersion,
-        signature,
-        results,
+        sourceResults,
       },
       null,
       2,

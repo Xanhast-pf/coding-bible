@@ -2,6 +2,7 @@ import {
   analyzerPacks,
   type AnalyzerConfig,
   type AnalyzerPack,
+  type AnalyzerRuleSelection,
   type AnalyzerRuleSetting,
 } from "./types.ts";
 import { detectors } from "./detectors/index.ts";
@@ -49,7 +50,10 @@ const validConfigKeys = new Set([
 ]);
 const validOverrideKeys = new Set(["files", "packs", "rules"]);
 const validPacks = new Set<AnalyzerPack>(analyzerPacks);
-const validRuleIds = new Set(detectors.map((detector) => detector.ruleId));
+export const analyzerRuleIds = [
+  ...new Set(detectors.map((detector) => detector.ruleId)),
+].sort();
+const validRuleIds = new Set(analyzerRuleIds);
 
 const toRecord = (value: unknown, message: string): Record<string, unknown> => {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
@@ -99,6 +103,59 @@ const assertSettings = (
       throw new Error(`${name}.${key} must be "error", "warning", or "off".`);
     }
   }
+};
+
+const assertRuleIdList = (
+  value: readonly string[] | undefined,
+  name: string,
+) => {
+  if (value === undefined) {
+    return;
+  }
+
+  for (const ruleId of value) {
+    if (!validRuleIds.has(ruleId)) {
+      throw new Error(`${name} contains unknown automated rule "${ruleId}".`);
+    }
+  }
+};
+
+export const normalizeAnalyzerRuleSelection = (
+  selection: AnalyzerRuleSelection = {},
+): AnalyzerRuleSelection => {
+  const include = selection.include
+    ? [
+        ...new Set(
+          selection.include.map((ruleId) => ruleId.trim()).filter(Boolean),
+        ),
+      ].sort()
+    : undefined;
+  const exclude = selection.exclude
+    ? [
+        ...new Set(
+          selection.exclude.map((ruleId) => ruleId.trim()).filter(Boolean),
+        ),
+      ].sort()
+    : undefined;
+
+  assertRuleIdList(include, "rule selection include");
+  assertRuleIdList(exclude, "rule selection exclude");
+
+  return {
+    ...(exclude?.length ? { exclude } : {}),
+    ...(include?.length ? { include } : {}),
+  };
+};
+
+export const createAnalyzerRuleSelectionPredicate = (
+  selection: AnalyzerRuleSelection = {},
+) => {
+  const normalized = normalizeAnalyzerRuleSelection(selection);
+  const include = normalized.include ? new Set(normalized.include) : null;
+  const exclude = new Set(normalized.exclude ?? []);
+
+  return (ruleId: string) =>
+    (!include || include.has(ruleId)) && !exclude.has(ruleId);
 };
 
 export const validateAnalyzerConfig = (value: unknown): AnalyzerConfig => {
