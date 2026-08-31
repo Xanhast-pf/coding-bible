@@ -243,6 +243,71 @@ test("detects aliased, namespaced, conditional, and post-return Hooks", () => {
   );
 });
 
+test("tracks Hook execution paths instead of syntax ancestry", () => {
+  assert.deepEqual(
+    ruleIds(
+      `function Panel() {\n  if (useFeatureToggle(FLAG)) return <div />;\n  return null;\n}`,
+    ),
+    [],
+  );
+
+  assert.deepEqual(
+    ruleIds(
+      `function Panel() {\n  return useFeatureToggle(FLAG) ? <Enabled /> : <Disabled />;\n}`,
+    ),
+    [],
+  );
+
+  assert.deepEqual(
+    ruleIds(
+      `function Panel() {\n  const enabled = useFeatureToggle(FLAG) && permission;\n  return <div>{enabled}</div>;\n}`,
+    ),
+    [],
+  );
+
+  assert.deepEqual(
+    ruleIds(
+      `function Panel() {\n  const enabled = permission && useFeatureToggle(FLAG);\n  return <div>{enabled}</div>;\n}`,
+    ),
+    ["REACT-009"],
+  );
+
+  assert.deepEqual(
+    ruleIds(
+      `function Panel() {\n  return enabled ? useFeatureToggle(FLAG) : false;\n}`,
+    ),
+    ["REACT-009"],
+  );
+});
+
+test("ignores throws and nested helper returns for Hook ordering", () => {
+  assert.deepEqual(
+    ruleIds(
+      `function Panel() {\n  if (failed) throw new Error("boom");\n  useState(0);\n  return <div />;\n}`,
+    ),
+    [],
+  );
+
+  assert.deepEqual(
+    ruleIds(
+      `function useThing() {\n  function helper() { return false; }\n  useEffect(() => helper(), []);\n}`,
+    ),
+    [],
+  );
+
+  assert.deepEqual(
+    ruleIds(
+      `function Panel() {\n  if (hidden) return null;\n  useState(0);\n  return <div />;\n}`,
+    ),
+    ["REACT-009"],
+  );
+
+  assert.deepEqual(
+    ruleIds(`function useUnreachable() {\n  return;\n  useState(0);\n}`),
+    [],
+  );
+});
+
 test("accepts Hooks in component wrappers and renderHook harnesses", () => {
   assert.deepEqual(
     ruleIds(

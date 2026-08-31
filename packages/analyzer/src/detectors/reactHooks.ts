@@ -161,41 +161,81 @@ const getNearestFunction = (node: ts.Node) => {
   return null;
 };
 
+const isShortCircuitOperator = (kind: ts.SyntaxKind) =>
+  kind === ts.SyntaxKind.AmpersandAmpersandToken ||
+  kind === ts.SyntaxKind.BarBarToken ||
+  kind === ts.SyntaxKind.QuestionQuestionToken ||
+  kind === ts.SyntaxKind.AmpersandAmpersandEqualsToken ||
+  kind === ts.SyntaxKind.BarBarEqualsToken ||
+  kind === ts.SyntaxKind.QuestionQuestionEqualsToken;
+
+const isConditionallyEvaluatedByParent = (child: ts.Node, parent: ts.Node) => {
+  if (ts.isIfStatement(parent)) {
+    return child !== parent.expression;
+  }
+
+  if (ts.isConditionalExpression(parent)) {
+    return child !== parent.condition;
+  }
+
+  if (
+    ts.isBinaryExpression(parent) &&
+    isShortCircuitOperator(parent.operatorToken.kind)
+  ) {
+    return child !== parent.left;
+  }
+
+  if (ts.isSwitchStatement(parent)) {
+    return child !== parent.expression;
+  }
+
+  if (ts.isForStatement(parent)) {
+    return child !== parent.initializer;
+  }
+
+  if (ts.isForInStatement(parent) || ts.isForOfStatement(parent)) {
+    return child !== parent.expression;
+  }
+
+  return ts.isWhileStatement(parent) || ts.isDoStatement(parent);
+};
+
 const hasForbiddenControlFlow = (
   node: ts.Node,
   boundary: ExecutableFunction,
   allowConditionalUse: boolean,
 ) => {
+  let child: ts.Node = node;
   let current = node.parent;
 
   while (current && current !== boundary) {
-    const isTryBoundary =
-      ts.isTryStatement(current) || ts.isCatchClause(current);
-    const isConditionalBoundary =
-      ts.isIfStatement(current) ||
-      ts.isConditionalExpression(current) ||
-      ts.isForStatement(current) ||
-      ts.isForInStatement(current) ||
-      ts.isForOfStatement(current) ||
-      ts.isWhileStatement(current) ||
-      ts.isDoStatement(current) ||
-      ts.isSwitchStatement(current);
-
-    if (isTryBoundary || (!allowConditionalUse && isConditionalBoundary)) {
+    if (ts.isTryStatement(current) || ts.isCatchClause(current)) {
       return true;
     }
 
+    if (
+      !allowConditionalUse &&
+      isConditionallyEvaluatedByParent(child, current)
+    ) {
+      return true;
+    }
+
+    child = current;
     current = current.parent;
   }
 
   return false;
 };
 
-const statementContainsFunctionExit = (statement: ts.Statement) => {
-  let exits = false;
+const statementContainsPotentialEarlyReturn = (statement: ts.Statement) => {
+  if (ts.isFunctionDeclaration(statement) || ts.isReturnStatement(statement)) {
+    return false;
+  }
+
+  let returns = false;
 
   const walk = (node: ts.Node) => {
-    if (exits) {
+    if (returns) {
       return;
     }
 
@@ -203,8 +243,8 @@ const statementContainsFunctionExit = (statement: ts.Statement) => {
       return;
     }
 
-    if (ts.isReturnStatement(node) || ts.isThrowStatement(node)) {
-      exits = true;
+    if (ts.isReturnStatement(node)) {
+      returns = true;
       return;
     }
 
@@ -212,7 +252,7 @@ const statementContainsFunctionExit = (statement: ts.Statement) => {
   };
 
   walk(statement);
-  return exits;
+  return returns;
 };
 
 const isAfterPotentialEarlyExit = (
@@ -235,7 +275,7 @@ const isAfterPotentialEarlyExit = (
   const statementIndex = boundary.body.statements.indexOf(current);
   return boundary.body.statements
     .slice(0, Math.max(statementIndex, 0))
-    .some(statementContainsFunctionExit);
+    .some(statementContainsPotentialEarlyReturn);
 };
 
 const isAsyncFunction = (node: ExecutableFunction) =>
