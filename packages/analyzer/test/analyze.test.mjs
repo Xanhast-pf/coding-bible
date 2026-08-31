@@ -10,15 +10,15 @@ const uniqueRuleIds = (source, language = "tsx") =>
   [...new Set(ruleIds(source, language))].sort();
 
 test("analyzer runs only detectors applicable to the selected language", () => {
-  assert.equal(detectors.length, 20);
+  assert.equal(detectors.length, 21);
 
   const tsResult = analyze({ source: "const value = 1;", language: "ts" });
   const tsxResult = analyze({ source: "const value = 1;", language: "tsx" });
 
-  assert.equal(tsResult.checksRun, 11);
-  assert.equal(tsResult.ruleIdsChecked.length, 11);
-  assert.equal(tsxResult.checksRun, 20);
-  assert.equal(tsxResult.ruleIdsChecked.length, 19);
+  assert.equal(tsResult.checksRun, 12);
+  assert.equal(tsResult.ruleIdsChecked.length, 12);
+  assert.equal(tsxResult.checksRun, 21);
+  assert.equal(tsxResult.ruleIdsChecked.length, 20);
 });
 
 test("syntax errors pause rule analysis instead of returning a misleading clean result", () => {
@@ -531,5 +531,95 @@ test("analysis can be cancelled before detector execution", () => {
         { signal: controller.signal },
       ),
     /aborted/i,
+  );
+});
+
+test("detects state that is only synchronized from Effect dependencies", () => {
+  assert.deepEqual(
+    ruleIds(`import { useEffect, useState } from "react";
+const View = ({ items }) => {
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    setCount(items.length);
+  }, [items]);
+  return <span>{count}</span>;
+};`),
+    ["REACT-004"],
+  );
+
+  assert.deepEqual(
+    ruleIds(`import * as React from "react";
+const View = ({ items }) => {
+  const [visible, setVisible] = React.useState(false);
+  React.useEffect(() => setVisible(items.length > 0), [items]);
+  return <span>{String(visible)}</span>;
+};`),
+    ["REACT-004"],
+  );
+});
+
+test("does not confuse editable, reset, or accumulated state with derived state", () => {
+  assert.deepEqual(
+    ruleIds(`import { useEffect, useState } from "react";
+const Field = ({ value }) => {
+  const [draft, setDraft] = useState(value);
+  useEffect(() => { setDraft(value); }, [value]);
+  return <input value={draft} onChange={(event) => setDraft(event.target.value)} />;
+};`),
+    [],
+  );
+
+  assert.deepEqual(
+    ruleIds(`import { useEffect, useState } from "react";
+const View = ({ userId }) => {
+  const [error, setError] = useState(null);
+  useEffect(() => { setError(null); }, [userId]);
+  return <span>{error}</span>;
+};`),
+    [],
+  );
+
+  assert.deepEqual(
+    ruleIds(`import { useEffect, useState } from "react";
+const View = ({ amount }) => {
+  const [total, setTotal] = useState(0);
+  useEffect(() => { setTotal((current) => current + amount); }, [amount]);
+  return <span>{total}</span>;
+};`),
+    [],
+  );
+
+  assert.deepEqual(
+    ruleIds(`import { useEffect, useState } from "react";
+const useEditable = ({ value }) => {
+  const [draft, setDraft] = useState(value);
+  useEffect(() => { setDraft(value); }, [value]);
+  return { draft, setDraft };
+};`),
+    [],
+  );
+
+  assert.deepEqual(
+    ruleIds(`import { useEffect, useState } from "react";
+const useCurrent = ({ source }) => {
+  const [current, setCurrent] = useState({});
+  const response = useSource({ fallback: current, source });
+  useEffect(() => { setCurrent(response); }, [response]);
+  return current;
+};`),
+    [],
+  );
+});
+
+test("derived-state detection respects shadowed React hook names", () => {
+  assert.deepEqual(
+    ruleIds(`const useState = (value) => [value, () => {}];
+const useEffect = (callback) => callback();
+const View = ({ value }) => {
+  const [copy, setCopy] = useState(value);
+  useEffect(() => { setCopy(value); }, [value]);
+  return <span>{copy}</span>;
+};`),
+    [],
   );
 });

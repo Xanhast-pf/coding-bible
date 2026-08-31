@@ -1,5 +1,6 @@
 import { accessibleControlNameDetector, keyboardInteractionDetector, semanticInteractiveElementDetector, } from "./accessibilityJsx.mjs";
 import { directComponentCallsDetector } from "./directComponentCalls.mjs";
+import { derivedStateEffectDetector } from "./derivedStateEffects.mjs";
 import { graphqlInterpolationDetector } from "./graphqlTemplates.mjs";
 import { hookDependencySuppressionsDetector } from "./hookDependencySuppressions.mjs";
 import { defaultParameterDetector, nonMutatingCollectionDetector, optionalChainingDetector, } from "./javascriptPatterns.mjs";
@@ -31,6 +32,7 @@ export const detectors = [
     staticComponentValueDetector,
     reactHookPlacementDetector,
     directComponentCallsDetector,
+    derivedStateEffectDetector,
     reactInputMutationDetector,
     hookDependencySuppressionsDetector,
 ];

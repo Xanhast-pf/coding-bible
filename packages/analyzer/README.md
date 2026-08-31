@@ -189,7 +189,7 @@ path to force one config. Otherwise selected files are grouped by their nearest
 
 ## Automated coverage
 
-The current pass runs 20 detector functions covering 19 Bible rules:
+The current pass runs 21 detector functions covering 20 Bible rules:
 
 - `CORE-003` bindings that can be `const`
 - `JS-002` repeated nullish guard chains suited to optional chaining
@@ -204,6 +204,7 @@ The current pass runs 20 detector functions covering 19 Bible rules:
 - `A11Y-004` buttons without a detectable accessible name
 - `GQL-002` runtime interpolation inside `gql`/`graphql` templates
 - `LEGEND-001` Legend-State `get()` subscriptions inside `observer` renders
+- `REACT-004` state that is only synchronized from Effect dependencies
 - `REACT-006` missing list keys
 - `REACT-006` unstable index/generated list keys
 - `REACT-008` context-free array/object allocations inside components

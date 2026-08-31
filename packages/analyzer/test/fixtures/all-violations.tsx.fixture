@@ -1,6 +1,6 @@
 import { gql } from "@apollo/client";
 import { observer } from "@legendapp/state/react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { User } from "./types";
 
 type Props = {
@@ -41,6 +41,11 @@ export function Dashboard({ user, users }: Props) {
   const city = user && user.address && user.address.city;
   const sortedUsers = users.sort(compareUsers);
   const options = ["Canada", "France"];
+  const [visibleUserCount, setVisibleUserCount] = useState(0);
+
+  useEffect(() => {
+    setVisibleUserCount(users.length);
+  }, [users]);
 
   user.name = user.name.trim();
 
@@ -84,6 +89,7 @@ export function Dashboard({ user, users }: Props) {
 
       <p>{city}</p>
       <p>{options.join(", ")}</p>
+      <p>{visibleUserCount}</p>
       <p>{String(query)}</p>
       {badge}
       <ObservedName />
