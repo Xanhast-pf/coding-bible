@@ -201,13 +201,14 @@ generation uses the same shared edit/diff implementation as the CLI; review
 patches are intentionally separated because they can require an intent decision.
 Individual fixes can also be previewed as unified diffs in the results panel.
 Analyzer findings additionally feed a GitHub-style code-review workspace: files
-with findings are selectable from a side navigator, each finding opens the full
-original source beside the detector's proposed source, and the exact affected
-range is highlighted in both panes. Findings without a structured edit remain
-visible with review guidance instead of inventing a replacement. Snippet mode
-can apply detector-authored safe fixes directly from either review surface and
-immediately re-analyze the updated source; review fixes and Project mode remain
-read-only and export-only.
+with findings are selectable from a side navigator, each finding centers and
+highlights the exact affected range in the source pane, and an analyzer-guidance
+pane explains the issue, recommended fix, and canonical rule rationale/pattern.
+This avoids presenting unchanged code as a fake green replacement when a
+detector intentionally requires human judgment. Snippet mode can apply
+detector-authored safe fixes directly from either review surface and immediately
+re-analyze the updated source; review fixes and Project mode remain read-only
+and export-only.
 The compiler remains lazy-loaded so the initial Learn-page bundle does not pay
 that cost. Installed `node_modules` are intentionally not fetched by the browser,
 so the CLI remains the highest-fidelity option when dependency declarations are

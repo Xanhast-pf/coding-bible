@@ -12,6 +12,7 @@ import type {
 } from "../../analyzer/types";
 import styles from "./AnalyzeView.module.css";
 import { ReviewCodePane } from "./ReviewCodePane";
+import { ReviewGuidancePane } from "./ReviewGuidancePane";
 
 const rulesById = new Map(rules.map((rule) => [rule.id, rule]));
 
@@ -209,12 +210,6 @@ export const ReviewWorkspace = ({
                 )}
               </div>
               <h4>{rule?.title ?? activeFinding.ruleId}</h4>
-              <p>{activeFinding.message}</p>
-              <p className={styles.reviewSuggestion}>
-                {hasStructuredFix && fix
-                  ? fix.description
-                  : activeFinding.suggestion}
-              </p>
             </div>
             <div className={styles.reviewFindingActions}>
               <span>
@@ -239,30 +234,12 @@ export const ReviewWorkspace = ({
           ) : comparison ? (
             <div className={styles.reviewPanes}>
               <ReviewCodePane
-                label="Original"
+                label="Source"
                 ranges={comparison.originalRanges}
                 source={comparison.originalSource}
-                tone="original"
               />
-              <ReviewCodePane
-                label={
-                  hasStructuredFix
-                    ? "Suggested change"
-                    : "No automated replacement"
-                }
-                ranges={comparison.proposedRanges}
-                source={comparison.proposedSource}
-                tone={hasStructuredFix ? "proposed" : "neutral"}
-              />
+              <ReviewGuidancePane finding={activeFinding} rule={rule} />
             </div>
-          ) : null}
-
-          {!hasStructuredFix ? (
-            <p className={styles.reviewNoFix}>
-              This detector found a problem but does not provide a structured
-              text edit yet. Use the recommendation above as the review
-              guidance.
-            </p>
           ) : null}
         </div>
       </div>

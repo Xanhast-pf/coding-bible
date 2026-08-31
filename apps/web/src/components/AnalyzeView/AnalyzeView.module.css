@@ -1148,18 +1148,6 @@
   margin: 0.625rem 0 0.25rem;
 }
 
-.reviewFindingHeader p {
-  color: var(--muted);
-  font-size: 0.8125rem;
-  line-height: 1.55;
-  margin: 0;
-}
-
-.reviewFindingHeader .reviewSuggestion {
-  color: var(--text);
-  margin-top: 0.375rem;
-}
-
 .reviewFindingMeta {
   align-items: center;
   display: flex;
@@ -1239,7 +1227,7 @@
 .reviewPanes {
   display: grid;
   gap: 1px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1.15fr) minmax(20rem, 0.85fr);
   background: var(--border);
 }
 
@@ -1251,20 +1239,6 @@
 
   background: var(--codeSurface);
   min-width: 0;
-}
-
-.reviewCodePane[data-tone="proposed"] {
-  --reviewAccent: var(--matrix);
-  --reviewAccentDim: var(--matrixDim);
-  --reviewHighlight: color-mix(in srgb, var(--matrix) 8%, transparent);
-  --reviewMark: color-mix(in srgb, var(--matrix) 20%, transparent);
-}
-
-.reviewCodePane[data-tone="neutral"] {
-  --reviewAccent: var(--muted);
-  --reviewAccentDim: var(--placeholder);
-  --reviewHighlight: color-mix(in srgb, var(--muted) 6%, transparent);
-  --reviewMark: color-mix(in srgb, var(--muted) 14%, transparent);
 }
 
 .reviewCodeHeader {
@@ -1297,7 +1271,6 @@
   max-height: 34rem;
   overflow: auto;
   padding-block: 0.75rem;
-  scroll-behavior: smooth;
 }
 
 .reviewCodePre code {
@@ -1346,24 +1319,182 @@
   box-shadow: 0 0 0 0.0625rem var(--reviewMark);
 }
 
-.reviewNoFix,
+.reviewGuidancePane {
+  --reviewAccent: var(--matrix);
+
+  background: color-mix(in srgb, var(--matrix) 1.5%, var(--codeSurface));
+  min-width: 0;
+}
+
+.reviewGuidanceHeader {
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  gap: 0.5rem;
+  min-height: 2.5rem;
+  padding-inline: 0.75rem;
+}
+
+.reviewGuidanceHeader strong {
+  color: var(--matrixDim);
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  text-transform: uppercase;
+}
+
+.reviewGuidanceBody {
+  max-height: 34rem;
+  overflow-y: auto;
+}
+
+.reviewGuidanceSection {
+  border-bottom: 1px solid var(--border);
+  padding: 1rem;
+}
+
+.reviewGuidanceSection:last-child {
+  border-bottom: 0;
+}
+
+.reviewGuidanceLabel,
+.reviewGuidanceBadge,
+.reviewGuidanceRuleLink,
+.reviewGuidanceExample > span,
+.reviewGuidanceExceptions > span,
+.reviewGuidanceReferences a {
+  font-family: var(--font-mono);
+}
+
+.reviewGuidanceLabel {
+  color: var(--matrixDim);
+  font-size: 0.5625rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.reviewGuidanceTitleRow {
+  align-items: center;
+  display: flex;
+  gap: 0.75rem;
+  justify-content: space-between;
+}
+
+.reviewGuidanceBadge {
+  border: 1px solid var(--borderStrong);
+  border-radius: 999rem;
+  color: var(--muted);
+  font-size: 0.5rem;
+  font-weight: 700;
+  padding: 0.125rem 0.4rem;
+  text-transform: uppercase;
+}
+
+.reviewGuidanceBadge[data-safety="safe"] {
+  border-color: color-mix(in srgb, var(--matrix) 35%, var(--border));
+  color: var(--matrix);
+}
+
+.reviewGuidanceBadge[data-safety="review"] {
+  border-color: var(--dangerBorder);
+  color: var(--danger);
+}
+
+.reviewGuidanceSection h5 {
+  color: var(--textStrong);
+  font-size: 0.875rem;
+  line-height: 1.45;
+  margin: 0.5rem 0 0;
+}
+
+.reviewGuidanceSection p {
+  color: var(--muted);
+  font-size: 0.75rem;
+  line-height: 1.6;
+  margin: 0.375rem 0 0;
+}
+
+.reviewGuidanceSection .reviewGuidanceRationale {
+  color: var(--placeholder);
+}
+
+.reviewGuidanceRuleLink {
+  color: var(--matrix);
+  font-size: 0.5625rem;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.reviewGuidanceRuleLink:hover,
+.reviewGuidanceReferences a:hover {
+  color: var(--matrixBright);
+}
+
+.reviewGuidanceExample {
+  margin-top: 0.875rem;
+}
+
+.reviewGuidanceExample > span,
+.reviewGuidanceExceptions > span {
+  color: var(--placeholder);
+  display: block;
+  font-size: 0.5625rem;
+  margin-bottom: 0.375rem;
+  text-transform: uppercase;
+}
+
+.reviewGuidanceCode {
+  background: var(--background);
+  border: 1px solid color-mix(in srgb, var(--matrix) 25%, var(--border));
+  border-radius: 0.25rem;
+  color: var(--syntaxText);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  line-height: 1.55;
+  margin: 0;
+  overflow-x: auto;
+  padding: 0.625rem 0.75rem;
+}
+
+.reviewGuidanceCode code,
+.reviewGuidanceCodeLine {
+  display: block;
+}
+
+.reviewGuidanceExceptions {
+  margin-top: 0.875rem;
+}
+
+.reviewGuidanceExceptions ul {
+  color: var(--muted);
+  font-size: 0.6875rem;
+  line-height: 1.55;
+  margin: 0;
+  padding-left: 1rem;
+}
+
+.reviewGuidanceReferences {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.75rem;
+  margin-top: 0.875rem;
+}
+
+.reviewGuidanceReferences a {
+  color: var(--matrixDim);
+  font-size: 0.5625rem;
+  text-decoration: none;
+}
+
 .reviewError {
-  border-top: 1px solid var(--border);
+  background: color-mix(in srgb, var(--danger) 4%, transparent);
+  border-top: 1px solid var(--dangerBorder);
+  color: var(--danger);
   font-family: var(--font-mono);
   font-size: 0.625rem;
   line-height: 1.55;
   margin: 0;
   padding: 0.75rem 1rem;
-}
-
-.reviewNoFix {
-  color: var(--placeholder);
-}
-
-.reviewError {
-  background: color-mix(in srgb, var(--danger) 4%, transparent);
-  border-color: var(--dangerBorder);
-  color: var(--danger);
 }
 
 @media (max-width: 72rem) {
@@ -1375,7 +1506,8 @@
     grid-template-columns: 1fr;
   }
 
-  .reviewCodePre {
+  .reviewCodePre,
+  .reviewGuidanceBody {
     max-height: 24rem;
   }
 }
