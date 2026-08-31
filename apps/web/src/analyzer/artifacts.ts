@@ -1,6 +1,8 @@
 import {
+  applyAnalyzerTextEdits,
   createAnalyzerFilePatch,
   normalizeAnalyzerPatchPath,
+  prepareAnalyzerTextEdits,
   type AnalyzerFixSafety,
   type AnalyzerTextEdit,
 } from "@coding-bible/analyzer";
@@ -24,6 +26,25 @@ interface FixEntry {
 
 const hasEdits = (finding: BrowserAnalyzerFinding) =>
   Boolean(finding.fix?.edits?.length);
+
+export const createBrowserFindingFix = (
+  fileName: string,
+  source: string,
+  finding: BrowserAnalyzerFinding,
+) => {
+  const edits = finding.fix?.edits;
+  if (!edits?.length) {
+    return { patch: "", source };
+  }
+
+  const prepared = prepareAnalyzerTextEdits(source, edits, fileName);
+  const patch = createAnalyzerFilePatch(fileName, source, prepared);
+
+  return {
+    patch: patch ? `${patch}\n` : "",
+    source: applyAnalyzerTextEdits(source, prepared),
+  };
+};
 
 export const countBrowserFixes = (
   result: BrowserAnalyzeResult,

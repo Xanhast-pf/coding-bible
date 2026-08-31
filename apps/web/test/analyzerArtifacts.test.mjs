@@ -4,6 +4,7 @@ import test from "node:test";
 import {
   countBrowserFixes,
   createBrowserAnalyzerReport,
+  createBrowserFindingFix,
   createBrowserFixPatch,
 } from "../src/analyzer/artifacts.ts";
 
@@ -99,6 +100,31 @@ test("browser artifacts separate safe and review patches", () => {
   assert.match(reviewPatch.patch, /-const page = parseInt\(rawPage\);/u);
   assert.match(reviewPatch.patch, /\+const page = parseInt\(rawPage, 10\);/u);
   assert.doesNotMatch(reviewPatch.patch, /type User/u);
+});
+
+test("browser finding fixes preview and apply only that finding's edits", () => {
+  const safeFinding = result.files[0].result.findings[0];
+  const reviewFinding = result.files[0].result.findings[1];
+
+  const safeFix = createBrowserFindingFix(
+    "src/example.ts",
+    source,
+    safeFinding,
+  );
+  assert.match(safeFix.patch, /\+import \{ type User \}/u);
+  assert.doesNotMatch(safeFix.patch, /parseInt\(rawPage, 10\)/u);
+  assert.match(safeFix.source, /import \{ type User \}/u);
+  assert.match(safeFix.source, /parseInt\(rawPage\);/u);
+
+  const reviewFix = createBrowserFindingFix(
+    "src/example.ts",
+    source,
+    reviewFinding,
+  );
+  assert.match(reviewFix.patch, /\+const page = parseInt\(rawPage, 10\);/u);
+  assert.doesNotMatch(reviewFix.patch, /type User/u);
+  assert.match(reviewFix.source, /parseInt\(rawPage, 10\);/u);
+  assert.match(reviewFix.source, /import \{ User \}/u);
 });
 
 test("browser report exposes severity and fix safety without source contents", () => {

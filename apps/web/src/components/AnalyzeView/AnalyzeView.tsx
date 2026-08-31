@@ -6,6 +6,7 @@ import { runBrowserAnalysis } from "../../analyzer/runBrowserAnalysis";
 import type { BrowserProjectSelection } from "../../analyzer/projectSelection";
 import { readProjectSelection } from "../../analyzer/projectSelection";
 import type {
+  BrowserAnalyzeInput,
   BrowserAnalyzerMode,
   BrowserAnalyzerProgress,
   BrowserAnalyzeResult,
@@ -96,32 +97,8 @@ export const AnalyzeView = () => {
     resetResult();
   };
 
-  const handleAnalyze = async () => {
+  const runAnalysis = async (input: BrowserAnalyzeInput) => {
     if (status !== "idle") {
-      return;
-    }
-
-    const input =
-      mode === "snippet"
-        ? source.trim()
-          ? {
-              files: [
-                {
-                  fileName: snippetFileNameByLanguage[language],
-                  source,
-                },
-              ],
-              mode,
-            }
-          : null
-        : project
-          ? {
-              files: project.files,
-              mode,
-            }
-          : null;
-
-    if (!input) {
       return;
     }
 
@@ -152,6 +129,51 @@ export const AnalyzeView = () => {
         setProgress(null);
       }
     }
+  };
+
+  const handleAnalyze = async () => {
+    const input =
+      mode === "snippet"
+        ? source.trim()
+          ? {
+              files: [
+                {
+                  fileName: snippetFileNameByLanguage[language],
+                  source,
+                },
+              ],
+              mode,
+            }
+          : null
+        : project
+          ? {
+              files: project.files,
+              mode,
+            }
+          : null;
+
+    if (!input) {
+      return;
+    }
+
+    await runAnalysis(input);
+  };
+
+  const handleApplySnippetFix = (nextSource: string) => {
+    if (mode !== "snippet" || status !== "idle") {
+      return;
+    }
+
+    setSource(nextSource);
+    void runAnalysis({
+      files: [
+        {
+          fileName: snippetFileNameByLanguage[language],
+          source: nextSource,
+        },
+      ],
+      mode: "snippet",
+    });
   };
 
   const handleProjectFiles = async (files: FileList) => {
@@ -359,6 +381,7 @@ export const AnalyzeView = () => {
           <AnalysisResults
             errorMessage={errorMessage}
             files={analysisFiles}
+            onApplySnippetFix={handleApplySnippetFix}
             {...(project?.projectName
               ? { projectName: project.projectName }
               : {})}

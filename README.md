@@ -199,6 +199,10 @@ browser runs can export a local JSON report plus separate `safe-fixes.patch` and
 `review-fixes.patch` files when detectors provide structured edits. Patch
 generation uses the same shared edit/diff implementation as the CLI; review
 patches are intentionally separated because they can require an intent decision.
+Individual fixes can also be previewed as unified diffs in the results panel.
+Snippet mode can apply detector-authored safe fixes directly to the editor and
+immediately re-analyze the updated source; review fixes and Project mode remain
+read-only and export-only.
 The compiler remains lazy-loaded so the initial Learn-page bundle does not pay
 that cost. Installed `node_modules` are intentionally not fetched by the browser,
 so the CLI remains the highest-fidelity option when dependency declarations are
