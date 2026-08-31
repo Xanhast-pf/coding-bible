@@ -133,11 +133,11 @@ export default defineConfig({
   include: ["src/**/*"],
 
   // Set ignoreDefaults: false only if you intentionally want to scan build,
-  // dependency, declaration, or generated-code locations.
+  // dependency, declaration, generated, vendor, or minified-code locations.
   ignoreDefaults: true,
   ignore: [
-    "src/vendor/**",
-    "**/*.generated.ts",
+    "src/legacy/**",
+    "**/*.fixtures.ts",
   ],
 
   packs: {
@@ -176,8 +176,9 @@ that is enabled by project config. Unknown or non-automated IDs fail instead of
 being silently ignored.
 
 File overrides are applied in order after the project-wide settings. Default
-ignores cover dependencies, build output, coverage, declarations, and common
-generated-code paths. Set `ignoreDefaults: false` to opt out explicitly.
+ignores cover dependencies, build output, coverage, declarations, common
+generated/vendor directories, browser static assets, and minified source files.
+Set `ignoreDefaults: false` to opt out explicitly.
 Unknown config keys, unknown/non-automated rule IDs, and invalid settings fail
 with exit code `2` rather than being silently ignored.
 

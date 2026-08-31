@@ -1,6 +1,8 @@
 import ts from "../../../typescript/typescript.cjs";
-import { createFinding, getFunctionName, getImportBinding, isExecutableFunction, nodesOfKind, } from "../utils.mjs";
+import { createFinding, getFunctionName, getImportBinding, hasSourceFileDeclaration, isExecutableFunction, nodesOfKind, } from "../utils.mjs";
 const hookNamePattern = /^use[A-Z0-9]/;
+const isLegendModule = (moduleName) => moduleName.startsWith("@legendapp/state");
+const isReactModule = (moduleName) => moduleName === "react";
 const getReactHookName = (context, expression) => {
     if (ts.isIdentifier(expression)) {
         const binding = getImportBinding(context, expression);
@@ -27,9 +29,51 @@ const getReactHookName = (context, expression) => {
     }
     return null;
 };
-const isAllowedHookFunction = (node) => {
+const isBareUnshadowedIdentifier = (context, expression, name) => ts.isIdentifier(expression) &&
+    expression.text === name &&
+    !hasSourceFileDeclaration(context, expression);
+const isImportedCallTarget = (context, expression, importedName, matchesModule) => {
+    if (ts.isIdentifier(expression)) {
+        const binding = getImportBinding(context, expression);
+        return Boolean(binding &&
+            matchesModule(binding.moduleName) &&
+            binding.importedName === importedName);
+    }
+    if (!ts.isPropertyAccessExpression(expression) ||
+        !ts.isIdentifier(expression.expression) ||
+        expression.name.text !== importedName) {
+        return false;
+    }
+    const binding = getImportBinding(context, expression.expression);
+    return Boolean(binding &&
+        matchesModule(binding.moduleName) &&
+        (binding.kind === "default" || binding.kind === "namespace"));
+};
+const isComponentWrapperCall = (context, call) => isImportedCallTarget(context, call.expression, "memo", isReactModule) ||
+    isImportedCallTarget(context, call.expression, "forwardRef", isReactModule) ||
+    isImportedCallTarget(context, call.expression, "observer", isLegendModule) ||
+    isBareUnshadowedIdentifier(context, call.expression, "observer");
+const isHookHarnessCall = (context, call) => {
+    if (ts.isIdentifier(call.expression)) {
+        const binding = getImportBinding(context, call.expression);
+        if (binding) {
+            return binding.importedName === "renderHook";
+        }
+    }
+    return isBareUnshadowedIdentifier(context, call.expression, "renderHook");
+};
+const isDirectCallArgument = (node, call) => call.arguments.some((argument) => argument === node);
+const isRecognizedRenderBoundary = (context, node) => {
+    const parent = node.parent;
+    return Boolean(ts.isCallExpression(parent) &&
+        isDirectCallArgument(node, parent) &&
+        (isComponentWrapperCall(context, parent) ||
+            isHookHarnessCall(context, parent)));
+};
+const isAllowedHookFunction = (context, node) => {
     const name = getFunctionName(node);
-    return Boolean(name && (/^[A-Z]/.test(name) || hookNamePattern.test(name)));
+    return Boolean((name && (/^[A-Z]/.test(name) || hookNamePattern.test(name))) ||
+        isRecognizedRenderBoundary(context, node));
 };
 const getNearestFunction = (node) => {
     let current = node.parent;
@@ -107,7 +151,7 @@ export const reactHookPlacementDetector = {
                 continue;
             }
             const boundary = getNearestFunction(node);
-            if (!boundary || !isAllowedHookFunction(boundary)) {
+            if (!boundary || !isAllowedHookFunction(context, boundary)) {
                 findings.push(createFinding(context, node, {
                     detectorId: "react-hook-placement",
                     message: `\`${hookName}\` is called outside a React component or custom Hook.`,

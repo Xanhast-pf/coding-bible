@@ -25,10 +25,17 @@ export const defaultAnalyzerIgnorePatterns = [
   "**/build/**",
   "**/coverage/**",
   "**/dist/**",
+  "**/generated/**",
   "**/node_modules/**",
   "**/out/**",
+  "**/third-party/**",
+  "**/third_party/**",
+  "**/vendor/**",
+  "**/vendors/**",
+  "**/public/static/**",
   "**/*.d.ts",
   "**/*.generated.*",
+  "**/*.min.{js,jsx,mjs,cjs,ts,tsx,mts,cts}",
   "**/__generated__/**",
 ] as const;
 
