@@ -8,6 +8,7 @@ import { redundantAsyncDetector } from "./asyncFunctions.ts";
 import { directComponentCallsDetector } from "./directComponentCalls.ts";
 import { derivedStateEffectDetector } from "./derivedStateEffects.ts";
 import { graphqlInterpolationDetector } from "./graphqlTemplates.ts";
+import { hardcodedJsxTextDetector } from "./hardcodedJsxText.ts";
 import { hookDependencySuppressionsDetector } from "./hookDependencySuppressions.ts";
 import {
   defaultParameterDetector,
@@ -44,6 +45,7 @@ export const detectors = [
   keyboardInteractionDetector,
   accessibleControlNameDetector,
   graphqlInterpolationDetector,
+  hardcodedJsxTextDetector,
   legendReactSubscriptionDetector,
   missingReactListKeyDetector,
   unstableReactListKeyDetector,

@@ -14,11 +14,11 @@ export const internationalizationRules = [
     tags: ["i18n", "strings", "ui"],
     bad: {
       language: "tsx",
-      code: '<button type="button">Save changes</button>',
+      code: 'import { FormattedMessage } from "react-intl";\n\nexport const SaveButton = () => (\n  <button type="button">Save changes</button>\n);',
     },
     good: {
       language: "tsx",
-      code: '<button type="button">\n  {t("actions.saveChanges")}\n</button>',
+      code: 'import { FormattedMessage } from "react-intl";\n\nexport const SaveButton = () => (\n  <button type="button">\n    <FormattedMessage id="actions.saveChanges" defaultMessage="Save changes" />\n  </button>\n);',
     },
     detection: { autoFixable: false, detectable: true, strategy: "semantic" },
   },

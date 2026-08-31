@@ -1,6 +1,7 @@
 import { gql } from "@apollo/client";
 import type { User } from "./types";
 import { useEffect } from "react";
+import { FormattedMessage } from "react-intl";
 
 type Props = {
   readonly user: User;
@@ -64,7 +65,9 @@ export function Dashboard({ user, users }: Props) {
 
   return (
     <section>
-      <button type="button">Open menu</button>
+      <button type="button">
+        <FormattedMessage id="actions.openMenu" defaultMessage="Open menu" />
+      </button>
 
       <button type="button" aria-label="Close menu">
         <CloseIcon />

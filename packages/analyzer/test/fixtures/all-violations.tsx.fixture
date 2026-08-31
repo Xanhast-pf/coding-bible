@@ -1,6 +1,7 @@
 import { gql } from "@apollo/client";
 import { observer } from "@legendapp/state/react";
 import { useEffect, useState } from "react";
+import { FormattedMessage } from "react-intl";
 import { User } from "./types";
 
 type Props = {
@@ -74,7 +75,7 @@ export function Dashboard({ user, users }: Props) {
       <div onClick={openMenu}>Open menu</div>
 
       <div role="button" tabIndex={0} onClick={openMenu}>
-        Custom button
+        <FormattedMessage id="actions.customButton" defaultMessage="Custom button" />
       </div>
 
       <button type="button">

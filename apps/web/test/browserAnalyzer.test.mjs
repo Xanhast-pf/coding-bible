@@ -47,12 +47,12 @@ test("browser analysis preserves the canonical clean/violation detector contract
   );
 
   assert.equal(clean.files[0]?.result.findings.length, 0);
-  assert.equal(clean.files[0]?.result.checksRun, 22);
-  assert.equal(violations.files[0]?.result.findings.length, 24);
+  assert.equal(clean.files[0]?.result.checksRun, 23);
+  assert.equal(violations.files[0]?.result.findings.length, 25);
   assert.equal(
     new Set(violations.files[0]?.result.findings.map(({ ruleId }) => ruleId))
       .size,
-    21,
+    22,
   );
 });
 

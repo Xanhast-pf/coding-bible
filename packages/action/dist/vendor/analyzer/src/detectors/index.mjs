@@ -3,6 +3,7 @@ import { redundantAsyncDetector } from "./asyncFunctions.mjs";
 import { directComponentCallsDetector } from "./directComponentCalls.mjs";
 import { derivedStateEffectDetector } from "./derivedStateEffects.mjs";
 import { graphqlInterpolationDetector } from "./graphqlTemplates.mjs";
+import { hardcodedJsxTextDetector } from "./hardcodedJsxText.mjs";
 import { hookDependencySuppressionsDetector } from "./hookDependencySuppressions.mjs";
 import { defaultParameterDetector, nonMutatingCollectionDetector, optionalChainingDetector, } from "./javascriptPatterns.mjs";
 import { legacyBuiltinsDetector } from "./legacyBuiltins.mjs";
@@ -28,6 +29,7 @@ export const detectors = [
     keyboardInteractionDetector,
     accessibleControlNameDetector,
     graphqlInterpolationDetector,
+    hardcodedJsxTextDetector,
     legendReactSubscriptionDetector,
     missingReactListKeyDetector,
     unstableReactListKeyDetector,

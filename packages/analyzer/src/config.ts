@@ -261,6 +261,7 @@ const packByRulePrefix = new Map<string, AnalyzerPack>([
   ["A11Y", "accessibility"],
   ["CORE", "core"],
   ["GQL", "graphql"],
+  ["I18N", "internationalization"],
   ["JS", "javascript"],
   ["LEGEND", "legend-state"],
   ["REACT", "react"],

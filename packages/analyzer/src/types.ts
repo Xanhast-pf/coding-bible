@@ -7,6 +7,7 @@ export const analyzerPacks = [
   "accessibility",
   "core",
   "graphql",
+  "internationalization",
   "javascript",
   "legend-state",
   "react",

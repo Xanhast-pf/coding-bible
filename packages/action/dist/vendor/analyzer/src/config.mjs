@@ -189,6 +189,7 @@ const packByRulePrefix = new Map([
     ["A11Y", "accessibility"],
     ["CORE", "core"],
     ["GQL", "graphql"],
+    ["I18N", "internationalization"],
     ["JS", "javascript"],
     ["LEGEND", "legend-state"],
     ["REACT", "react"],

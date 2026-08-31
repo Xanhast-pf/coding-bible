@@ -10,15 +10,15 @@ const uniqueRuleIds = (source, language = "tsx") =>
   [...new Set(ruleIds(source, language))].sort();
 
 test("analyzer runs only detectors applicable to the selected language", () => {
-  assert.equal(detectors.length, 22);
+  assert.equal(detectors.length, 23);
 
   const tsResult = analyze({ source: "const value = 1;", language: "ts" });
   const tsxResult = analyze({ source: "const value = 1;", language: "tsx" });
 
   assert.equal(tsResult.checksRun, 13);
   assert.equal(tsResult.ruleIdsChecked.length, 13);
-  assert.equal(tsxResult.checksRun, 22);
-  assert.equal(tsxResult.ruleIdsChecked.length, 21);
+  assert.equal(tsxResult.checksRun, 23);
+  assert.equal(tsxResult.ruleIdsChecked.length, 22);
 });
 
 test("syntax errors pause rule analysis instead of returning a misleading clean result", () => {
@@ -156,6 +156,58 @@ test("detects only clearly redundant async functions", () => {
     ),
     [],
   );
+});
+
+test("detects hardcoded JSX text only in files that already use localization", () => {
+  const localized = analyze({
+    fileName: "src/View.js",
+    language: "js",
+    source: `import { FormattedMessage } from "react-intl";
+export const View = () => <button>Save changes</button>;`,
+  });
+  assert.deepEqual(
+    localized.findings.map(({ ruleId }) => ruleId),
+    ["I18N-001"],
+  );
+
+  const entityOnly = analyze({
+    fileName: "src/View.js",
+    language: "js",
+    source: `import { FormattedMessage } from "react-intl";
+export const View = () => <span>&nbsp;-&nbsp;</span>;`,
+  });
+  assert.deepEqual(entityOnly.findings, []);
+
+  const localizedExpression = analyze({
+    fileName: "src/View.tsx",
+    language: "tsx",
+    source: `import { useIntl } from "react-intl";
+export const View = () => { const { formatMessage } = useIntl(); return <button>{formatMessage({ id: "save" })}</button>; };`,
+  });
+  assert.deepEqual(localizedExpression.findings, []);
+
+  const codeSample = analyze({
+    fileName: "src/View.tsx",
+    language: "tsx",
+    source: `import { FormattedMessage } from "react-intl";
+export const View = () => <pre>npm run build</pre>;`,
+  });
+  assert.deepEqual(codeSample.findings, []);
+
+  const testFile = analyze({
+    fileName: "src/View.test.tsx",
+    language: "tsx",
+    source: `import { FormattedMessage } from "react-intl";
+export const View = () => <button>Save changes</button>;`,
+  });
+  assert.deepEqual(testFile.findings, []);
+
+  const unlocalizedFile = analyze({
+    fileName: "src/View.tsx",
+    language: "tsx",
+    source: `export const View = () => <button>Save changes</button>;`,
+  });
+  assert.deepEqual(unlocalizedFile.findings, []);
 });
 
 test("detects legacy globals without being confused by shadowed bindings", () => {
@@ -471,6 +523,30 @@ test("does not suggest hoisting a static collection that is intentionally mutate
   assert.deepEqual(
     ruleIds(
       `const CountrySelect = () => {\n  const options = ["Canada", "France"];\n  return <Select options={options} />;\n};`,
+    ),
+    ["REACT-008"],
+  );
+});
+
+test("does not hoist objects whose computed keys depend on component inputs", () => {
+  assert.deepEqual(
+    ruleIds(
+      `const Toast = ({ type }) => {\n  const typeObj = { [type]: true };\n  return <Message {...typeObj} />;\n};`,
+      "js",
+    ),
+    [],
+  );
+  assert.deepEqual(
+    ruleIds(
+      `const Sidebar = ({ isRight }) => {\n  const params = { [isRight ? "right" : "left"]: "0" };\n  return <Panel {...params} />;\n};`,
+      "js",
+    ),
+    [],
+  );
+  assert.deepEqual(
+    ruleIds(
+      `const View = () => {\n  const attrs = { ["data-kind"]: "static" };\n  return <div {...attrs} />;\n};`,
+      "js",
     ),
     ["REACT-008"],
   );
