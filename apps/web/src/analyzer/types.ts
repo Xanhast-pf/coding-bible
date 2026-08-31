@@ -48,7 +48,7 @@ export interface BrowserAnalyzeResult {
 }
 
 export type BrowserAnalyzerProgressPhase =
-  "preparing" | "program" | "analyzing";
+  "reading" | "preparing" | "program" | "analyzing";
 
 export interface BrowserAnalyzerProgress {
   completed?: number;

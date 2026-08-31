@@ -5,33 +5,35 @@ import {
   isProjectTextFile,
   stripCommonRootDirectory,
 } from "./fileTypes";
+import {
+  getProjectResourceWarning,
+  readProjectFiles,
+} from "./projectIngestion";
+import type { ProjectReadOptions } from "./projectIngestion";
 import type { BrowserProjectFile } from "./types";
 
-const maxProjectFiles = 2_500;
-const maxProjectBytes = 32 * 1024 * 1024;
+export { formatByteSize } from "./projectIngestion";
 
 export interface BrowserProjectSelection {
   files: readonly BrowserProjectFile[];
   ignoredFileCount: number;
   projectName: string;
+  resourceWarning: string | null;
   sourceFileCount: number;
   totalBytes: number;
   tsconfigFileNames: readonly string[];
 }
 
-const formatProjectLimit = () => {
-  const maxProjectMegabytes = Math.round(maxProjectBytes / 1024 / 1024);
-
-  return `${maxProjectFiles.toLocaleString()} text files / ${maxProjectMegabytes} MB`;
-};
-
 export const readProjectSelection = async (
   fileList: FileList,
+  options: ProjectReadOptions = {},
 ): Promise<BrowserProjectSelection> => {
   const selectedFiles = Array.from(fileList);
   if (!selectedFiles.length) {
     throw new Error("Choose a project folder first.");
   }
+
+  options.signal?.throwIfAborted();
 
   const rawNames = selectedFiles.map(
     (file) => file.webkitRelativePath || file.name,
@@ -62,18 +64,7 @@ export const readProjectSelection = async (
     (total, { file }) => total + file.size,
     0,
   );
-  if (candidates.length > maxProjectFiles || totalBytes > maxProjectBytes) {
-    throw new Error(
-      `This browser analyzer is capped at ${formatProjectLimit()} per run. Exclude generated/vendor folders or analyze a smaller workspace.`,
-    );
-  }
-
-  const files = await Promise.all(
-    candidates.map(async ({ file, fileName }) => ({
-      fileName,
-      source: await file.text(),
-    })),
-  );
+  const files = await readProjectFiles(candidates, options);
   const sourceFileCount = files.filter(({ fileName }) =>
     isAnalyzableSourceFile(fileName),
   ).length;
@@ -88,20 +79,9 @@ export const readProjectSelection = async (
     files,
     ignoredFileCount: selectedFiles.length - candidates.length,
     projectName,
+    resourceWarning: getProjectResourceWarning(candidates.length, totalBytes),
     sourceFileCount,
     totalBytes,
     tsconfigFileNames: getProjectTsconfigFiles(files),
   };
-};
-
-export const formatByteSize = (bytes: number) => {
-  if (bytes < 1024) {
-    return `${bytes} B`;
-  }
-
-  if (bytes < 1024 * 1024) {
-    return `${(bytes / 1024).toFixed(1)} KB`;
-  }
-
-  return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 };

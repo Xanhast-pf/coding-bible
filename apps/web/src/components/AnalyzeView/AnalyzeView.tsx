@@ -78,10 +78,12 @@ export const AnalyzeView = () => {
   );
   const [status, setStatus] = useState<AnalyzerStatus>("idle");
   const activeTaskRef = useRef<BrowserAnalysisTask | null>(null);
+  const activeProjectReadRef = useRef<AbortController | null>(null);
 
   useEffect(
     () => () => {
       activeTaskRef.current?.cancel();
+      activeProjectReadRef.current?.abort();
     },
     [],
   );
@@ -92,9 +94,11 @@ export const AnalyzeView = () => {
     setProgress(null);
   };
 
-  const cancelAnalysis = () => {
+  const cancelWork = () => {
     activeTaskRef.current?.cancel();
     activeTaskRef.current = null;
+    activeProjectReadRef.current?.abort();
+    activeProjectReadRef.current = null;
     setStatus("idle");
     setProgress(null);
   };
@@ -104,7 +108,7 @@ export const AnalyzeView = () => {
       return;
     }
 
-    cancelAnalysis();
+    cancelWork();
     setMode(nextMode);
     resetResult();
   };
@@ -198,25 +202,56 @@ export const AnalyzeView = () => {
   };
 
   const handleProjectFiles = async (files: FileList) => {
-    cancelAnalysis();
+    cancelWork();
     resetResult();
+    setProject(null);
     setProjectError(null);
     setStatus("reading");
 
+    const controller = new AbortController();
+    activeProjectReadRef.current = controller;
+    setProgress({
+      completed: 0,
+      message: "Reading local project…",
+      phase: "reading",
+      total: files.length,
+    });
+
     try {
-      setProject(await readProjectSelection(files));
+      const nextProject = await readProjectSelection(files, {
+        onProgress: ({ completed, total }) => {
+          setProgress({
+            completed,
+            message: `Reading local project · ${completed.toLocaleString()} of ${total.toLocaleString()} text files`,
+            phase: "reading",
+            total,
+          });
+        },
+        signal: controller.signal,
+      });
+      if (!controller.signal.aborted) {
+        setProject(nextProject);
+      }
     } catch (error: unknown) {
-      setProject(null);
-      setProjectError(
-        error instanceof Error ? error.message : "Could not read that project.",
-      );
+      if (!(error instanceof DOMException && error.name === "AbortError")) {
+        setProject(null);
+        setProjectError(
+          error instanceof Error
+            ? error.message
+            : "Could not read that project.",
+        );
+      }
     } finally {
-      setStatus("idle");
+      if (activeProjectReadRef.current === controller) {
+        activeProjectReadRef.current = null;
+        setStatus("idle");
+        setProgress(null);
+      }
     }
   };
 
   const loadExample = () => {
-    cancelAnalysis();
+    cancelWork();
     setMode("snippet");
     setLanguage("tsx");
     setSource(sampleSource);
@@ -363,8 +398,10 @@ export const AnalyzeView = () => {
               <span>{progress.message}</span>
               {progress.total && progress.completed !== undefined ? (
                 <span className={styles.progressCount}>
-                  {Math.min(progress.completed + 1, progress.total)}/
-                  {progress.total}
+                  {progress.phase === "analyzing"
+                    ? Math.min(progress.completed + 1, progress.total)
+                    : Math.min(progress.completed, progress.total)}
+                  /{progress.total}
                 </span>
               ) : null}
             </div>
@@ -377,10 +414,10 @@ export const AnalyzeView = () => {
                 : "Uses selected files, tsconfig options, and coding-bible.config.json when present; generated/vendor folders are skipped."}
             </p>
             <div className={styles.actionButtons}>
-              {status === "analyzing" ? (
+              {status !== "idle" ? (
                 <button
                   className={styles.cancelButton}
-                  onClick={cancelAnalysis}
+                  onClick={cancelWork}
                   type="button"
                 >
                   Cancel

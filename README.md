@@ -211,7 +211,11 @@ This avoids presenting unchanged code as a fake green replacement when a
 detector intentionally requires human judgment. Snippet mode can apply
 detector-authored safe fixes directly from either review surface and immediately
 re-analyze the updated source; review fixes and Project mode remain read-only
-and export-only.
+and export-only. Project folder selection has no artificial file/byte rejection:
+large workspaces remain analyzable with an explicit browser resource warning,
+bounded-concurrency file reads, progress, and cancellation. The practical upper
+bound is therefore the browser/OS memory available to the tab rather than a
+Coding Bible file-count cap.
 The compiler remains lazy-loaded so the initial Learn-page bundle does not pay
 that cost. Installed `node_modules` are intentionally not fetched by the browser,
 so the CLI remains the highest-fidelity option when dependency declarations are
