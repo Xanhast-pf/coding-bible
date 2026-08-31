@@ -31,6 +31,10 @@ function parse(value: any) {
   return parseInt(value, 10);
 }
 
+async function getStatusLabel() {
+  return "Ready";
+}
+
 async function loadUser(response: Response) {
   const raw = await response.json();
   return raw as User;
@@ -99,4 +103,5 @@ export function Dashboard({ user, users }: Props) {
 
 void normalize;
 void parse;
+void getStatusLabel;
 void loadUser;

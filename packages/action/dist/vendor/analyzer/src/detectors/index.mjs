@@ -1,4 +1,5 @@
 import { accessibleControlNameDetector, keyboardInteractionDetector, semanticInteractiveElementDetector, } from "./accessibilityJsx.mjs";
+import { redundantAsyncDetector } from "./asyncFunctions.mjs";
 import { directComponentCallsDetector } from "./directComponentCalls.mjs";
 import { derivedStateEffectDetector } from "./derivedStateEffects.mjs";
 import { graphqlInterpolationDetector } from "./graphqlTemplates.mjs";
@@ -15,6 +16,7 @@ import { typeOnlyImportsDetector } from "./typeOnlyImports.mjs";
 import { untrustedAssertionsDetector } from "./untrustedAssertions.mjs";
 export const detectors = [
     preferConstDetector,
+    redundantAsyncDetector,
     noExplicitAnyDetector,
     typeOnlyImportsDetector,
     untrustedAssertionsDetector,

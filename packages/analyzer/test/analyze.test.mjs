@@ -10,15 +10,15 @@ const uniqueRuleIds = (source, language = "tsx") =>
   [...new Set(ruleIds(source, language))].sort();
 
 test("analyzer runs only detectors applicable to the selected language", () => {
-  assert.equal(detectors.length, 21);
+  assert.equal(detectors.length, 22);
 
   const tsResult = analyze({ source: "const value = 1;", language: "ts" });
   const tsxResult = analyze({ source: "const value = 1;", language: "tsx" });
 
-  assert.equal(tsResult.checksRun, 12);
-  assert.equal(tsResult.ruleIdsChecked.length, 12);
-  assert.equal(tsxResult.checksRun, 21);
-  assert.equal(tsxResult.ruleIdsChecked.length, 20);
+  assert.equal(tsResult.checksRun, 13);
+  assert.equal(tsResult.ruleIdsChecked.length, 13);
+  assert.equal(tsxResult.checksRun, 22);
+  assert.equal(tsxResult.ruleIdsChecked.length, 21);
 });
 
 test("syntax errors pause rule analysis instead of returning a misleading clean result", () => {
@@ -84,6 +84,78 @@ test("tracks unsafe external data through local aliases but permits unknown", ()
     ["TS-004"],
   );
   assert.deepEqual(ruleIds(`const user = payload as User;`, "ts"), []);
+});
+
+test("detects only clearly redundant async functions", () => {
+  assert.deepEqual(
+    ruleIds(`async function getStatusLabel() { return "Ready"; }`, "ts"),
+    ["JS-001"],
+  );
+  assert.deepEqual(
+    ruleIds(`const load = async () => ({ ready: true });`, "ts"),
+    ["JS-001"],
+  );
+  assert.deepEqual(
+    ruleIds(`async function save() { doSynchronousWork(); }`, "ts"),
+    ["JS-001"],
+  );
+  assert.deepEqual(
+    ruleIds(`async function load() { return Promise.resolve("Ready"); }`, "ts"),
+    [],
+  );
+  assert.deepEqual(
+    ruleIds(`test("works", async () => { doSynchronousWork(); });`, "ts"),
+    [],
+  );
+  assert.deepEqual(
+    ruleIds(
+      `const makeCandidate = (readSource = async () => "export {};") => ({ readSource });`,
+      "ts",
+    ),
+    [],
+  );
+  assert.deepEqual(
+    ruleIds(`const load = async (): Promise<string> => "Ready";`, "ts"),
+    [],
+  );
+  assert.deepEqual(
+    ruleIds(`const load: () => Promise<string> = async () => "Ready";`, "ts"),
+    [],
+  );
+  assert.deepEqual(
+    ruleIds(
+      `type Loader = () => Promise<string>; const load: Loader = async () => "Ready";`,
+      "ts",
+    ),
+    [],
+  );
+  assert.deepEqual(
+    ruleIds(`async function load(): Promise<string> { return "Ready"; }`, "ts"),
+    [],
+  );
+  assert.deepEqual(
+    ruleIds(`async function load() { return fetchData(); }`, "ts"),
+    [],
+  );
+  assert.deepEqual(
+    ruleIds(
+      `async function load() { await fetchData(); return "Ready"; }`,
+      "ts",
+    ),
+    [],
+  );
+  assert.deepEqual(
+    ruleIds(`async function fail() { throw new Error("nope"); }`, "ts"),
+    [],
+  );
+  assert.deepEqual(ruleIds(`async function* stream() { yield 1; }`, "ts"), []);
+  assert.deepEqual(
+    ruleIds(
+      `async function outer() { function inner() { return "Ready"; } return fetchData(); }`,
+      "ts",
+    ),
+    [],
+  );
 });
 
 test("detects legacy globals without being confused by shadowed bindings", () => {
