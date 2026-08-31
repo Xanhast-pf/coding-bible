@@ -110,7 +110,7 @@ export interface DetectorContext {
   language: AnalyzerLanguage;
   nodesByKind: ReadonlyMap<ts.SyntaxKind, readonly ts.Node[]>;
   program: ts.Program;
-  referencesBySymbol: ReadonlyMap<ts.Symbol, readonly ts.Identifier[]>;
+  identifiersByText: ReadonlyMap<string, readonly ts.Identifier[]>;
   source: string;
   sourceFile: ts.SourceFile;
 }

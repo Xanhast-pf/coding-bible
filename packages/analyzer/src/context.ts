@@ -143,7 +143,7 @@ const buildContext = (
 
   const importsBySymbol = new Map<ts.Symbol, ImportBinding>();
   const nodesByKind = new Map<ts.SyntaxKind, ts.Node[]>();
-  const referencesBySymbol = new Map<ts.Symbol, ts.Identifier[]>();
+  const identifiersByText = new Map<string, ts.Identifier[]>();
 
   const walk = (node: ts.Node) => {
     const bucket = nodesByKind.get(node.kind);
@@ -154,19 +154,22 @@ const buildContext = (
     }
 
     if (ts.isIdentifier(node)) {
-      const symbol = checker.getSymbolAtLocation(node);
-      if (symbol) {
-        const references = referencesBySymbol.get(symbol);
-        if (references) {
-          references.push(node);
-        } else {
-          referencesBySymbol.set(symbol, [node]);
-        }
+      const identifiers = identifiersByText.get(node.text);
+      if (identifiers) {
+        identifiers.push(node);
+      } else {
+        identifiersByText.set(node.text, [node]);
       }
 
-      const importBinding = getImportBinding(node, checker);
-      if (importBinding?.symbol) {
-        importsBySymbol.set(importBinding.symbol, importBinding);
+      if (
+        ts.isImportSpecifier(node.parent) ||
+        ts.isNamespaceImport(node.parent) ||
+        ts.isImportClause(node.parent)
+      ) {
+        const importBinding = getImportBinding(node, checker);
+        if (importBinding?.symbol) {
+          importsBySymbol.set(importBinding.symbol, importBinding);
+        }
       }
     }
 
@@ -181,7 +184,7 @@ const buildContext = (
     language: input.language,
     nodesByKind,
     program,
-    referencesBySymbol,
+    identifiersByText,
     source: input.source,
     sourceFile,
   };

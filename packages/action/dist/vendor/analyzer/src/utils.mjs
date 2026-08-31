@@ -4,10 +4,38 @@ export const visit = (node, visitor) => {
     node.forEachChild((child) => visit(child, visitor));
 };
 export const nodesOfKind = (context, kind) => (context.nodesByKind.get(kind) ?? []);
-export const getSymbol = (context, identifier) => context.checker.getSymbolAtLocation(identifier) ?? null;
+const symbolsByContext = new WeakMap();
+const referencesByContext = new WeakMap();
+export const getSymbol = (context, identifier) => {
+    let symbols = symbolsByContext.get(context);
+    if (!symbols) {
+        symbols = new Map();
+        symbolsByContext.set(context, symbols);
+    }
+    if (symbols.has(identifier)) {
+        return symbols.get(identifier) ?? null;
+    }
+    const symbol = context.checker.getSymbolAtLocation(identifier) ?? null;
+    symbols.set(identifier, symbol);
+    return symbol;
+};
 export const getReferences = (context, identifier) => {
     const symbol = getSymbol(context, identifier);
-    return symbol ? (context.referencesBySymbol.get(symbol) ?? []) : [];
+    if (!symbol) {
+        return [];
+    }
+    let references = referencesByContext.get(context);
+    if (!references) {
+        references = new Map();
+        referencesByContext.set(context, references);
+    }
+    const cached = references.get(symbol);
+    if (cached) {
+        return cached;
+    }
+    const resolved = (context.identifiersByText.get(identifier.text) ?? []).filter((candidate) => getSymbol(context, candidate) === symbol);
+    references.set(symbol, resolved);
+    return resolved;
 };
 export const getImportBinding = (context, identifier) => {
     const symbol = getSymbol(context, identifier);

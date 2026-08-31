@@ -4,6 +4,7 @@ import {
   type AnalyzerPack,
   type AnalyzerRuleSetting,
 } from "./types.ts";
+import { detectors } from "./detectors/index.ts";
 import { compileGlobs, matchesAnyGlob, normalizeGlobPath } from "./glob.ts";
 
 export const analyzerConfigFileNames = [
@@ -48,6 +49,7 @@ const validConfigKeys = new Set([
 ]);
 const validOverrideKeys = new Set(["files", "packs", "rules"]);
 const validPacks = new Set<AnalyzerPack>(analyzerPacks);
+const validRuleIds = new Set(detectors.map((detector) => detector.ruleId));
 
 const toRecord = (value: unknown, message: string): Record<string, unknown> => {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
@@ -73,7 +75,10 @@ const assertStringArray = (value: unknown, name: string) => {
 const assertSettings = (
   value: unknown,
   name: string,
-  { validatePacks = false }: { validatePacks?: boolean } = {},
+  {
+    validatePacks = false,
+    validateRules = false,
+  }: { validatePacks?: boolean; validateRules?: boolean } = {},
 ) => {
   if (value === undefined) {
     return;
@@ -86,6 +91,9 @@ const assertSettings = (
     }
     if (validatePacks && !validPacks.has(key as AnalyzerPack)) {
       throw new Error(`${name} contains unknown analyzer pack "${key}".`);
+    }
+    if (validateRules && !validRuleIds.has(key)) {
+      throw new Error(`${name} contains unknown automated rule "${key}".`);
     }
     if (!validRuleSettings.has(setting as AnalyzerRuleSetting)) {
       throw new Error(`${name}.${key} must be "error", "warning", or "off".`);
@@ -129,7 +137,7 @@ export const validateAnalyzerConfig = (value: unknown): AnalyzerConfig => {
     throw new Error("ignoreDefaults must be a boolean.");
   }
   assertSettings(config.packs, "packs", { validatePacks: true });
-  assertSettings(config.rules, "rules");
+  assertSettings(config.rules, "rules", { validateRules: true });
 
   if (
     config.tsconfig !== undefined &&
@@ -160,7 +168,9 @@ export const validateAnalyzerConfig = (value: unknown): AnalyzerConfig => {
       assertSettings(item.packs, `overrides[${index}].packs`, {
         validatePacks: true,
       });
-      assertSettings(item.rules, `overrides[${index}].rules`);
+      assertSettings(item.rules, `overrides[${index}].rules`, {
+        validateRules: true,
+      });
     });
   }
 

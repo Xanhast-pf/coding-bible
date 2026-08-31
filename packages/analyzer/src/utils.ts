@@ -16,17 +16,59 @@ export const nodesOfKind = <T extends ts.Node>(
   kind: ts.SyntaxKind,
 ): readonly T[] => (context.nodesByKind.get(kind) ?? []) as readonly T[];
 
+const symbolsByContext = new WeakMap<
+  DetectorContext,
+  Map<ts.Identifier, ts.Symbol | null>
+>();
+const referencesByContext = new WeakMap<
+  DetectorContext,
+  Map<ts.Symbol, readonly ts.Identifier[]>
+>();
+
 export const getSymbol = (
   context: DetectorContext,
   identifier: ts.Identifier,
-) => context.checker.getSymbolAtLocation(identifier) ?? null;
+) => {
+  let symbols = symbolsByContext.get(context);
+  if (!symbols) {
+    symbols = new Map();
+    symbolsByContext.set(context, symbols);
+  }
+
+  if (symbols.has(identifier)) {
+    return symbols.get(identifier) ?? null;
+  }
+
+  const symbol = context.checker.getSymbolAtLocation(identifier) ?? null;
+  symbols.set(identifier, symbol);
+  return symbol;
+};
 
 export const getReferences = (
   context: DetectorContext,
   identifier: ts.Identifier,
 ) => {
   const symbol = getSymbol(context, identifier);
-  return symbol ? (context.referencesBySymbol.get(symbol) ?? []) : [];
+  if (!symbol) {
+    return [];
+  }
+
+  let references = referencesByContext.get(context);
+  if (!references) {
+    references = new Map();
+    referencesByContext.set(context, references);
+  }
+
+  const cached = references.get(symbol);
+  if (cached) {
+    return cached;
+  }
+
+  const resolved = (
+    context.identifiersByText.get(identifier.text) ?? []
+  ).filter((candidate) => getSymbol(context, candidate) === symbol);
+  references.set(symbol, resolved);
+  return resolved;
 };
 
 export const getImportBinding = (
