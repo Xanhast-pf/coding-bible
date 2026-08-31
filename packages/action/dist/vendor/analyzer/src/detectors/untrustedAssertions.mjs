@@ -67,6 +67,7 @@ const collectTaintedSymbols = (context) => {
     return taintedSymbols;
 };
 export const untrustedAssertionsDetector = {
+    dependencyScope: "source-file",
     id: "untrusted-data-assertion",
     languages: ["ts", "tsx"],
     ruleId: "TS-004",

@@ -96,6 +96,7 @@ const isAfterPotentialEarlyExit = (node, boundary) => {
 };
 const isAsyncFunction = (node) => Boolean(node.modifiers?.some((modifier) => modifier.kind === ts.SyntaxKind.AsyncKeyword));
 export const reactHookPlacementDetector = {
+    dependencyScope: "source-file",
     id: "react-hook-placement",
     ruleId: "REACT-009",
     analyze: (context) => {

@@ -66,6 +66,7 @@ const isExtendingPath = (
   previous.every((part, index) => next[index] === part);
 
 export const optionalChainingDetector: Detector = {
+  dependencyScope: "source-file",
   id: "optional-chaining-guard-chain",
   ruleId: "JS-002",
   analyze: (context) => {
@@ -149,6 +150,7 @@ const isUndefinedOnlyDefaultCandidate = (parameter: ts.ParameterDeclaration) =>
   (Boolean(parameter.questionToken) || typeContainsUndefined(parameter.type));
 
 export const defaultParameterDetector: Detector = {
+  dependencyScope: "source-file",
   id: "default-parameter-normalization",
   languages: ["ts", "tsx"],
   ruleId: "JS-003",
@@ -282,6 +284,7 @@ const isFreshLocalCollection = (
 };
 
 export const nonMutatingCollectionDetector: Detector = {
+  dependencyScope: "source-file",
   id: "non-mutating-collection-copy",
   ruleId: "JS-006",
   analyze: (context) => {

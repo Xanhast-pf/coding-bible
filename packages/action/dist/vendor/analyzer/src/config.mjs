@@ -41,7 +41,10 @@ const validConfigKeys = new Set([
 ]);
 const validOverrideKeys = new Set(["files", "packs", "rules"]);
 const validPacks = new Set(analyzerPacks);
-const validRuleIds = new Set(detectors.map((detector) => detector.ruleId));
+export const analyzerRuleIds = [
+    ...new Set(detectors.map((detector) => detector.ruleId)),
+].sort();
+const validRuleIds = new Set(analyzerRuleIds);
 const toRecord = (value, message) => {
     if (!value || typeof value !== "object" || Array.isArray(value)) {
         throw new Error(message);
@@ -76,6 +79,40 @@ const assertSettings = (value, name, { validatePacks = false, validateRules = fa
             throw new Error(`${name}.${key} must be "error", "warning", or "off".`);
         }
     }
+};
+const assertRuleIdList = (value, name) => {
+    if (value === undefined) {
+        return;
+    }
+    for (const ruleId of value) {
+        if (!validRuleIds.has(ruleId)) {
+            throw new Error(`${name} contains unknown automated rule "${ruleId}".`);
+        }
+    }
+};
+export const normalizeAnalyzerRuleSelection = (selection = {}) => {
+    const include = selection.include
+        ? [
+            ...new Set(selection.include.map((ruleId) => ruleId.trim()).filter(Boolean)),
+        ].sort()
+        : undefined;
+    const exclude = selection.exclude
+        ? [
+            ...new Set(selection.exclude.map((ruleId) => ruleId.trim()).filter(Boolean)),
+        ].sort()
+        : undefined;
+    assertRuleIdList(include, "rule selection include");
+    assertRuleIdList(exclude, "rule selection exclude");
+    return {
+        ...(exclude?.length ? { exclude } : {}),
+        ...(include?.length ? { include } : {}),
+    };
+};
+export const createAnalyzerRuleSelectionPredicate = (selection = {}) => {
+    const normalized = normalizeAnalyzerRuleSelection(selection);
+    const include = normalized.include ? new Set(normalized.include) : null;
+    const exclude = new Set(normalized.exclude ?? []);
+    return (ruleId) => (!include || include.has(ruleId)) && !exclude.has(ruleId);
 };
 export const validateAnalyzerConfig = (value) => {
     const config = toRecord(value, "Coding Bible config must export an object.");

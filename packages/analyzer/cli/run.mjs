@@ -18,6 +18,9 @@ Scan options:
   --staged              Check only staged files.
   --since <git-ref>     Check branch changes since a Git ref plus local changes.
   --config <path>       Use an explicit Coding Bible config file.
+  --rules <id,...>      Run only the listed automated rule IDs.
+  --exclude-rules <id,...>
+                        Skip the listed automated rule IDs.
   --json                Print the versioned analyzer report JSON.
   --profile             Include analyzer timing information.
   --no-cache            Disable the project result cache for this run.
@@ -56,12 +59,24 @@ const createDefaultOptions = (command) => ({
   includeReviewFixes: false,
   json: false,
   outputDirectory: ".coding-bible",
+  ruleSelection: {},
   patch: false,
   profile: false,
   report: false,
   scope: { mode: "project" },
   targets: [],
 });
+
+const parseRuleList = (value, optionName) => {
+  const ruleIds = value
+    .split(",")
+    .map((ruleId) => ruleId.trim())
+    .filter(Boolean);
+  if (!ruleIds.length) {
+    throw new Error(`${optionName} requires at least one rule ID.`);
+  }
+  return ruleIds;
+};
 
 const parseArguments = (args) => {
   if (!args.length || args.includes("--help") || args.includes("-h")) {
@@ -146,6 +161,19 @@ const parseArguments = (args) => {
       index += 1;
       continue;
     }
+    if (argument === "--rules" || argument === "--exclude-rules") {
+      const value = rest[index + 1];
+      if (!value || value.startsWith("--")) {
+        throw new Error(`${argument} requires a comma-separated rule list.`);
+      }
+      const key = argument === "--rules" ? "include" : "exclude";
+      options.ruleSelection = {
+        ...options.ruleSelection,
+        [key]: parseRuleList(value, argument),
+      };
+      index += 1;
+      continue;
+    }
     if (argument === "--changed") {
       options.scope = { mode: "changed" };
       scopeCount += 1;
@@ -196,10 +224,12 @@ const parseArguments = (args) => {
       options.clearCache ||
       !options.baseline ||
       options.baselinePath ||
+      options.ruleSelection.include ||
+      options.ruleSelection.exclude ||
       scopeCount
     ) {
       throw new Error(
-        "Report, patch, cache, baseline, profile, and scan-scope options are " +
+        "Report, patch, cache, baseline, profile, rule-selection, and scan-scope options are " +
           "only valid for check/baseline.",
       );
     }
@@ -382,6 +412,7 @@ const createBaseline = async (options, { cwd, stdout }) => {
     configPath: options.configPath,
     cwd,
     profile: options.profile,
+    ruleSelection: options.ruleSelection,
   });
   if (result.diagnostics.length) {
     writeLine(stdout, formatSummary(result));
@@ -461,6 +492,7 @@ export const runCli = async (
       configPath: options.configPath,
       cwd,
       profile: options.profile,
+      ruleSelection: options.ruleSelection,
       scope: options.scope,
     });
     const artifacts =

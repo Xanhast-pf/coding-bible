@@ -5,6 +5,7 @@ import {
   createFinding,
   getImportBinding,
   getSymbol,
+  hasSourceFileDeclaration,
   nodesOfKind,
 } from "../utils.ts";
 
@@ -32,7 +33,7 @@ const isGraphqlIdentifier = (
 
   return (
     (identifier.text === "gql" || identifier.text === "graphql") &&
-    !getSymbol(context, identifier)
+    !hasSourceFileDeclaration(context, identifier)
   );
 };
 
@@ -104,6 +105,7 @@ const isLikelyDocumentInterpolation = (
 };
 
 export const graphqlInterpolationDetector: Detector = {
+  dependencyScope: "source-file",
   id: "graphql-runtime-interpolation",
   ruleId: "GQL-002",
   analyze: (context) => {

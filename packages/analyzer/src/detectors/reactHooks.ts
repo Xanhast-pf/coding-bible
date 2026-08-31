@@ -153,6 +153,7 @@ const isAsyncFunction = (node: ExecutableFunction) =>
   );
 
 export const reactHookPlacementDetector: Detector = {
+  dependencyScope: "source-file",
   id: "react-hook-placement",
   ruleId: "REACT-009",
   analyze: (context) => {

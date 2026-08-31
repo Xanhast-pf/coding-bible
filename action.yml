@@ -23,6 +23,14 @@ inputs:
     description: Optional repository-relative Coding Bible config path.
     required: false
     default: ""
+  rules:
+    description: Optional comma/space-separated allowlist of automated rule IDs. Empty means all applicable rules.
+    required: false
+    default: ""
+  exclude-rules:
+    description: Optional comma/space-separated automated rule IDs to skip after the allowlist/config is applied.
+    required: false
+    default: ""
   baseline:
     description: Honor the project's Coding Bible baseline when present.
     required: false

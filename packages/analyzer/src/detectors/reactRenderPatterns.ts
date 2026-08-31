@@ -153,6 +153,7 @@ const identifierIsMutated = (
 };
 
 export const staticComponentValueDetector: Detector = {
+  dependencyScope: "source-file",
   id: "react-static-component-value",
   languages: ["jsx", "tsx"],
   ruleId: "REACT-008",
@@ -355,6 +356,7 @@ const assignmentOperatorKinds = new Set<ts.SyntaxKind>([
 ]);
 
 export const reactInputMutationDetector: Detector = {
+  dependencyScope: "source-file",
   id: "react-input-mutation",
   languages: ["jsx", "tsx"],
   ruleId: "REACT-011",

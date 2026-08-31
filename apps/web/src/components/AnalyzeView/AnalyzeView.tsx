@@ -1,8 +1,15 @@
-import type { AnalyzerLanguage } from "@coding-bible/analyzer";
+import type {
+  AnalyzerLanguage,
+  AnalyzerRuleSelection,
+} from "@coding-bible/analyzer";
 import { useEffect, useRef, useState } from "react";
 
 import type { BrowserAnalysisTask } from "../../analyzer/runBrowserAnalysis";
 import { runBrowserAnalysis } from "../../analyzer/runBrowserAnalysis";
+import {
+  readBrowserRuleSelection,
+  writeBrowserRuleSelection,
+} from "../../analyzer/ruleSelection";
 import type { BrowserProjectSelection } from "../../analyzer/projectSelection";
 import { readProjectSelection } from "../../analyzer/projectSelection";
 import type {
@@ -14,6 +21,7 @@ import type {
 import { AnalysisResults } from "./AnalysisResults";
 import styles from "./AnalyzeView.module.css";
 import { ProjectPicker } from "./ProjectPicker";
+import { RuleSelectionPanel } from "./RuleSelectionPanel";
 import { ReviewWorkspace } from "./ReviewWorkspace";
 
 const sampleSource = `import { User } from "./types";
@@ -58,6 +66,9 @@ export const AnalyzeView = () => {
   const [mode, setMode] = useState<BrowserAnalyzerMode>("snippet");
   const [language, setLanguage] = useState<AnalyzerLanguage>("tsx");
   const [source, setSource] = useState("");
+  const [ruleSelection, setRuleSelection] = useState<AnalyzerRuleSelection>(
+    () => readBrowserRuleSelection(),
+  );
   const [project, setProject] = useState<BrowserProjectSelection | null>(null);
   const [projectError, setProjectError] = useState<string | null>(null);
   const [result, setResult] = useState<BrowserAnalyzeResult | null>(null);
@@ -67,10 +78,12 @@ export const AnalyzeView = () => {
   );
   const [status, setStatus] = useState<AnalyzerStatus>("idle");
   const activeTaskRef = useRef<BrowserAnalysisTask | null>(null);
+  const activeProjectReadRef = useRef<AbortController | null>(null);
 
   useEffect(
     () => () => {
       activeTaskRef.current?.cancel();
+      activeProjectReadRef.current?.abort();
     },
     [],
   );
@@ -81,9 +94,11 @@ export const AnalyzeView = () => {
     setProgress(null);
   };
 
-  const cancelAnalysis = () => {
+  const cancelWork = () => {
     activeTaskRef.current?.cancel();
     activeTaskRef.current = null;
+    activeProjectReadRef.current?.abort();
+    activeProjectReadRef.current = null;
     setStatus("idle");
     setProgress(null);
   };
@@ -93,7 +108,7 @@ export const AnalyzeView = () => {
       return;
     }
 
-    cancelAnalysis();
+    cancelWork();
     setMode(nextMode);
     resetResult();
   };
@@ -132,6 +147,12 @@ export const AnalyzeView = () => {
     }
   };
 
+  const handleRuleSelectionChange = (nextSelection: AnalyzerRuleSelection) => {
+    setRuleSelection(nextSelection);
+    writeBrowserRuleSelection(nextSelection);
+    resetResult();
+  };
+
   const handleAnalyze = async () => {
     const input =
       mode === "snippet"
@@ -144,12 +165,14 @@ export const AnalyzeView = () => {
                 },
               ],
               mode,
+              ruleSelection,
             }
           : null
         : project
           ? {
               files: project.files,
               mode,
+              ruleSelection,
             }
           : null;
 
@@ -174,29 +197,61 @@ export const AnalyzeView = () => {
         },
       ],
       mode: "snippet",
+      ruleSelection,
     });
   };
 
   const handleProjectFiles = async (files: FileList) => {
-    cancelAnalysis();
+    cancelWork();
     resetResult();
+    setProject(null);
     setProjectError(null);
     setStatus("reading");
 
+    const controller = new AbortController();
+    activeProjectReadRef.current = controller;
+    setProgress({
+      completed: 0,
+      message: "Reading local project…",
+      phase: "reading",
+      total: files.length,
+    });
+
     try {
-      setProject(await readProjectSelection(files));
+      const nextProject = await readProjectSelection(files, {
+        onProgress: ({ completed, total }) => {
+          setProgress({
+            completed,
+            message: `Reading local project · ${completed.toLocaleString()} of ${total.toLocaleString()} text files`,
+            phase: "reading",
+            total,
+          });
+        },
+        signal: controller.signal,
+      });
+      if (!controller.signal.aborted) {
+        setProject(nextProject);
+      }
     } catch (error: unknown) {
-      setProject(null);
-      setProjectError(
-        error instanceof Error ? error.message : "Could not read that project.",
-      );
+      if (!(error instanceof DOMException && error.name === "AbortError")) {
+        setProject(null);
+        setProjectError(
+          error instanceof Error
+            ? error.message
+            : "Could not read that project.",
+        );
+      }
     } finally {
-      setStatus("idle");
+      if (activeProjectReadRef.current === controller) {
+        activeProjectReadRef.current = null;
+        setStatus("idle");
+        setProgress(null);
+      }
     }
   };
 
   const loadExample = () => {
-    cancelAnalysis();
+    cancelWork();
     setMode("snippet");
     setLanguage("tsx");
     setSource(sampleSource);
@@ -258,6 +313,12 @@ export const AnalyzeView = () => {
           <span>Folder + tsconfig context</span>
         </button>
       </div>
+
+      <RuleSelectionPanel
+        disabled={status !== "idle"}
+        onChange={handleRuleSelectionChange}
+        selection={ruleSelection}
+      />
 
       <div className={styles.workspace}>
         <section className={styles.editorPanel}>
@@ -337,8 +398,10 @@ export const AnalyzeView = () => {
               <span>{progress.message}</span>
               {progress.total && progress.completed !== undefined ? (
                 <span className={styles.progressCount}>
-                  {Math.min(progress.completed + 1, progress.total)}/
-                  {progress.total}
+                  {progress.phase === "analyzing"
+                    ? Math.min(progress.completed + 1, progress.total)
+                    : Math.min(progress.completed, progress.total)}
+                  /{progress.total}
                 </span>
               ) : null}
             </div>
@@ -351,10 +414,10 @@ export const AnalyzeView = () => {
                 : "Uses selected files, tsconfig options, and coding-bible.config.json when present; generated/vendor folders are skipped."}
             </p>
             <div className={styles.actionButtons}>
-              {status === "analyzing" ? (
+              {status !== "idle" ? (
                 <button
                   className={styles.cancelButton}
-                  onClick={cancelAnalysis}
+                  onClick={cancelWork}
                   type="button"
                 >
                   Cancel

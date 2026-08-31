@@ -107,6 +107,7 @@ const isLoopInitializer = (node: ts.VariableDeclarationList) => {
 };
 
 export const preferConstDetector: Detector = {
+  dependencyScope: "source-file",
   id: "prefer-const",
   ruleId: "CORE-003",
   analyze: (context) => {

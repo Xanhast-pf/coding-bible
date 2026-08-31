@@ -3,7 +3,7 @@ import ts from "typescript";
 import type { AnalyzerFinding, Detector } from "../types.ts";
 import {
   createFinding,
-  getSymbol,
+  hasSourceFileDeclaration,
   nodesOfKind,
   replaceNodeEdit,
 } from "../utils.ts";
@@ -15,26 +15,13 @@ const legacyGlobals = new Map([
   ["isFinite", "Number.isFinite"],
 ]);
 
-const isDefaultLibrarySymbol = (
-  context: Parameters<typeof getSymbol>[0],
-  node: ts.Identifier,
-) => {
-  const symbol = getSymbol(context, node);
-  return Boolean(
-    symbol?.declarations?.length &&
-    symbol.declarations.every((declaration) =>
-      context.program.isSourceFileDefaultLibrary(declaration.getSourceFile()),
-    ),
-  );
-};
-
 const isUnshadowedGlobalIdentifier = (
-  context: Parameters<typeof getSymbol>[0],
+  context: Parameters<typeof hasSourceFileDeclaration>[0],
   node: ts.Identifier,
-) => !getSymbol(context, node) || isDefaultLibrarySymbol(context, node);
+) => !hasSourceFileDeclaration(context, node);
 
 const isUnshadowedGlobalOwner = (
-  context: Parameters<typeof getSymbol>[0],
+  context: Parameters<typeof hasSourceFileDeclaration>[0],
   node: ts.Expression,
 ) =>
   ts.isIdentifier(node) &&
@@ -42,6 +29,7 @@ const isUnshadowedGlobalOwner = (
   isUnshadowedGlobalIdentifier(context, node);
 
 export const legacyBuiltinsDetector: Detector = {
+  dependencyScope: "source-file",
   id: "namespace-safe-builtins",
   ruleId: "JS-004",
   analyze: (context) => {

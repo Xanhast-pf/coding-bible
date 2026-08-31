@@ -4,6 +4,7 @@ import type { AnalyzerFinding, Detector } from "../types.ts";
 import { createFinding, visit } from "../utils.ts";
 
 export const noExplicitAnyDetector: Detector = {
+  dependencyScope: "source-file",
   id: "no-explicit-any",
   languages: ["ts", "tsx"],
   ruleId: "TS-001",

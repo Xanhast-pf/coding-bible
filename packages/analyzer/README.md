@@ -24,6 +24,8 @@ coding-bible check . --staged
 coding-bible check . --since origin/main
 coding-bible check . --json
 coding-bible check . --profile
+coding-bible check . --rules TS-001,REACT-006
+coding-bible check . --exclude-rules JS-004
 coding-bible check . --no-cache
 coding-bible baseline create .
 coding-bible check . --no-baseline
@@ -44,12 +46,15 @@ checks only the index.
 
 ### Cache and baselines
 
-Project-result caching is enabled by default at `.coding-bible/cache/`. A cached
-result is reused only when the complete tsconfig project source set, compiler
-options, Coding Bible config, dependency metadata, TypeScript version, and
-analyzer implementation signature are unchanged. Project-reference graphs are
-currently analyzed normally instead of cached. This deliberately favors a cold
-rebuild over a questionable cache hit.
+Incremental caching is enabled by default at `.coding-bible/cache/`. Every
+detector declares whether it depends only on the current source file or on the
+whole TypeScript project. Source-file detector results are fingerprinted
+independently, so editing one file can reuse validated findings for unaffected
+files and analyze only cache misses in a small TypeScript Program. Project-scope
+detectors remain tied to the complete project signature. Compiler options,
+Coding Bible config, rule selection, dependency metadata, TypeScript version,
+and analyzer implementation changes invalidate the relevant entries.
+Project-reference graphs remain deliberately cache-conservative.
 
 ```bash
 coding-bible check . --profile
@@ -57,9 +62,12 @@ coding-bible check . --no-cache
 coding-bible check . --clear-cache
 ```
 
-`--profile` reports cache hashing time plus file hit/miss counts. Cache data is
-disposable and belongs under the ignored `.coding-bible/` directory. Set
-`cache: false` or a custom cache directory in config when needed.
+`--profile` reports cache hashing time plus file hit/miss counts. A full-project
+scan still validates selected source contents rather than trusting mtimes, while
+changed/staged/targeted scopes hash only their selected files when no project-
+scope detector requires the full graph. Cache data is disposable and belongs
+under the ignored `.coding-bible/` directory. Set `cache: false` or a custom
+cache directory in config when needed.
 
 Baselines solve a different problem: adopting Coding Bible in a repository that
 already contains known violations. Create one with:
@@ -154,9 +162,22 @@ export default defineConfig({
 });
 ```
 
-Individual rule settings override pack settings. File overrides are applied in
-order after the project-wide settings. Default ignores cover dependencies, build output, coverage, declarations, and
-common generated-code paths. Set `ignoreDefaults: false` to opt out explicitly.
+Individual rule settings override pack settings. A one-off scan can additionally
+narrow the automated catalog without editing config:
+
+```bash
+coding-bible check . --rules TS-001,REACT-006
+coding-bible check . --exclude-rules JS-004,REACT-008
+```
+
+`--rules` is an allowlist; `--exclude-rules` is applied afterward, and both
+accept comma-separated rule IDs. Omitting both always means every automated rule
+that is enabled by project config. Unknown or non-automated IDs fail instead of
+being silently ignored.
+
+File overrides are applied in order after the project-wide settings. Default
+ignores cover dependencies, build output, coverage, declarations, and common
+generated-code paths. Set `ignoreDefaults: false` to opt out explicitly.
 Unknown config keys, unknown/non-automated rule IDs, and invalid settings fail
 with exit code `2` rather than being silently ignored.
 

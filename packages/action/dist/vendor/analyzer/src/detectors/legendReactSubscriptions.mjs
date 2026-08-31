@@ -1,5 +1,5 @@
 import ts from "../../../typescript/typescript.cjs";
-import { createFinding, getImportBinding, getSymbol, isExecutableFunction, nodesOfKind, } from "../utils.mjs";
+import { createFinding, getImportBinding, getSymbol, hasSourceFileDeclaration, isExecutableFunction, nodesOfKind, } from "../utils.mjs";
 const isLegendModule = (moduleName) => moduleName.startsWith("@legendapp/state");
 const isImportedFunction = (context, expression, importedName) => {
     if (ts.isIdentifier(expression)) {
@@ -24,7 +24,7 @@ const isObserverCall = (context, node) => {
     }
     return (ts.isIdentifier(node.expression) &&
         node.expression.text === "observer" &&
-        !getSymbol(context, node.expression));
+        !hasSourceFileDeclaration(context, node.expression));
 };
 const collectObservableSymbols = (context) => {
     const symbols = new Set();
@@ -74,6 +74,7 @@ const visitRenderBody = (node, root, visitor) => {
     });
 };
 export const legendReactSubscriptionDetector = {
+    dependencyScope: "source-file",
     id: "legend-react-use-value",
     languages: ["jsx", "tsx"],
     ruleId: "LEGEND-001",

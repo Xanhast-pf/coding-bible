@@ -1,4 +1,8 @@
-import { analyzeProgram } from "@coding-bible/analyzer";
+import {
+  analyzeProgram,
+  createAnalyzerRuleSelectionPredicate,
+  normalizeAnalyzerRuleSelection,
+} from "@coding-bible/analyzer";
 
 import { loadBrowserAnalyzerConfig } from "./browserConfig.ts";
 import { normalizeRelativeFileName } from "./fileTypes.ts";
@@ -20,6 +24,8 @@ export const analyzeBrowserInput = (
   onProgress: (progress: BrowserAnalyzerProgress) => void = () => {},
 ): BrowserAnalyzeResult => {
   const startedAt = performance.now();
+  const ruleSelection = normalizeAnalyzerRuleSelection(input.ruleSelection);
+  const ruleSelected = createAnalyzerRuleSelectionPredicate(ruleSelection);
   const browserConfig =
     input.mode === "project"
       ? loadBrowserAnalyzerConfig(input.files)
@@ -90,7 +96,9 @@ export const analyzeBrowserInput = (
       });
 
       const result = analyzeProgram(project.program, [programInput], {
-        isRuleEnabled: browserConfig.resolver.isRuleEnabled,
+        isRuleEnabled: (ruleId, fileName) =>
+          ruleSelected(ruleId) &&
+          browserConfig.resolver.isRuleEnabled(ruleId, fileName),
       })[0];
       if (!result) {
         throw new Error(
@@ -131,6 +139,7 @@ export const analyzeBrowserInput = (
     durationMs: performance.now() - startedAt,
     files: fileResults,
     mode: input.mode,
+    ruleSelection,
     sourceFileCount,
     tsconfigFileNames,
   };

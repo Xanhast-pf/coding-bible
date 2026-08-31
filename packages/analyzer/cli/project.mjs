@@ -244,3 +244,21 @@ export const createProjectProgram = (project) => {
     projectFiles: project.rootNames.length,
   };
 };
+
+export const createSourceFileProgram = (project, fileNames) => {
+  const startedAt = performance.now();
+  const program = ts.createProgram({
+    options: {
+      ...project.options,
+      noResolve: true,
+    },
+    rootNames: fileNames,
+  });
+
+  return {
+    ...project,
+    program,
+    programMs: performance.now() - startedAt,
+    projectFiles: fileNames.length,
+  };
+};

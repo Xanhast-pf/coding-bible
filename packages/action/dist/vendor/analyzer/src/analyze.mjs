@@ -8,6 +8,8 @@ const defaultFileNameByLanguage = {
     tsx: "snippet.tsx",
 };
 const getApplicableDetectors = (language, fileName, options) => detectors.filter((detector) => (!detector.languages || detector.languages.includes(language)) &&
+    (!options.dependencyScope ||
+        detector.dependencyScope === options.dependencyScope) &&
     (options.isRuleEnabled?.(detector.ruleId, fileName) ?? true));
 const createDiagnostic = (context, diagnostic) => {
     const start = diagnostic.start ?? 0;

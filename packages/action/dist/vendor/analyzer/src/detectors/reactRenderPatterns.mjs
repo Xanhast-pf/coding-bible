@@ -99,6 +99,7 @@ const identifierIsMutated = (context, identifier) => {
     });
 };
 export const staticComponentValueDetector = {
+    dependencyScope: "source-file",
     id: "react-static-component-value",
     languages: ["jsx", "tsx"],
     ruleId: "REACT-008",
@@ -244,6 +245,7 @@ const assignmentOperatorKinds = new Set([
     ts.SyntaxKind.AmpersandAmpersandEqualsToken,
 ]);
 export const reactInputMutationDetector = {
+    dependencyScope: "source-file",
     id: "react-input-mutation",
     languages: ["jsx", "tsx"],
     ruleId: "REACT-011",

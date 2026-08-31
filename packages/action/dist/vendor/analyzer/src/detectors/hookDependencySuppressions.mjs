@@ -1,6 +1,7 @@
 import ts from "../../../typescript/typescript.cjs";
 const suppressionPattern = /eslint-disable(?:-next-line|-line)?[^\n]*react-hooks\/exhaustive-deps/;
 export const hookDependencySuppressionsDetector = {
+    dependencyScope: "source-file",
     id: "react-hook-dependency-suppression",
     ruleId: "REACT-012",
     analyze: (context) => {

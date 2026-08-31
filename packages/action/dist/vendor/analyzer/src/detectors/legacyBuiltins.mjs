@@ -1,21 +1,17 @@
 import ts from "../../../typescript/typescript.cjs";
-import { createFinding, getSymbol, nodesOfKind, replaceNodeEdit, } from "../utils.mjs";
+import { createFinding, hasSourceFileDeclaration, nodesOfKind, replaceNodeEdit, } from "../utils.mjs";
 const legacyGlobals = new Map([
     ["parseInt", "Number.parseInt"],
     ["parseFloat", "Number.parseFloat"],
     ["isNaN", "Number.isNaN"],
     ["isFinite", "Number.isFinite"],
 ]);
-const isDefaultLibrarySymbol = (context, node) => {
-    const symbol = getSymbol(context, node);
-    return Boolean(symbol?.declarations?.length &&
-        symbol.declarations.every((declaration) => context.program.isSourceFileDefaultLibrary(declaration.getSourceFile())));
-};
-const isUnshadowedGlobalIdentifier = (context, node) => !getSymbol(context, node) || isDefaultLibrarySymbol(context, node);
+const isUnshadowedGlobalIdentifier = (context, node) => !hasSourceFileDeclaration(context, node);
 const isUnshadowedGlobalOwner = (context, node) => ts.isIdentifier(node) &&
     (node.text === "globalThis" || node.text === "window") &&
     isUnshadowedGlobalIdentifier(context, node);
 export const legacyBuiltinsDetector = {
+    dependencyScope: "source-file",
     id: "namespace-safe-builtins",
     ruleId: "JS-004",
     analyze: (context) => {

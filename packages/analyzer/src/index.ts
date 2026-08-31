@@ -1,11 +1,14 @@
 export { analyze, analyzeMany, analyzeProgram } from "./analyze.ts";
 export {
   analyzerConfigFileNames,
+  analyzerRuleIds,
   createAnalyzerConfigResolver,
+  createAnalyzerRuleSelectionPredicate,
   createAnalyzerFileSelector,
   defaultAnalyzerIgnorePatterns,
   defineConfig,
   getAnalyzerPack,
+  normalizeAnalyzerRuleSelection,
   resolveAnalyzerConfigDefaults,
   validateAnalyzerConfig,
 } from "./config.ts";
@@ -24,6 +27,7 @@ export type {
   AnalyzeResult,
   AnalyzerDiagnostic,
   AnalyzerFinding,
+  AnalyzerDetectorDependencyScope,
   AnalyzerFixSafety,
   AnalyzerLanguage,
   AnalyzerSuggestedFix,
@@ -31,6 +35,7 @@ export type {
   AnalyzerConfig,
   AnalyzerConfigOverride,
   AnalyzerPack,
+  AnalyzerRuleSelection,
   AnalyzerRuleSetting,
   ProgramAnalyzeInput,
   SourceLocation,

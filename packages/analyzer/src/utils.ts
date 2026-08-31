@@ -44,6 +44,16 @@ export const getSymbol = (
   return symbol;
 };
 
+export const hasSourceFileDeclaration = (
+  context: DetectorContext,
+  identifier: ts.Identifier,
+) =>
+  Boolean(
+    getSymbol(context, identifier)?.declarations?.some(
+      (declaration) => declaration.getSourceFile() === context.sourceFile,
+    ),
+  );
+
 export const getReferences = (
   context: DetectorContext,
   identifier: ts.Identifier,

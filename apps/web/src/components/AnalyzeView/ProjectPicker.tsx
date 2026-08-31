@@ -84,6 +84,12 @@ export const ProjectPicker = ({
         </dl>
       ) : null}
 
+      {selection?.resourceWarning ? (
+        <p className={styles.projectWarning} role="status">
+          <strong>Large project.</strong> {selection.resourceWarning}
+        </p>
+      ) : null}
+
       {errorMessage ? (
         <p className={styles.projectError} role="alert">
           {errorMessage}

@@ -63,6 +63,7 @@ const isNativeInteractive = (node: JsxWithAttributes) => {
 };
 
 export const semanticInteractiveElementDetector: Detector = {
+  dependencyScope: "source-file",
   id: "semantic-interactive-element",
   languages: ["jsx", "tsx"],
   ruleId: "A11Y-001",
@@ -106,6 +107,7 @@ export const semanticInteractiveElementDetector: Detector = {
 };
 
 export const keyboardInteractionDetector: Detector = {
+  dependencyScope: "source-file",
   id: "keyboard-interaction",
   languages: ["jsx", "tsx"],
   ruleId: "A11Y-002",
@@ -219,6 +221,7 @@ const hasPotentialTextContent = (node: ts.JsxElement) =>
   node.children.some(childMayNameControl);
 
 export const accessibleControlNameDetector: Detector = {
+  dependencyScope: "source-file",
   id: "accessible-control-name",
   languages: ["jsx", "tsx"],
   ruleId: "A11Y-004",

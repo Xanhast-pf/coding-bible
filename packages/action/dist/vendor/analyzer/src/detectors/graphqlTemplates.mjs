@@ -1,5 +1,5 @@
 import ts from "../../../typescript/typescript.cjs";
-import { createFinding, getImportBinding, getSymbol, nodesOfKind, } from "../utils.mjs";
+import { createFinding, getImportBinding, getSymbol, hasSourceFileDeclaration, nodesOfKind, } from "../utils.mjs";
 const graphqlModules = new Set([
     "@apollo/client",
     "@urql/core",
@@ -16,7 +16,7 @@ const isGraphqlIdentifier = (context, identifier) => {
                 binding.kind === "default"));
     }
     return ((identifier.text === "gql" || identifier.text === "graphql") &&
-        !getSymbol(context, identifier));
+        !hasSourceFileDeclaration(context, identifier));
 };
 const isGraphqlTag = (context, tag) => {
     if (ts.isIdentifier(tag)) {
@@ -59,6 +59,7 @@ const isLikelyDocumentInterpolation = (context, expression) => {
     return /(fragment|document|query|mutation|subscription)$/i.test(expression.text);
 };
 export const graphqlInterpolationDetector = {
+    dependencyScope: "source-file",
     id: "graphql-runtime-interpolation",
     ruleId: "GQL-002",
     analyze: (context) => {

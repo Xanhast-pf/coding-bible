@@ -26,6 +26,9 @@ const parseOptionalLimit = (name) => {
 
 const maxColdMs = parseOptionalLimit("CODING_BIBLE_BENCH_MAX_MS");
 const maxWarmMs = parseOptionalLimit("CODING_BIBLE_BENCH_MAX_WARM_MS");
+const maxIncrementalMs = parseOptionalLimit(
+  "CODING_BIBLE_BENCH_MAX_INCREMENTAL_MS",
+);
 const maxRssMb = parseOptionalLimit("CODING_BIBLE_BENCH_MAX_RSS_MB");
 
 const directory = await mkdtemp(path.join(os.tmpdir(), "coding-bible-bench-"));
@@ -55,8 +58,17 @@ try {
     cwd: directory,
     profile: true,
   });
+  const changedFile = path.join(srcDirectory, "module-00000.ts");
+  await writeFile(changedFile, "export const value0 = 1000;\n");
+  const incremental = await checkPaths(["src"], {
+    cwd: directory,
+    profile: true,
+  });
+
   const coldFilesPerSecond = cold.filesScanned / (cold.profile.totalMs / 1000);
   const warmFilesPerSecond = warm.filesScanned / (warm.profile.totalMs / 1000);
+  const incrementalFilesPerSecond =
+    incremental.filesScanned / (incremental.profile.totalMs / 1000);
 
   console.log("Coding Bible project benchmark");
   console.log(`  files       ${cold.filesScanned}`);
@@ -76,7 +88,15 @@ try {
   console.log(`    program   ${warm.profile.programMs.toFixed(1)} ms`);
   console.log(`    analysis  ${warm.profile.analysisMs.toFixed(1)} ms`);
   console.log(`    rate      ${warmFilesPerSecond.toFixed(0)} files/s`);
-  console.log(`  rss         ${warm.profile.rssMb.toFixed(1)} MB`);
+  console.log(`  edit 1 file ${incremental.profile.totalMs.toFixed(1)} ms`);
+  console.log(
+    `    cache     ${incremental.profile.cacheMs.toFixed(1)} ms ` +
+      `(${incremental.profile.cacheHits} hits, ${incremental.profile.cacheMisses} misses)`,
+  );
+  console.log(`    program   ${incremental.profile.programMs.toFixed(1)} ms`);
+  console.log(`    analysis  ${incremental.profile.analysisMs.toFixed(1)} ms`);
+  console.log(`    rate      ${incrementalFilesPerSecond.toFixed(0)} files/s`);
+  console.log(`  rss         ${incremental.profile.rssMb.toFixed(1)} MB`);
 
   if (maxColdMs !== null && cold.profile.totalMs > maxColdMs) {
     throw new Error(
@@ -88,9 +108,17 @@ try {
       `Warm benchmark exceeded ${maxWarmMs} ms (${warm.profile.totalMs.toFixed(1)} ms).`,
     );
   }
-  if (maxRssMb !== null && warm.profile.rssMb > maxRssMb) {
+  if (
+    maxIncrementalMs !== null &&
+    incremental.profile.totalMs > maxIncrementalMs
+  ) {
     throw new Error(
-      `Benchmark exceeded ${maxRssMb} MB RSS (${warm.profile.rssMb.toFixed(1)} MB).`,
+      `Incremental benchmark exceeded ${maxIncrementalMs} ms (${incremental.profile.totalMs.toFixed(1)} ms).`,
+    );
+  }
+  if (maxRssMb !== null && incremental.profile.rssMb > maxRssMb) {
+    throw new Error(
+      `Benchmark exceeded ${maxRssMb} MB RSS (${incremental.profile.rssMb.toFixed(1)} MB).`,
     );
   }
 } finally {

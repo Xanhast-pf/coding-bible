@@ -55,9 +55,13 @@ virtual TypeScript project.
 8. **Keep source private.** No source file, tsconfig, config, or analysis request is sent
    to Coding Bible or another service. The only network activity is loading the
    already-deployed static application assets.
-9. **Bound browser resource use.** Project selection ignores common generated and
-   vendor directories and applies a per-run file/byte cap. The CLI and GitHub
-   Action remain the right tools for repositories beyond those browser limits.
+9. **Manage browser resource use without an artificial hard cap.** Project
+   selection ignores common generated and vendor directories. The former 2,500
+   text-file / 32 MB thresholds are retained only as soft warnings; users can
+   continue with larger workspaces. File contents are read with bounded
+   concurrency, selection progress is visible and cancellable, and the analysis
+   itself remains isolated in a disposable Worker. The practical ceiling is the
+   memory available to the browser tab, not a Coding Bible rejection threshold.
 10. **Export actionable artifacts locally.** Completed browser runs can download a
     versioned JSON report and separate safe/review patch files. Structured text
     edits and unified-diff generation live in `@coding-bible/analyzer`, so CLI

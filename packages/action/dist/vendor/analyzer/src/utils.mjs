@@ -19,6 +19,7 @@ export const getSymbol = (context, identifier) => {
     symbols.set(identifier, symbol);
     return symbol;
 };
+export const hasSourceFileDeclaration = (context, identifier) => Boolean(getSymbol(context, identifier)?.declarations?.some((declaration) => declaration.getSourceFile() === context.sourceFile));
 export const getReferences = (context, identifier) => {
     const symbol = getSymbol(context, identifier);
     if (!symbol) {

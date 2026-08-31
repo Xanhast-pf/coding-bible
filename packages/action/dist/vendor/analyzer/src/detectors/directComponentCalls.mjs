@@ -21,6 +21,7 @@ const containsJsx = (root) => {
     return found;
 };
 export const directComponentCallsDetector = {
+    dependencyScope: "source-file",
     id: "react-direct-component-call",
     languages: ["jsx", "tsx"],
     ruleId: "REACT-010",

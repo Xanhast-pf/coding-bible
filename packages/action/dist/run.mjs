@@ -205,6 +205,7 @@ export const runAction = async ({
           cwd,
           baseline: inputs.baseline,
           cache: false,
+          ruleSelection: inputs.ruleSelection,
           ...(configPath ? { configPath } : {}),
         })
       : createEmptyAnalysis();
@@ -213,6 +214,7 @@ export const runAction = async ({
       cwd,
       baseline: inputs.baseline,
       cache: false,
+      ruleSelection: inputs.ruleSelection,
       ...(configPath ? { configPath } : {}),
     });
   }

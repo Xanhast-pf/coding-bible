@@ -1,6 +1,7 @@
 import ts from "../../../typescript/typescript.cjs";
 import { createFinding, visit } from "../utils.mjs";
 export const noExplicitAnyDetector = {
+    dependencyScope: "source-file",
     id: "no-explicit-any",
     languages: ["ts", "tsx"],
     ruleId: "TS-001",
