@@ -47,6 +47,12 @@ test("collectSourceFiles walks supported source files and ignores generated dire
     await mkdir(path.join(directory, "node_modules", "dependency"), {
       recursive: true,
     });
+    await mkdir(path.join(directory, "public", "static", "legacy"), {
+      recursive: true,
+    });
+    await mkdir(path.join(directory, "vendor", "dependency"), {
+      recursive: true,
+    });
     await writeFile(
       path.join(directory, "src", "good.ts"),
       "const value = 1;\n",
@@ -67,6 +73,18 @@ test("collectSourceFiles walks supported source files and ignores generated dire
     await writeFile(
       path.join(directory, "node_modules", "dependency", "bad.ts"),
       "const value: any = 1;\n",
+    );
+    await writeFile(
+      path.join(directory, "public", "static", "legacy", "jquery.js"),
+      "const value: any = 1;\n",
+    );
+    await writeFile(
+      path.join(directory, "vendor", "dependency", "bad.ts"),
+      "const value: any = 1;\n",
+    );
+    await writeFile(
+      path.join(directory, "src", "compiled.min.js"),
+      "const value = parseInt(raw);\n",
     );
 
     const files = await collectSourceFiles(["."], { cwd: directory });

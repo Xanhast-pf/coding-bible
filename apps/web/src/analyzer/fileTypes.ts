@@ -31,9 +31,16 @@ const ignoredDirectoryNames = new Set([
   "build",
   "coverage",
   "dist",
+  "generated",
   "node_modules",
   "out",
+  "third-party",
+  "third_party",
+  "vendor",
+  "vendors",
 ]);
+
+const minifiedSourcePattern = /\.min\.(?:[cm]?[jt]sx?)$/i;
 
 export const getAnalyzerLanguage = (
   fileName: string,
@@ -96,10 +103,19 @@ export const stripCommonRootDirectory = (fileNames: readonly string[]) => {
   return normalized.map((fileName) => fileName.slice(commonRoot.length + 1));
 };
 
-export const hasIgnoredDirectory = (fileName: string) =>
-  normalizeRelativeFileName(fileName)
-    .split("/")
-    .some((segment) => ignoredDirectoryNames.has(segment));
+export const hasIgnoredDirectory = (fileName: string) => {
+  const normalized = normalizeRelativeFileName(fileName);
+  const segments = normalized.split("/");
+
+  return (
+    segments.some((segment) => ignoredDirectoryNames.has(segment)) ||
+    segments.some(
+      (segment, index) =>
+        segment === "public" && segments[index + 1] === "static",
+    ) ||
+    minifiedSourcePattern.test(normalized)
+  );
+};
 
 export const getProjectTsconfigFiles = (
   files: readonly BrowserProjectFile[],

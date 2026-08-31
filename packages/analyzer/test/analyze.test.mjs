@@ -243,6 +243,53 @@ test("detects aliased, namespaced, conditional, and post-return Hooks", () => {
   );
 });
 
+test("accepts Hooks in component wrappers and renderHook harnesses", () => {
+  assert.deepEqual(
+    ruleIds(
+      `import { memo, useRef } from "react";\nconst FormBuilder = memo(() => {\n  const ref = useRef(null);\n  return <div ref={ref} />;\n});`,
+    ),
+    [],
+  );
+
+  assert.deepEqual(
+    ruleIds(
+      `import { observer as watch } from "@legendapp/state/react";\nconst DownloadForm = watch(() => {\n  const value = useValue(store$.value);\n  return <div>{value}</div>;\n});`,
+    ),
+    [],
+  );
+
+  assert.deepEqual(
+    ruleIds(
+      `import { renderHook as testHook } from "@testing-library/react-hooks";\ntestHook(() => useLocalStorage("key"));`,
+    ),
+    [],
+  );
+
+  assert.deepEqual(
+    ruleIds(`renderHook(() => {\n  if (enabled) useState(0);\n});`),
+    ["REACT-009"],
+  );
+
+  assert.deepEqual(ruleIds(`items.map(() => useState(0));`), ["REACT-009"]);
+
+  assert.deepEqual(
+    ruleIds(
+      `const observer = (render) => render();\nobserver(() => useState(0));`,
+    ),
+    ["REACT-009"],
+  );
+  assert.deepEqual(
+    ruleIds(
+      `const renderHook = (render) => render();\nrenderHook(() => useState(0));`,
+    ),
+    ["REACT-009"],
+  );
+  assert.deepEqual(
+    ruleIds(`const memo = (render) => render();\nmemo(() => useState(0));`),
+    ["REACT-009"],
+  );
+});
+
 test("detects direct invocation by component symbol without shadowing false positives", () => {
   assert.deepEqual(
     ruleIds(

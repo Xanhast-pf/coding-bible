@@ -42,6 +42,18 @@ test("browser project filtering skips generated and vendor directories", () => {
   assert.equal(hasIgnoredDirectory("node_modules/pkg/index.d.ts"), true);
   assert.equal(hasIgnoredDirectory(".coding-bible/report.json"), true);
   assert.equal(hasIgnoredDirectory("dist/index.js"), true);
+  assert.equal(hasIgnoredDirectory("vendor/jquery/index.js"), true);
+  assert.equal(hasIgnoredDirectory("src/generated/client.ts"), true);
+  assert.equal(
+    hasIgnoredDirectory("public/static/mraid/jquery.event.drag.js"),
+    true,
+  );
+  assert.equal(
+    hasIgnoredDirectory("apps/web/public/static/mraid/jquery.event.drag.js"),
+    true,
+  );
+  assert.equal(hasIgnoredDirectory("src/runtime.min.js"), true);
+  assert.equal(hasIgnoredDirectory("src/static/index.ts"), false);
   assert.equal(hasIgnoredDirectory("src/builders/index.ts"), false);
 });
 

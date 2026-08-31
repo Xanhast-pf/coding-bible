@@ -6,11 +6,17 @@ import {
   createFinding,
   getFunctionName,
   getImportBinding,
+  hasSourceFileDeclaration,
   isExecutableFunction,
   nodesOfKind,
 } from "../utils.ts";
 
 const hookNamePattern = /^use[A-Z0-9]/;
+
+const isLegendModule = (moduleName: string) =>
+  moduleName.startsWith("@legendapp/state");
+
+const isReactModule = (moduleName: string) => moduleName === "react";
 
 const getReactHookName = (
   context: DetectorContext,
@@ -50,9 +56,96 @@ const getReactHookName = (
   return null;
 };
 
-const isAllowedHookFunction = (node: ExecutableFunction) => {
+const isBareUnshadowedIdentifier = (
+  context: DetectorContext,
+  expression: ts.LeftHandSideExpression,
+  name: string,
+) =>
+  ts.isIdentifier(expression) &&
+  expression.text === name &&
+  !hasSourceFileDeclaration(context, expression);
+
+const isImportedCallTarget = (
+  context: DetectorContext,
+  expression: ts.LeftHandSideExpression,
+  importedName: string,
+  matchesModule: (moduleName: string) => boolean,
+) => {
+  if (ts.isIdentifier(expression)) {
+    const binding = getImportBinding(context, expression);
+    return Boolean(
+      binding &&
+      matchesModule(binding.moduleName) &&
+      binding.importedName === importedName,
+    );
+  }
+
+  if (
+    !ts.isPropertyAccessExpression(expression) ||
+    !ts.isIdentifier(expression.expression) ||
+    expression.name.text !== importedName
+  ) {
+    return false;
+  }
+
+  const binding = getImportBinding(context, expression.expression);
+  return Boolean(
+    binding &&
+    matchesModule(binding.moduleName) &&
+    (binding.kind === "default" || binding.kind === "namespace"),
+  );
+};
+
+const isComponentWrapperCall = (
+  context: DetectorContext,
+  call: ts.CallExpression,
+) =>
+  isImportedCallTarget(context, call.expression, "memo", isReactModule) ||
+  isImportedCallTarget(context, call.expression, "forwardRef", isReactModule) ||
+  isImportedCallTarget(context, call.expression, "observer", isLegendModule) ||
+  isBareUnshadowedIdentifier(context, call.expression, "observer");
+
+const isHookHarnessCall = (
+  context: DetectorContext,
+  call: ts.CallExpression,
+) => {
+  if (ts.isIdentifier(call.expression)) {
+    const binding = getImportBinding(context, call.expression);
+    if (binding) {
+      return binding.importedName === "renderHook";
+    }
+  }
+
+  return isBareUnshadowedIdentifier(context, call.expression, "renderHook");
+};
+
+const isDirectCallArgument = (
+  node: ExecutableFunction,
+  call: ts.CallExpression,
+) => call.arguments.some((argument) => argument === node);
+
+const isRecognizedRenderBoundary = (
+  context: DetectorContext,
+  node: ExecutableFunction,
+) => {
+  const parent = node.parent;
+  return Boolean(
+    ts.isCallExpression(parent) &&
+    isDirectCallArgument(node, parent) &&
+    (isComponentWrapperCall(context, parent) ||
+      isHookHarnessCall(context, parent)),
+  );
+};
+
+const isAllowedHookFunction = (
+  context: DetectorContext,
+  node: ExecutableFunction,
+) => {
   const name = getFunctionName(node);
-  return Boolean(name && (/^[A-Z]/.test(name) || hookNamePattern.test(name)));
+  return Boolean(
+    (name && (/^[A-Z]/.test(name) || hookNamePattern.test(name))) ||
+    isRecognizedRenderBoundary(context, node),
+  );
 };
 
 const getNearestFunction = (node: ts.Node) => {
@@ -169,7 +262,7 @@ export const reactHookPlacementDetector: Detector = {
       }
 
       const boundary = getNearestFunction(node);
-      if (!boundary || !isAllowedHookFunction(boundary)) {
+      if (!boundary || !isAllowedHookFunction(context, boundary)) {
         findings.push(
           createFinding(context, node, {
             detectorId: "react-hook-placement",

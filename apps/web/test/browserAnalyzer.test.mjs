@@ -153,6 +153,33 @@ test("browser project analysis honors JSON config includes, ignores, severities,
   );
 });
 
+test("browser project analysis skips default vendor and compiled source paths", () => {
+  const result = analyzeBrowserInput(
+    {
+      files: [
+        { fileName: "src/index.ts", source: "export const value = 1;" },
+        { fileName: "vendor/legacy.ts", source: "const unsafe: any = 1;" },
+        {
+          fileName: "public/static/jquery.js",
+          source: "const unsafe = parseInt(raw);",
+        },
+        {
+          fileName: "src/bundle.min.js",
+          source: "const unsafe = parseInt(raw);",
+        },
+      ],
+      mode: "project",
+    },
+    libraryFiles,
+  );
+
+  assert.equal(result.sourceFileCount, 1);
+  assert.deepEqual(
+    result.files.map(({ fileName }) => fileName),
+    ["src/index.ts"],
+  );
+});
+
 test("browser project analysis reports executable config modules instead of silently ignoring them", () => {
   const result = analyzeBrowserInput(
     {
