@@ -30,6 +30,7 @@ import {
 import { reactHookPlacementDetector } from "./reactHooks.ts";
 import { typeOnlyImportsDetector } from "./typeOnlyImports.ts";
 import { untrustedAssertionsDetector } from "./untrustedAssertions.ts";
+import { unsafeUnknownAssertionDetector } from "./unsafeTypeAssertions.ts";
 
 export const detectors = [
   preferConstDetector,
@@ -37,6 +38,7 @@ export const detectors = [
   noExplicitAnyDetector,
   typeOnlyImportsDetector,
   untrustedAssertionsDetector,
+  unsafeUnknownAssertionDetector,
   optionalChainingDetector,
   defaultParameterDetector,
   legacyBuiltinsDetector,

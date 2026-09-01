@@ -115,7 +115,7 @@ test("checkPaths returns file-aware analyzer findings", async () => {
     assert.equal(result.findings.length, 1);
     assert.equal(result.findings[0]?.filePath, path.join("src", "bad.ts"));
     assert.equal(result.findings[0]?.ruleId, "TS-001");
-    assert.equal(result.ruleIdsChecked.length, 13);
+    assert.equal(result.ruleIdsChecked.length, 14);
   });
 });
 
@@ -135,7 +135,7 @@ test("runCli exits non-zero for findings and supports JSON output", async () => 
     assert.equal(exitCode, 1);
     assert.equal(stderr.value, "");
     assert.equal(result.findings[0].ruleId, "TS-001");
-    assert.equal(result.summary.rulesChecked, 13);
+    assert.equal(result.summary.rulesChecked, 14);
   });
 });
 
@@ -153,7 +153,7 @@ test("CLI clean summary states automated coverage instead of implying a full rev
 
     assert.equal(exitCode, 0);
     assert.equal(stderr.value, "");
-    assert.match(stdout.value, /13 applicable automated rules/);
+    assert.match(stdout.value, /14 applicable automated rules/);
     assert.doesNotMatch(stdout.value, /found no issues/);
   });
 });
@@ -190,7 +190,7 @@ test("CLI reports the union of rules actually applicable to scanned languages", 
 
     const result = await checkPaths(["."], { cwd: directory });
 
-    assert.equal(result.ruleIdsChecked.length, 22);
+    assert.equal(result.ruleIdsChecked.length, 23);
     assert.equal(result.diagnostics.length, 0);
   });
 });

@@ -50,12 +50,12 @@ test("browser analysis preserves the canonical clean/violation detector contract
   );
 
   assert.equal(clean.files[0]?.result.findings.length, 0);
-  assert.equal(clean.files[0]?.result.checksRun, 23);
-  assert.equal(violations.files[0]?.result.findings.length, 25);
+  assert.equal(clean.files[0]?.result.checksRun, 24);
+  assert.equal(violations.files[0]?.result.findings.length, 26);
   assert.equal(
     new Set(violations.files[0]?.result.findings.map(({ ruleId }) => ruleId))
       .size,
-    22,
+    23,
   );
 });
 
@@ -112,6 +112,44 @@ test("browser project analysis runs JSX detectors for legacy .js React files", (
     result.files[0]?.result.findings.map(({ ruleId }) => ruleId),
     ["A11Y-001", "REACT-006"],
   );
+});
+
+test("browser project findings are invariant when the selected folder adds one path prefix", () => {
+  const source = `export const LegacyView = ({ items }) => (
+  <div onClick={() => {}}>
+    {items.map((item) => <span>{item.name}</span>)}
+  </div>
+);`;
+  const tsconfig = JSON.stringify({
+    compilerOptions: { allowJs: true, jsx: "preserve" },
+    include: ["src/**/*"],
+  });
+  const analyze = (prefix) =>
+    analyzeBrowserInput(
+      {
+        files: [
+          { fileName: `${prefix}tsconfig.json`, source: tsconfig },
+          { fileName: `${prefix}src/LegacyView.js`, source },
+        ],
+        mode: "project",
+      },
+      libraryFiles,
+    );
+
+  const direct = analyze("");
+  const nested = analyze("t1next-qa/");
+  const normalize = (result, prefix = "") =>
+    result.files.flatMap(({ fileName, result: fileResult }) =>
+      fileResult.findings.map(({ ruleId, location }) => ({
+        fileName: fileName.startsWith(prefix)
+          ? fileName.slice(prefix.length)
+          : fileName,
+        line: location.line,
+        ruleId,
+      })),
+    );
+
+  assert.deepEqual(normalize(nested, "t1next-qa/"), normalize(direct));
 });
 
 test("browser analyzer runtime integrity rejects stale legacy .js detector contracts", () => {

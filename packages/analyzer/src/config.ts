@@ -39,11 +39,12 @@ export const defaultAnalyzerIgnorePatterns = [
   "**/__generated__/**",
 ] as const;
 
-const validRuleSettings = new Set<AnalyzerRuleSetting>([
+const analyzerRuleSettings = [
   "error",
   "warning",
   "off",
-]);
+] as const satisfies readonly AnalyzerRuleSetting[];
+const validRuleSettings: ReadonlySet<unknown> = new Set(analyzerRuleSettings);
 const validConfigKeys = new Set([
   "baseline",
   "cache",
@@ -106,7 +107,7 @@ const assertSettings = (
     if (validateRules && !validRuleIds.has(key)) {
       throw new Error(`${name} contains unknown automated rule "${key}".`);
     }
-    if (!validRuleSettings.has(setting as AnalyzerRuleSetting)) {
+    if (!validRuleSettings.has(setting)) {
       throw new Error(`${name}.${key} must be "error", "warning", or "off".`);
     }
   }

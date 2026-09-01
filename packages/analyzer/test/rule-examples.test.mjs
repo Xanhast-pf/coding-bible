@@ -36,7 +36,7 @@ const automatedRuleIds = [
 ].sort();
 
 test("every automated rule catches its own DON'T example", () => {
-  assert.equal(automatedRuleIds.length, 22);
+  assert.equal(automatedRuleIds.length, 23);
 
   for (const ruleId of automatedRuleIds) {
     const rule = rulesById.get(ruleId);

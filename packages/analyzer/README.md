@@ -189,7 +189,7 @@ path to force one config. Otherwise selected files are grouped by their nearest
 
 ## Automated coverage
 
-The current pass runs 23 detector functions covering 22 Bible rules:
+The current pass runs 24 detector functions covering 23 Bible rules:
 
 JSX-aware React, accessibility, and Legend-State detectors also run on legacy `.js` sources because many established React codebases use JSX without the `.jsx` extension.
 
@@ -202,6 +202,7 @@ JSX-aware React, accessibility, and Legend-State detectors also run on legacy `.
 - `TS-001` explicit `any`
 - `TS-003` value imports used only in type positions
 - `TS-004` unsafe assertions over external runtime data, including local aliases
+- `TS-007` direct assertions from `unknown`, including double-assertion escape hatches
 - `A11Y-001` clickable generic elements without native semantics
 - `A11Y-002` custom buttons without equivalent keyboard handling
 - `A11Y-004` buttons without a detectable accessible name
