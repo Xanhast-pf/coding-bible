@@ -18,6 +18,10 @@ const reviewStart = source.indexOf("parseInt(rawPage)");
 const reviewEnd = reviewStart + "parseInt(rawPage)".length;
 
 const result = {
+  analyzer: {
+    detectorCount: 23,
+    detectorSignature: "detectors-v1-test",
+  },
   configFileName: "coding-bible.config.json",
   configurationDiagnostics: [],
   durationMs: 12,
@@ -134,6 +138,7 @@ test("browser report exposes severity and fix safety without source contents", (
 
   assert.equal(report.schemaVersion, 1);
   assert.equal(report.runtime, "browser");
+  assert.deepEqual(report.analyzer, result.analyzer);
   assert.equal(report.summary.errors, 1);
   assert.equal(report.summary.warnings, 1);
   assert.equal(report.summary.safeFixes, 1);

@@ -141,6 +141,7 @@ export const createBrowserAnalyzerReport = (
   return {
     schemaVersion: 1,
     runtime: "browser",
+    analyzer: result.analyzer,
     mode: result.mode,
     ruleSelection: result.ruleSelection,
     summary: {
