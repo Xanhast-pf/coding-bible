@@ -14,8 +14,8 @@
     "bible:bench": "node packages/analyzer/bench/project-benchmark.mjs",
     "bible:check": "node packages/analyzer/bin/coding-bible.mjs check .",
     "bible:staged": "node packages/analyzer/bin/coding-bible.mjs check . --staged",
-    "build": "pnpm agent:generate && pnpm -r --if-present build",
-    "check": "pnpm lint && pnpm format:check && pnpm agent:check && pnpm action:check && pnpm typecheck && pnpm knip && pnpm test && pnpm build && pnpm bible:check",
+    "build": "pnpm registries:generate && pnpm agent:generate && pnpm -r --if-present build",
+    "check": "pnpm lint && pnpm format:check && pnpm registries:check && pnpm agent:check && pnpm action:check && pnpm typecheck && pnpm knip && pnpm test && pnpm build && pnpm bible:check",
     "dev": "pnpm --filter @coding-bible/web dev",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
@@ -29,7 +29,10 @@
     "prepush": "pnpm check",
     "test": "node --test scripts/test/*.test.mjs && pnpm -r --if-present test",
     "test:affected": "node scripts/run-affected-tests.mjs",
-    "typecheck": "pnpm -r --if-present typecheck"
+    "typecheck": "pnpm -r --if-present typecheck",
+    "registries:generate": "node scripts/rules/generate-registries.mjs",
+    "registries:check": "node scripts/rules/generate-registries.mjs --check",
+    "rule:new": "node scripts/rules/new-rule.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",

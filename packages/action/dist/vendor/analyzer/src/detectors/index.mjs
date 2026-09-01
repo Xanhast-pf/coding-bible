@@ -1,47 +1,5 @@
-import { accessibleControlNameDetector, keyboardInteractionDetector, semanticInteractiveElementDetector, } from "./accessibilityJsx.mjs";
-import { redundantAsyncDetector } from "./asyncFunctions.mjs";
-import { directComponentCallsDetector } from "./directComponentCalls.mjs";
-import { derivedStateEffectDetector } from "./derivedStateEffects.mjs";
-import { graphqlInterpolationDetector } from "./graphqlTemplates.mjs";
-import { hardcodedJsxTextDetector } from "./hardcodedJsxText.mjs";
-import { hookDependencySuppressionsDetector } from "./hookDependencySuppressions.mjs";
-import { defaultParameterDetector, nonMutatingCollectionDetector, optionalChainingDetector, } from "./javascriptPatterns.mjs";
-import { legacyBuiltinsDetector } from "./legacyBuiltins.mjs";
-import { legendReactSubscriptionDetector } from "./legendReactSubscriptions.mjs";
-import { noExplicitAnyDetector } from "./noExplicitAny.mjs";
-import { preferConstDetector } from "./preferConst.mjs";
-import { reactInputMutationDetector, staticComponentValueDetector, } from "./reactRenderPatterns.mjs";
-import { missingReactListKeyDetector, unstableReactListKeyDetector, } from "./reactListKeys.mjs";
-import { reactHookPlacementDetector } from "./reactHooks.mjs";
-import { typeOnlyImportsDetector } from "./typeOnlyImports.mjs";
-import { untrustedAssertionsDetector } from "./untrustedAssertions.mjs";
-import { unsafeUnknownAssertionDetector } from "./unsafeTypeAssertions.mjs";
-export const detectors = [
-    preferConstDetector,
-    redundantAsyncDetector,
-    noExplicitAnyDetector,
-    typeOnlyImportsDetector,
-    untrustedAssertionsDetector,
-    unsafeUnknownAssertionDetector,
-    optionalChainingDetector,
-    defaultParameterDetector,
-    legacyBuiltinsDetector,
-    nonMutatingCollectionDetector,
-    semanticInteractiveElementDetector,
-    keyboardInteractionDetector,
-    accessibleControlNameDetector,
-    graphqlInterpolationDetector,
-    hardcodedJsxTextDetector,
-    legendReactSubscriptionDetector,
-    missingReactListKeyDetector,
-    unstableReactListKeyDetector,
-    staticComponentValueDetector,
-    reactHookPlacementDetector,
-    directComponentCallsDetector,
-    derivedStateEffectDetector,
-    reactInputMutationDetector,
-    hookDependencySuppressionsDetector,
-];
+import { detectors } from "./registry.generated.mjs";
+export { detectors } from "./registry.generated.mjs";
 const hashDetectorContract = (value) => {
     let hash = 0x811c9dc5;
     for (let index = 0; index < value.length; index += 1) {
