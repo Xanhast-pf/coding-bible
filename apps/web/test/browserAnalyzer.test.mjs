@@ -4,7 +4,10 @@ import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
 import test from "node:test";
 
+import { detectors } from "@coding-bible/analyzer";
+
 import { analyzeBrowserInput } from "../src/analyzer/analyzeBrowserInput.ts";
+import { getBrowserAnalyzerRuntimeIntegrityError } from "../src/analyzer/runtimeIntegrity.ts";
 
 const require = createRequire(import.meta.url);
 const typescriptLibDirectory = dirname(require.resolve("typescript"));
@@ -77,6 +80,52 @@ test("browser analysis runs JSX detectors for legacy .js React files", () => {
   assert.deepEqual(
     result.files[0]?.result.findings.map(({ ruleId }) => ruleId),
     ["A11Y-001", "REACT-006"],
+  );
+});
+
+test("browser project analysis runs JSX detectors for legacy .js React files", () => {
+  const result = analyzeBrowserInput(
+    {
+      files: [
+        {
+          fileName: "tsconfig.json",
+          source: JSON.stringify({
+            compilerOptions: { allowJs: true, jsx: "preserve" },
+            include: ["src/**/*"],
+          }),
+        },
+        {
+          fileName: "src/LegacyView.js",
+          source: `export const LegacyView = ({ items }) => (
+  <div onClick={() => {}}>
+    {items.map((item) => <span>{item.name}</span>)}
+  </div>
+);`,
+        },
+      ],
+      mode: "project",
+    },
+    libraryFiles,
+  );
+
+  assert.deepEqual(
+    result.files[0]?.result.findings.map(({ ruleId }) => ruleId),
+    ["A11Y-001", "REACT-006"],
+  );
+});
+
+test("browser analyzer runtime integrity rejects stale legacy .js detector contracts", () => {
+  assert.equal(getBrowserAnalyzerRuntimeIntegrityError(), null);
+
+  const staleDetectors = detectors.map((detector) =>
+    detector.id === "legend-react-use-value"
+      ? { ...detector, languages: ["jsx", "tsx"] }
+      : detector,
+  );
+
+  assert.match(
+    getBrowserAnalyzerRuntimeIntegrityError(staleDetectors),
+    /legend-react-use-value/u,
   );
 });
 

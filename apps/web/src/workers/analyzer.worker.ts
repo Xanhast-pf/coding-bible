@@ -1,6 +1,7 @@
 import { typescriptLibs } from "virtual:coding-bible-typescript-libs";
 
 import { analyzeBrowserInput } from "../analyzer/analyzeBrowserInput";
+import { getBrowserAnalyzerRuntimeIntegrityError } from "../analyzer/runtimeIntegrity";
 import type {
   BrowserAnalyzerRequest,
   BrowserAnalyzerResponse,
@@ -9,6 +10,8 @@ import type {
 const send = (response: BrowserAnalyzerResponse) => {
   self.postMessage(response);
 };
+
+const runtimeIntegrityError = getBrowserAnalyzerRuntimeIntegrityError();
 
 self.addEventListener(
   "message",
@@ -19,6 +22,10 @@ self.addEventListener(
     }
 
     try {
+      if (runtimeIntegrityError) {
+        throw new Error(runtimeIntegrityError);
+      }
+
       const result = analyzeBrowserInput(
         request.input,
         typescriptLibs,

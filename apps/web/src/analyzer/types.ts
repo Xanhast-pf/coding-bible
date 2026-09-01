@@ -37,6 +37,10 @@ export interface BrowserFileResult {
 }
 
 export interface BrowserAnalyzeResult {
+  analyzer: {
+    detectorCount: number;
+    detectorSignature: string;
+  };
   configFileName: string | null;
   configurationDiagnostics: readonly string[];
   durationMs: number;

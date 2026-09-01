@@ -1,5 +1,7 @@
 import {
   analyzeProgram,
+  analyzerDetectorCount,
+  analyzerDetectorSignature,
   createAnalyzerRuleSelectionPredicate,
   normalizeAnalyzerRuleSelection,
 } from "@coding-bible/analyzer";
@@ -134,6 +136,10 @@ export const analyzeBrowserInput = (
   );
 
   return {
+    analyzer: {
+      detectorCount: analyzerDetectorCount,
+      detectorSignature: analyzerDetectorSignature,
+    },
     configFileName: browserConfig.configFileName,
     configurationDiagnostics,
     durationMs: performance.now() - startedAt,

@@ -12,7 +12,11 @@ export {
   resolveAnalyzerConfigDefaults,
   validateAnalyzerConfig,
 } from "./config.ts";
-export { detectors } from "./detectors/index.ts";
+export {
+  analyzerDetectorCount,
+  analyzerDetectorSignature,
+  detectors,
+} from "./detectors/index.ts";
 export {
   applyAnalyzerTextEdits,
   createAnalyzerFilePatch,
@@ -33,6 +37,7 @@ export type {
   AnalyzerSuggestedFix,
   AnalyzerTextEdit,
   AnalyzerConfig,
+  Detector,
   AnalyzerConfigOverride,
   AnalyzerPack,
   AnalyzerRuleSelection,
