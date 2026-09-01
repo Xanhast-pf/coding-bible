@@ -61,6 +61,20 @@ export const ReviewGuidancePane = ({
           </p>
         </section>
 
+        {finding.contextNote ? (
+          <section
+            className={styles.reviewContextDisclaimer}
+            data-confidence={finding.confidence}
+          >
+            <span className={styles.reviewGuidanceLabel}>
+              {finding.confidence === "contextual"
+                ? "Context required"
+                : "Analyzer note"}
+            </span>
+            <p>{finding.contextNote}</p>
+          </section>
+        ) : null}
+
         <section className={styles.reviewGuidanceSection}>
           <div className={styles.reviewGuidanceTitleRow}>
             <span className={styles.reviewGuidanceLabel}>Recommended fix</span>

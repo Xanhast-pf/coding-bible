@@ -58,6 +58,23 @@ export const createAnalyzerReport = (result, { patchFiles = null } = {}) => ({
       ({ fix }) => fix?.safety === "review" && fix.edits?.length,
     ).length,
     warnings: result.warnings,
+    confidence: {
+      certain: result.findings.filter(
+        ({ confidence }) => confidence === "certain",
+      ).length,
+      strong: result.findings.filter(
+        ({ confidence }) => confidence === "strong",
+      ).length,
+      contextual: result.findings.filter(
+        ({ confidence }) => confidence === "contextual",
+      ).length,
+    },
+    impact: {
+      high: result.findings.filter(({ impact }) => impact === "high").length,
+      medium: result.findings.filter(({ impact }) => impact === "medium")
+        .length,
+      low: result.findings.filter(({ impact }) => impact === "low").length,
+    },
   },
   baseline: result.baseline ?? null,
   cache: result.cache ?? null,
@@ -73,11 +90,14 @@ export const createAnalyzerReport = (result, { patchFiles = null } = {}) => ({
     message: diagnostic.message,
   })),
   findings: result.findings.map((finding) => ({
+    confidence: finding.confidence,
+    contextNote: finding.contextNote ?? null,
     detectorId: finding.detectorId,
     excerpt: finding.excerpt,
     file: finding.filePath.replaceAll("\\", "/"),
     fingerprint: createFindingFingerprint(finding),
     fix: serializeFix(finding.fix, patchFiles),
+    impact: finding.impact,
     location: finding.location,
     message: finding.message,
     ruleId: finding.ruleId,

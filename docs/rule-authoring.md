@@ -127,3 +127,14 @@ Then:
 The generated registry check intentionally fails when a new prefixed file has not
 been wired into the checked-in barrels. This keeps adding rules mechanical while
 keeping runtime imports static and bundler-friendly.
+
+## Analyzer finding metadata
+
+Automated findings are classified on two independent axes in addition to the configurable `error | warning` enforcement setting. Detector logic stays in its rule-owned module; `packages/analyzer/src/findingProfiles.ts` owns this reporting metadata so confidence/impact can evolve without changing detection semantics:
+
+- `impact`: `high`, `medium`, or `low` — how costly the violation is likely to be when the finding is correct.
+- `confidence`: `certain`, `strong`, or `contextual` — how much the analyzer can prove from static code alone.
+
+`contextual` profiles must provide a short `contextNote` explaining what surrounding information could make the pattern intentional. Repository tests require every detector ID to have a profile, so adding a detector cannot silently omit this classification. The browser, CLI, JSON report, GitHub annotations, and SARIF output surface that note as a context-required disclaimer.
+
+Keep these concepts separate from configuration severity. A team can still configure a low-impact/certain rule as an error or a high-impact/contextual rule as a warning; enforcement is project policy, while impact/confidence describe the finding itself.

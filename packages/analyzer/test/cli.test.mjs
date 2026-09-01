@@ -671,6 +671,11 @@ test("JSON output uses the versioned report schema with stable finding fingerpri
     assert.equal(first.schemaVersion, 1);
     assert.equal(first.summary.findings, 1);
     assert.equal(first.findings[0].ruleId, "TS-001");
+    assert.equal(first.findings[0].impact, "medium");
+    assert.equal(first.findings[0].confidence, "contextual");
+    assert.match(first.findings[0].contextNote, /interoperability boundary/u);
+    assert.equal(first.summary.confidence.contextual, 1);
+    assert.equal(first.summary.impact.medium, 1);
     assert.match(first.findings[0].fingerprint, /^[a-f0-9]{24}$/);
     assert.equal(
       first.findings[0].ruleUrl,

@@ -22,6 +22,9 @@ test("SARIF output uses GitHub-supported 2.1.0 shape and stable rule metadata", 
     diagnostics: [],
     findings: [
       {
+        confidence: "contextual",
+        contextNote: "Review the interoperability boundary.",
+        impact: "medium",
         ruleId: "TS-001",
         severity: "error",
         filePath: "src/a.ts",
@@ -38,6 +41,14 @@ test("SARIF output uses GitHub-supported 2.1.0 shape and stable rule metadata", 
   assert.equal(sarif.runs[0].tool.driver.rules[0].id, "TS-001");
   assert.equal(sarif.runs[0].results[0].ruleId, "TS-001");
   assert.equal(sarif.runs[0].results[0].level, "error");
+  assert.deepEqual(sarif.runs[0].results[0].properties, {
+    confidence: "contextual",
+    impact: "medium",
+  });
+  assert.match(
+    sarif.runs[0].results[0].message.text,
+    /Review the interoperability boundary/u,
+  );
   assert.match(
     sarif.runs[0].results[0].partialFingerprints.codingBibleFinding,
     /^[a-f0-9]{24}$/u,

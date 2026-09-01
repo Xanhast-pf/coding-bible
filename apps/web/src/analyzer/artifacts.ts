@@ -153,6 +153,24 @@ export const createBrowserAnalyzerReport = (
       rulesChecked: ruleIdsChecked.length,
       safeFixes,
       warnings,
+      confidence: {
+        certain: findings.filter(
+          ({ finding }) => finding.confidence === "certain",
+        ).length,
+        strong: findings.filter(
+          ({ finding }) => finding.confidence === "strong",
+        ).length,
+        contextual: findings.filter(
+          ({ finding }) => finding.confidence === "contextual",
+        ).length,
+      },
+      impact: {
+        high: findings.filter(({ finding }) => finding.impact === "high")
+          .length,
+        medium: findings.filter(({ finding }) => finding.impact === "medium")
+          .length,
+        low: findings.filter(({ finding }) => finding.impact === "low").length,
+      },
     },
     project: {
       configPath: result.configFileName,
@@ -167,6 +185,8 @@ export const createBrowserAnalyzerReport = (
       message: diagnostic.message,
     })),
     findings: findings.map(({ fileName, finding }) => ({
+      confidence: finding.confidence,
+      contextNote: finding.contextNote ?? null,
       detectorId: finding.detectorId,
       excerpt: finding.excerpt,
       file: normalizeAnalyzerPatchPath(fileName),
@@ -186,6 +206,7 @@ export const createBrowserAnalyzerReport = (
             available: false,
             safety: "none",
           },
+      impact: finding.impact,
       location: finding.location,
       message: finding.message,
       ruleId: finding.ruleId,

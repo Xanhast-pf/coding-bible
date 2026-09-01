@@ -116,6 +116,15 @@ const FindingCard = ({
         <span className={styles.severity} data-severity={finding.severity}>
           {finding.severity}
         </span>
+        <span className={styles.impact} data-impact={finding.impact}>
+          {finding.impact} impact
+        </span>
+        <span
+          className={styles.confidence}
+          data-confidence={finding.confidence}
+        >
+          {finding.confidence} confidence
+        </span>
         {rule ? (
           <>
             <span className={styles.level}>{rule.level}</span>
@@ -129,6 +138,20 @@ const FindingCard = ({
 
       <h3 className={styles.findingTitle}>{rule?.title ?? finding.ruleId}</h3>
       <p className={styles.message}>{finding.message}</p>
+
+      {finding.contextNote ? (
+        <div
+          className={styles.contextDisclaimer}
+          data-confidence={finding.confidence}
+        >
+          <strong>
+            {finding.confidence === "contextual"
+              ? "Context required"
+              : "Analyzer note"}
+          </strong>
+          <p>{finding.contextNote}</p>
+        </div>
+      ) : null}
 
       <pre className={styles.excerpt}>
         <code>
@@ -250,6 +273,15 @@ export const AnalysisResults = ({
     ({ finding }) => finding.severity === "error",
   ).length;
   const warningCount = findings.length - errorCount;
+  const highImpactCount = findings.filter(
+    ({ finding }) => finding.impact === "high",
+  ).length;
+  const mediumImpactCount = findings.filter(
+    ({ finding }) => finding.impact === "medium",
+  ).length;
+  const contextualCount = findings.filter(
+    ({ finding }) => finding.confidence === "contextual",
+  ).length;
   const safeFixCount = countBrowserFixes(result, "safe");
   const reviewFixCount = countBrowserFixes(result, "review");
   const issueCount = diagnostics.length + findings.length;
@@ -387,6 +419,9 @@ export const AnalysisResults = ({
         <div className={styles.severitySummary}>
           <span>{errorCount} errors</span>
           <span>{warningCount} warnings</span>
+          <span>{highImpactCount} high impact</span>
+          <span>{mediumImpactCount} medium impact</span>
+          <span>{contextualCount} need context</span>
           {diagnostics.length ? <span>{diagnostics.length} syntax</span> : null}
         </div>
       ) : null}

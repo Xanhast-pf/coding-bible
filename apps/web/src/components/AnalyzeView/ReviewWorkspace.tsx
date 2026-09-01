@@ -200,6 +200,12 @@ export const ReviewWorkspace = ({
                 <span data-severity={activeFinding.severity}>
                   {activeFinding.severity}
                 </span>
+                <span data-impact={activeFinding.impact}>
+                  {activeFinding.impact} impact
+                </span>
+                <span data-confidence={activeFinding.confidence}>
+                  {activeFinding.confidence} confidence
+                </span>
                 {rule ? <span>{rulePackLabels[rule.pack]}</span> : null}
                 {fix ? (
                   <span data-safety={fix.safety}>

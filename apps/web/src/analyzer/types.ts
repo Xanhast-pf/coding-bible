@@ -1,6 +1,6 @@
 import type {
   AnalyzeResult,
-  AnalyzerFinding,
+  ResolvedAnalyzerFinding,
   AnalyzerLanguage,
   AnalyzerRuleSelection,
   AnalyzerRuleSetting,
@@ -19,7 +19,7 @@ export interface BrowserAnalyzeInput {
   ruleSelection?: AnalyzerRuleSelection;
 }
 
-export interface BrowserAnalyzerFinding extends AnalyzerFinding {
+export interface BrowserAnalyzerFinding extends ResolvedAnalyzerFinding {
   severity: Exclude<AnalyzerRuleSetting, "off">;
 }
 

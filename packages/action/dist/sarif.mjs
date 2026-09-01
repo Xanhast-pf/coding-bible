@@ -47,7 +47,11 @@ export const createSarif = ({ diagnostics, findings, rulesById }) => {
     ruleId: finding.ruleId,
     level: finding.severity === "error" ? "error" : "warning",
     message: {
-      text: `${finding.message} ${finding.suggestion}`,
+      text: `${finding.message} ${finding.suggestion}${finding.contextNote ? ` ${finding.confidence === "contextual" ? "Context required" : "Analyzer note"}: ${finding.contextNote}` : ""}`,
+    },
+    properties: {
+      confidence: finding.confidence,
+      impact: finding.impact,
     },
     locations: [
       {

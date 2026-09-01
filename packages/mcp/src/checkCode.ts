@@ -1,7 +1,7 @@
 import {
   analyze,
   type AnalyzerDiagnostic,
-  type AnalyzerFinding,
+  type ResolvedAnalyzerFinding,
   type AnalyzerLanguage,
 } from "@coding-bible/analyzer";
 
@@ -14,7 +14,7 @@ export interface CheckCodeInput {
   fileName?: string;
 }
 
-export interface McpCodeFinding extends AnalyzerFinding {
+export interface McpCodeFinding extends ResolvedAnalyzerFinding {
   rule: McpRuleReference;
 }
 

@@ -7,11 +7,13 @@ import {
   type ResolvedAnalyzeInput,
 } from "./context.ts";
 import { detectors } from "./detectors/index.ts";
+import { getAnalyzerFindingProfile } from "./findingProfiles.ts";
 import type {
   AnalyzeInput,
   AnalyzeOptions,
   AnalyzeResult,
   AnalyzerDiagnostic,
+  ResolvedAnalyzerFinding,
   AnalyzerLanguage,
   Detector,
   DetectorContext,
@@ -113,10 +115,23 @@ const analyzeContext = (
     };
   }
 
-  const rawFindings = [];
+  const rawFindings: ResolvedAnalyzerFinding[] = [];
   for (const detector of applicableDetectors) {
     options.signal?.throwIfAborted();
-    rawFindings.push(...detector.analyze(context));
+    const profile = getAnalyzerFindingProfile(detector.id);
+    if (!profile) {
+      throw new Error(`Detector "${detector.id}" is missing finding metadata.`);
+    }
+    rawFindings.push(
+      ...detector.analyze(context).map((finding) => ({
+        ...finding,
+        confidence: finding.confidence ?? profile.confidence,
+        ...((finding.contextNote ?? profile.contextNote)
+          ? { contextNote: finding.contextNote ?? profile.contextNote }
+          : {}),
+        impact: finding.impact ?? profile.impact,
+      })),
+    );
   }
   const findings = dedupeFindings(rawFindings);
 
