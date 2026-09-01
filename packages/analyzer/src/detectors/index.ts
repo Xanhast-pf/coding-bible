@@ -1,63 +1,6 @@
-import type { Detector } from "../types.ts";
-import {
-  accessibleControlNameDetector,
-  keyboardInteractionDetector,
-  semanticInteractiveElementDetector,
-} from "./accessibilityJsx.ts";
-import { redundantAsyncDetector } from "./asyncFunctions.ts";
-import { directComponentCallsDetector } from "./directComponentCalls.ts";
-import { derivedStateEffectDetector } from "./derivedStateEffects.ts";
-import { graphqlInterpolationDetector } from "./graphqlTemplates.ts";
-import { hardcodedJsxTextDetector } from "./hardcodedJsxText.ts";
-import { hookDependencySuppressionsDetector } from "./hookDependencySuppressions.ts";
-import {
-  defaultParameterDetector,
-  nonMutatingCollectionDetector,
-  optionalChainingDetector,
-} from "./javascriptPatterns.ts";
-import { legacyBuiltinsDetector } from "./legacyBuiltins.ts";
-import { legendReactSubscriptionDetector } from "./legendReactSubscriptions.ts";
-import { noExplicitAnyDetector } from "./noExplicitAny.ts";
-import { preferConstDetector } from "./preferConst.ts";
-import {
-  reactInputMutationDetector,
-  staticComponentValueDetector,
-} from "./reactRenderPatterns.ts";
-import {
-  missingReactListKeyDetector,
-  unstableReactListKeyDetector,
-} from "./reactListKeys.ts";
-import { reactHookPlacementDetector } from "./reactHooks.ts";
-import { typeOnlyImportsDetector } from "./typeOnlyImports.ts";
-import { untrustedAssertionsDetector } from "./untrustedAssertions.ts";
-import { unsafeUnknownAssertionDetector } from "./unsafeTypeAssertions.ts";
+import { detectors } from "./registry.generated.ts";
 
-export const detectors = [
-  preferConstDetector,
-  redundantAsyncDetector,
-  noExplicitAnyDetector,
-  typeOnlyImportsDetector,
-  untrustedAssertionsDetector,
-  unsafeUnknownAssertionDetector,
-  optionalChainingDetector,
-  defaultParameterDetector,
-  legacyBuiltinsDetector,
-  nonMutatingCollectionDetector,
-  semanticInteractiveElementDetector,
-  keyboardInteractionDetector,
-  accessibleControlNameDetector,
-  graphqlInterpolationDetector,
-  hardcodedJsxTextDetector,
-  legendReactSubscriptionDetector,
-  missingReactListKeyDetector,
-  unstableReactListKeyDetector,
-  staticComponentValueDetector,
-  reactHookPlacementDetector,
-  directComponentCallsDetector,
-  derivedStateEffectDetector,
-  reactInputMutationDetector,
-  hookDependencySuppressionsDetector,
-] satisfies readonly Detector[];
+export { detectors } from "./registry.generated.ts";
 
 const hashDetectorContract = (value: string) => {
   let hash = 0x811c9dc5;

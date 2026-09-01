@@ -74,3 +74,56 @@ Before accepting a rule:
 4. Is the severity proportional to the risk?
 5. Could two reasonable engineers apply the rule consistently?
 6. If auto-detected, can we explain likely false positives?
+
+## Repository layout
+
+Every Bible rule owns one source file whose name starts with its permanent rule ID:
+
+```text
+packages/rules/src/rules/react/
+  REACT-009-follow-the-rules-of-hooks.ts
+```
+
+Automated implementations mirror the same convention:
+
+```text
+packages/analyzer/src/detectors/react/
+  REACT-009-hook-placement.ts
+```
+
+A rule may expose more than one detector strategy from its rule-owned analyzer file
+(for example, missing and unstable list-key checks for `REACT-006`). Generic AST
+helpers shared by multiple rules use an underscore-prefixed helper module and must
+not contain rule-specific findings.
+
+Do not hand-edit pack barrels or `packages/analyzer/src/detectors/registry.generated.ts`.
+They are generated from rule-prefixed filenames. `detectors/index.ts` stays a small,
+stable public entry point so generated registry churn does not conflict with runtime metadata:
+
+```bash
+pnpm registries:generate
+pnpm registries:check
+```
+
+### Adding a rule
+
+Start a draft with the scaffold command:
+
+```bash
+pnpm rule:new -- --id REACT-014 --title "Prefer explicit event ownership"
+```
+
+Then:
+
+1. Fill in the summary, rationale, level, tags, and exceptions where needed.
+2. Add paired DON'T / DO examples before moving the rule to `stable`.
+3. If the rule becomes automated, add one matching detector file under the
+   analyzer pack directory and export `<ruleIdWithoutDash>Detectors` (for example
+   `react014Detectors`).
+4. Add focused regression coverage for the detector plus any project/browser
+   behavior it relies on.
+5. Run `pnpm registries:generate`, then `pnpm check`.
+
+The generated registry check intentionally fails when a new prefixed file has not
+been wired into the checked-in barrels. This keeps adding rules mechanical while
+keeping runtime imports static and bundler-friendly.

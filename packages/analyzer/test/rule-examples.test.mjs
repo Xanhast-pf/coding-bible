@@ -1,14 +1,16 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { accessibilityRules } from "../../rules/src/rules/accessibility.ts";
-import { coreRules } from "../../rules/src/rules/core.ts";
-import { graphqlRules } from "../../rules/src/rules/graphql.ts";
-import { internationalizationRules } from "../../rules/src/rules/internationalization.ts";
-import { javascriptRules } from "../../rules/src/rules/javascript.ts";
-import { legendStateRules } from "../../rules/src/rules/legendState.ts";
-import { reactRules } from "../../rules/src/rules/react.ts";
-import { typescriptRules } from "../../rules/src/rules/typescript.ts";
+import {
+  accessibilityRules,
+  coreRules,
+  graphqlRules,
+  internationalizationRules,
+  javascriptRules,
+  legendStateRules,
+  reactRules,
+  typescriptRules,
+} from "../../rules/src/rules/index.ts";
 import { analyze, detectors } from "../src/index.ts";
 
 const analyzerLanguageByExampleLanguage = new Map([
