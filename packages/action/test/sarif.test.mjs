@@ -37,7 +37,7 @@ test("SARIF output uses GitHub-supported 2.1.0 shape and stable rule metadata", 
   });
 
   assert.equal(sarif.version, "2.1.0");
-  assert.equal(sarif.runs[0].tool.driver.semanticVersion, "0.25.0");
+  assert.equal(sarif.runs[0].tool.driver.semanticVersion, "0.27.0");
   assert.equal(sarif.runs[0].tool.driver.rules[0].id, "TS-001");
   assert.equal(sarif.runs[0].results[0].ruleId, "TS-001");
   assert.equal(sarif.runs[0].results[0].level, "error");
