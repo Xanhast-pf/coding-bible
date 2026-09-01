@@ -1,6 +1,13 @@
 # Coding Bible GitHub Action
 
 The repository root exposes Coding Bible as a self-contained JavaScript action.
+Use it as an engineering-standards review gate alongside formatting, linting,
+typechecking, tests, and human or AI review—not as a replacement for those tools.
+
+The Action focuses review on Coding Bible standards that the analyzer can defend
+with static evidence, links findings back to canonical rule guidance, and keeps
+historical project debt from drowning out the change being reviewed.
+
 Consumers pin a release tag, floating minor branch, or immutable commit and do
 not install Coding Bible, pnpm, or TypeScript in their workflow.
 

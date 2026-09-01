@@ -2,10 +2,19 @@
 
 Local stdio MCP server for Coding Bible.
 
+The MCP server is a context bridge for coding agents, not a coding agent itself.
+It helps an agent quickly identify applicable engineering standards, inspect
+canonical rule guidance, and focus on deterministic analyzer findings while the
+agent remains responsible for repository reasoning and implementation.
+
 The server is deliberately read-only from an agent's perspective: it analyzes
 code, reads project files/manifests, and returns canonical rule guidance. File
 analysis disables the analyzer result cache so an MCP call does not write
 `.coding-bible/cache` as a side effect.
+
+This keeps Coding Bible vendor-neutral: the same standards and evidence can guide
+any capable agent without coupling the project to one model or remediation
+engine.
 
 ## Two-minute setup
 

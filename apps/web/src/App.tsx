@@ -41,11 +41,20 @@ const LearnView = () => {
       <header className={styles.hero}>
         <AppNavigation activeView="learn" />
         <p className={styles.eyebrow}>CODING BIBLE</p>
-        <h1>Engineering standards for software that lasts.</h1>
+        <h1>A shared engineering standard for humans and AI agents.</h1>
         <p className={styles.intro}>
-          Strict enough to guide decisions. Explicit enough to explain why.
-          Structured enough for humans, tooling, and AI agents.
+          Structured rules. Defensible automated review. Focused context for
+          code review and remediation.
         </p>
+
+        <div className={styles.boundaryNote}>
+          <strong>Coding Bible does not replace your toolchain.</strong>
+          <span>
+            Prettier formats. ESLint lints. TypeScript type-checks. Tests verify
+            behavior. Coding Bible codifies the engineering standards humans and
+            AI agents should apply consistently.
+          </span>
+        </div>
 
         <RuleSearch onChange={setQuery} value={query} />
 
@@ -108,10 +117,11 @@ const AnalyzerPage = () => (
     <header className={styles.hero}>
       <AppNavigation activeView="analyze" />
       <p className={styles.eyebrow}>CODING BIBLE · ANALYZER BETA</p>
-      <h1>Find the rule. Fix the code.</h1>
+      <h1>Automate what we can prove. Review what still needs judgment.</h1>
       <p className={styles.intro}>
-        Project-aware TypeScript analysis in your browser—real compiler context
-        for deterministic rules, without uploading your source.
+        Coding Bible automates only the rules static analysis can defend with
+        useful confidence. It complements ESLint, Prettier, TypeScript, tests,
+        and human or AI review instead of duplicating them.
       </p>
     </header>
 
