@@ -1,10 +1,16 @@
 # @coding-bible/analyzer
 
-Deterministic Coding Bible checks for pasted source and real TypeScript projects.
+Deterministic automation for the subset of Coding Bible rules that static
+analysis can defend with useful confidence.
 
-The analyzer remains UI-free. The browser API accepts source strings; the CLI
-adds filesystem, Git, configuration, and tsconfig-aware project context around
-the same detector engine.
+The analyzer is one consumer of the canonical rule system, not a replacement for
+ESLint, Prettier, TypeScript, compilers, tests, or semantic code review. The
+browser API accepts source strings; the CLI adds filesystem, Git, configuration,
+and tsconfig-aware project context around the same detector engine.
+
+A clean result means clean for the applicable automated subset only. Rules that
+require architecture, runtime intent, or broader repository judgment remain
+explicitly human- or agent-reviewed.
 
 ```ts
 import { analyze } from "@coding-bible/analyzer";

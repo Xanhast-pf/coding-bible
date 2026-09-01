@@ -1,9 +1,42 @@
 # Coding Bible
 
-A public, opinionated engineering guide for writing software that is easy to
-understand, difficult to misuse, and pleasant to maintain.
+**A shared engineering standard for humans and AI agents.**
 
-The project is **rules-first**. The website is one consumer of the rule set.
+Structured rules. Defensible automated review. Focused context for code review
+and remediation.
+
+Coding Bible codifies maintainable software practices as structured, explainable
+rules. It automates only the subset static analysis can defend with useful
+confidence, then makes the same guidance available to humans, CI, and coding
+agents.
+
+It does **not** replace ESLint, Prettier, TypeScript, compilers, tests, or code
+review. Those tools answer questions about formatting, syntax, types,
+buildability, or behavior. Coding Bible asks a different question:
+
+> Does this code follow the engineering standards we want humans and AI agents
+> to apply consistently?
+
+The project is **rules-first**. The website, analyzer, CLI, GitHub Action, MCP
+server, and future integrations are consumers of the same canonical rule set.
+
+## Where Coding Bible fits
+
+| Tool | Primary responsibility |
+| --- | --- |
+| Prettier | Formatting |
+| ESLint | General-purpose linting and ecosystem diagnostics |
+| TypeScript | Type correctness |
+| Compiler / build tools | Transformation and executable output |
+| Tests | Behavioral expectations |
+| **Coding Bible** | **Explainable engineering standards, defensible automated review, and focused remediation context** |
+| Human / AI reviewer | Architecture, intent, tradeoffs, and remediation |
+
+Coding Bible does not collect diagnostics just because they can be detected. It
+codifies engineering judgment, automates only what can be defended, and leaves
+the rest explicit for human or agent review.
+
+See `docs/principles/tooling-boundaries.md`.
 
 ## Core idea
 
