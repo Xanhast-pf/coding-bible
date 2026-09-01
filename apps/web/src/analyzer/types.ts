@@ -40,6 +40,7 @@ export interface BrowserAnalyzeResult {
   analyzer: {
     detectorCount: number;
     detectorSignature: string;
+    findingProfileSignature: string;
   };
   configFileName: string | null;
   configurationDiagnostics: readonly string[];

@@ -9,17 +9,34 @@ export interface AnalyzerFindingProfile {
   impact: AnalyzerFindingImpact;
 }
 
-export const analyzerFindingProfiles = {
+export const analyzerFindingProfiles: Readonly<
+  Record<string, AnalyzerFindingProfile>
+> = {
   "accessible-control-name": { confidence: "certain", impact: "high" },
-  "default-parameter-normalization": { confidence: "certain", impact: "low" },
-  "graphql-runtime-interpolation": { confidence: "certain", impact: "high" },
+  "default-parameter-normalization": {
+    confidence: "strong",
+    contextNote:
+      "Default parameters apply only when an argument is `undefined`; an in-body nullish fallback also replaces `null`. Confirm `null` is not part of the intended contract before changing the normalization.",
+    impact: "low",
+  },
+  "graphql-runtime-interpolation": {
+    confidence: "strong",
+    contextNote:
+      "Interpolating a statically defined GraphQL document or fragment is valid composition. Verify the interpolated value is static GraphQL syntax rather than runtime data.",
+    impact: "high",
+  },
   "hardcoded-jsx-text": {
     confidence: "contextual",
     contextNote:
       "Some user-visible strings, such as brand names, protocol labels, or intentionally invariant technical terms, may be correct to leave untranslated.",
     impact: "medium",
   },
-  "keyboard-interaction": { confidence: "certain", impact: "high" },
+  "keyboard-interaction": {
+    confidence: "strong",
+    contextNote:
+      "A custom component may render a native interactive element or implement focus and keyboard behavior internally. Verify the component implementation before treating the call site as inaccessible.",
+    impact: "high",
+  },
   "legend-react-use-value": {
     confidence: "contextual",
     contextNote:
@@ -104,9 +121,27 @@ export const analyzerFindingProfiles = {
       "Validation may exist outside the local expression. Confirm the value is actually validated at a trusted boundary before removing or changing the assertion.",
     impact: "high",
   },
-} as const satisfies Readonly<Record<string, AnalyzerFindingProfile>>;
+};
+
+const hashFindingProfileContract = (value: string) => {
+  let hash = 0x811c9dc5;
+  for (let index = 0; index < value.length; index += 1) {
+    hash ^= value.charCodeAt(index);
+    hash = Math.imul(hash, 0x01000193) >>> 0;
+  }
+  return hash.toString(16).padStart(8, "0");
+};
+
+const findingProfileContract = Object.entries(analyzerFindingProfiles)
+  .sort(([left], [right]) => left.localeCompare(right))
+  .map(
+    ([detectorId, { confidence, contextNote, impact }]) =>
+      `${detectorId}:${impact}:${confidence}:${contextNote ?? ""}`,
+  )
+  .join("|");
+
+export const analyzerFindingProfileSignature = `finding-profiles-v1-${hashFindingProfileContract(findingProfileContract)}`;
 
 export const getAnalyzerFindingProfile = (
   detectorId: string,
-): AnalyzerFindingProfile | undefined =>
-  analyzerFindingProfiles[detectorId as keyof typeof analyzerFindingProfiles];
+): AnalyzerFindingProfile | undefined => analyzerFindingProfiles[detectorId];

@@ -1,5 +1,11 @@
 import { createHash } from "node:crypto";
 
+import {
+  analyzerDetectorCount,
+  analyzerDetectorSignature,
+  analyzerFindingProfileSignature,
+} from "../src/index.mjs";
+
 const ruleBaseUrl = "https://xanhast-pf.github.io/coding-bible/#";
 
 const normalizeFingerprintText = (value) => value.replace(/\s+/g, " ").trim();
@@ -40,6 +46,11 @@ const serializeFix = (fix, patchFiles) => {
 
 export const createAnalyzerReport = (result, { patchFiles = null } = {}) => ({
   schemaVersion: 1,
+  analyzer: {
+    detectorCount: analyzerDetectorCount,
+    detectorSignature: analyzerDetectorSignature,
+    findingProfileSignature: analyzerFindingProfileSignature,
+  },
   scope: result.scope,
   summary: {
     baselineSuppressed: result.baseline?.suppressed ?? 0,
