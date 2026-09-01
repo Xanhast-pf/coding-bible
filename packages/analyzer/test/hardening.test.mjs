@@ -13,6 +13,8 @@ import test from "node:test";
 
 import {
   analyzeProgram,
+  analyzerFindingProfileSignature,
+  analyzerFindingProfiles,
   detectors,
   getAnalyzerFindingProfile,
 } from "../src/index.ts";
@@ -76,6 +78,23 @@ test("every detector declares an explicit dependency scope and finding profile",
       );
     }
   }
+
+  const detectorIds = new Set(detectors.map(({ id }) => id));
+  assert.equal(
+    detectorIds.size,
+    detectors.length,
+    "detector IDs must be unique",
+  );
+  for (const detectorId of Object.keys(analyzerFindingProfiles)) {
+    assert.ok(
+      detectorIds.has(detectorId),
+      `${detectorId} has finding metadata but no registered detector`,
+    );
+  }
+  assert.match(
+    analyzerFindingProfileSignature,
+    /^finding-profiles-v1-[a-f0-9]{8}$/u,
+  );
 });
 
 test("source-file cache signatures ignore unrelated source content while project signatures do not", async () => {

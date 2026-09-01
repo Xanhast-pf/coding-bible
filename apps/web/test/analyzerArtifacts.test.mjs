@@ -21,6 +21,7 @@ const result = {
   analyzer: {
     detectorCount: 23,
     detectorSignature: "detectors-v1-test",
+    findingProfileSignature: "finding-profiles-v1-test",
   },
   configFileName: "coding-bible.config.json",
   configurationDiagnostics: [],

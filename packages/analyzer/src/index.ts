@@ -26,6 +26,7 @@ export {
 export { compileGlobs, matchesAnyGlob, normalizeGlobPath } from "./glob.ts";
 export { analyzerLanguages, analyzerPacks } from "./types.ts";
 export {
+  analyzerFindingProfileSignature,
   analyzerFindingProfiles,
   getAnalyzerFindingProfile,
 } from "./findingProfiles.ts";

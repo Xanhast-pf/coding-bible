@@ -15,6 +15,11 @@ const legacyGlobals = new Map([
   ["isFinite", "Number.isFinite"],
 ]);
 
+const getLegacyGlobalMessage = (method: string, displayName: string) =>
+  method === "parseInt" || method === "parseFloat"
+    ? `Global \`${displayName}\` has a direct namespaced equivalent with the same parsing semantics.`
+    : `Legacy global \`${displayName}\` coerces values before testing them.`;
+
 const isUnshadowedGlobalIdentifier = (
   context: Parameters<typeof hasSourceFileDeclaration>[0],
   node: ts.Identifier,
@@ -66,7 +71,10 @@ export const js004NamespaceSafeBuiltinsDetector: Detector = {
               safety,
               title: `Replace with ${replacement}`,
             },
-            message: `Legacy global \`${node.expression.text}\` is ambiguous and may coerce values unexpectedly.`,
+            message: getLegacyGlobalMessage(
+              node.expression.text,
+              node.expression.text,
+            ),
             ruleId: "JS-004",
             suggestion: `Use \`${replacement}\` instead.`,
           }),
@@ -98,7 +106,10 @@ export const js004NamespaceSafeBuiltinsDetector: Detector = {
               safety,
               title: `Replace with ${replacement}`,
             },
-            message: `Legacy global \`${owner.getText(context.sourceFile)}.${method}\` uses the coercive global API.`,
+            message: getLegacyGlobalMessage(
+              method,
+              `${owner.getText(context.sourceFile)}.${method}`,
+            ),
             ruleId: "JS-004",
             suggestion: `Use \`${replacement}\` instead.`,
           }),

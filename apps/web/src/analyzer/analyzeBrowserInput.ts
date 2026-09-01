@@ -2,6 +2,7 @@ import {
   analyzeProgram,
   analyzerDetectorCount,
   analyzerDetectorSignature,
+  analyzerFindingProfileSignature,
   createAnalyzerRuleSelectionPredicate,
   normalizeAnalyzerRuleSelection,
 } from "@coding-bible/analyzer";
@@ -139,6 +140,7 @@ export const analyzeBrowserInput = (
     analyzer: {
       detectorCount: analyzerDetectorCount,
       detectorSignature: analyzerDetectorSignature,
+      findingProfileSignature: analyzerFindingProfileSignature,
     },
     configFileName: browserConfig.configFileName,
     configurationDiagnostics,

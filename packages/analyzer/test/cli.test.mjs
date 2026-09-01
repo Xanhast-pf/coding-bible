@@ -669,6 +669,15 @@ test("JSON output uses the versioned report schema with stable finding fingerpri
 
     assert.equal(firstExitCode, 1);
     assert.equal(first.schemaVersion, 1);
+    assert.equal(first.analyzer.detectorCount, 24);
+    assert.match(
+      first.analyzer.detectorSignature,
+      /^detectors-v1-[a-f0-9]{8}$/u,
+    );
+    assert.match(
+      first.analyzer.findingProfileSignature,
+      /^finding-profiles-v1-[a-f0-9]{8}$/u,
+    );
     assert.equal(first.summary.findings, 1);
     assert.equal(first.findings[0].ruleId, "TS-001");
     assert.equal(first.findings[0].impact, "medium");
