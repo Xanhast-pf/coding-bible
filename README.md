@@ -122,7 +122,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: Xanhast-pf/coding-bible@v0.25.0
+      - uses: Xanhast-pf/coding-bible@v0.27.0
 ```
 
 The default `changed` scope analyzes current files with project/tsconfig context

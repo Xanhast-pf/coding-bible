@@ -43,7 +43,7 @@ want Code Scanning add GitHub's `upload-sarif` action and the required
 
 ## Consequences
 
-- `uses: Xanhast-pf/coding-bible@v0.25.0` is sufficient after checkout.
+- `uses: Xanhast-pf/coding-bible@v0.27.0` is sufficient after checkout.
 - Pull requests receive deterministic feedback only for changed lines while the
   analyzer still has full project/type context.
 - Existing baselines remain a viable gradual-adoption mechanism.

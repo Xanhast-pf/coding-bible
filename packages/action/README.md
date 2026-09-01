@@ -1,8 +1,8 @@
 # Coding Bible GitHub Action
 
 The repository root exposes Coding Bible as a self-contained JavaScript action.
-Consumers pin a Git tag or immutable commit and do not install Coding Bible,
-pnpm, or TypeScript in their workflow.
+Consumers pin a release tag, floating minor branch, or immutable commit and do
+not install Coding Bible, pnpm, or TypeScript in their workflow.
 
 ## Minimal pull-request review
 
@@ -23,7 +23,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: Xanhast-pf/coding-bible@v0.25.0
+      - uses: Xanhast-pf/coding-bible@v0.27.0
 ```
 
 `changed` is the default scope. The action resolves the pull-request base SHA,
@@ -34,7 +34,7 @@ small PR into a report of unrelated historical debt.
 Use `scope: project` when a full scan is desired:
 
 ```yaml
-- uses: Xanhast-pf/coding-bible@v0.25.0
+- uses: Xanhast-pf/coding-bible@v0.27.0
   with:
     scope: project
     path: src
@@ -59,7 +59,7 @@ Use `scope: project` when a full scan is desired:
 Rule selection is an extra filter on top of the repository config. For example:
 
 ```yaml
-- uses: Xanhast-pf/coding-bible@v0.25.0
+- uses: Xanhast-pf/coding-bible@v0.27.0
   with:
     rules: TS-001, REACT-006, LEGEND-001
     exclude-rules: REACT-006
@@ -97,7 +97,7 @@ steps:
       fetch-depth: 0
 
   - id: coding-bible
-    uses: Xanhast-pf/coding-bible@v0.25.0
+    uses: Xanhast-pf/coding-bible@v0.27.0
     with:
       fail-on: none
 
@@ -116,8 +116,8 @@ the only desired reporting surface.
 
 Release tags are the public action contract:
 
-- `@v0.25.0` pins the exact Coding Bible release tag.
-- `@v0.25` may be maintained as a convenience tag for compatible patch updates.
+- `@v0.27.0` pins the exact Coding Bible release tag.
+- `@v0.27` is the floating minor branch for compatible patch updates.
 - a full commit SHA gives consumers an immutable supply-chain pin.
 
 The repository commits `packages/action/dist`. `pnpm action:build` regenerates
