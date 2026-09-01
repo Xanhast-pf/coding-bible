@@ -268,10 +268,18 @@ const formatFinding = (finding) => {
       : "  ⚠ Review fix available"
     : null;
 
+  const contextLabel = finding.contextNote
+    ? finding.confidence === "contextual"
+      ? `  ! Context required: ${finding.contextNote}`
+      : `  i Analyzer note: ${finding.contextNote}`
+    : null;
+
   return [
-    `${finding.filePath}:${line}:${column}  ${finding.severity.toUpperCase()}  ${finding.ruleId}`,
+    `${finding.filePath}:${line}:${column}  ${finding.severity.toUpperCase()}  ${finding.ruleId}  ` +
+      `${finding.impact.toUpperCase()} impact · ${finding.confidence.toUpperCase()} confidence`,
     `  ${finding.message}`,
     `  → ${finding.suggestion}`,
+    contextLabel,
     fixLabel,
   ]
     .filter(Boolean)

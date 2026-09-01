@@ -4,3 +4,4 @@ export { analyzerDetectorCount, analyzerDetectorSignature, detectors, } from "./
 export { applyAnalyzerTextEdits, createAnalyzerFilePatch, normalizeAnalyzerPatchPath, prepareAnalyzerTextEdits, } from "./fixes.mjs";
 export { compileGlobs, matchesAnyGlob, normalizeGlobPath } from "./glob.mjs";
 export { analyzerLanguages, analyzerPacks } from "./types.mjs";
+export { analyzerFindingProfiles, getAnalyzerFindingProfile, } from "./findingProfiles.mjs";

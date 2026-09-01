@@ -1,6 +1,7 @@
 import ts from "../../typescript/typescript.cjs";
 import { createDetectorContext, createDetectorContexts, createDetectorContextsFromProgram, } from "./context.mjs";
 import { detectors } from "./detectors/index.mjs";
+import { getAnalyzerFindingProfile } from "./findingProfiles.mjs";
 const defaultFileNameByLanguage = {
     js: "snippet.js",
     jsx: "snippet.jsx",
@@ -68,7 +69,18 @@ const analyzeContext = (context, options) => {
     const rawFindings = [];
     for (const detector of applicableDetectors) {
         options.signal?.throwIfAborted();
-        rawFindings.push(...detector.analyze(context));
+        const profile = getAnalyzerFindingProfile(detector.id);
+        if (!profile) {
+            throw new Error(`Detector "${detector.id}" is missing finding metadata.`);
+        }
+        rawFindings.push(...detector.analyze(context).map((finding) => ({
+            ...finding,
+            confidence: finding.confidence ?? profile.confidence,
+            ...((finding.contextNote ?? profile.contextNote)
+                ? { contextNote: finding.contextNote ?? profile.contextNote }
+                : {}),
+            impact: finding.impact ?? profile.impact,
+        })));
     }
     const findings = dedupeFindings(rawFindings);
     findings.sort((left, right) => left.location.line - right.location.line ||

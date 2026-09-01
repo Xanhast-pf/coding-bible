@@ -25,12 +25,18 @@ export {
 } from "./fixes.ts";
 export { compileGlobs, matchesAnyGlob, normalizeGlobPath } from "./glob.ts";
 export { analyzerLanguages, analyzerPacks } from "./types.ts";
+export {
+  analyzerFindingProfiles,
+  getAnalyzerFindingProfile,
+} from "./findingProfiles.ts";
 export type {
   AnalyzeInput,
   AnalyzeOptions,
   AnalyzeResult,
   AnalyzerDiagnostic,
   AnalyzerFinding,
+  AnalyzerFindingConfidence,
+  AnalyzerFindingImpact,
   AnalyzerDetectorDependencyScope,
   AnalyzerFixSafety,
   AnalyzerLanguage,
@@ -43,5 +49,6 @@ export type {
   AnalyzerRuleSelection,
   AnalyzerRuleSetting,
   ProgramAnalyzeInput,
+  ResolvedAnalyzerFinding,
   SourceLocation,
 } from "./types.ts";

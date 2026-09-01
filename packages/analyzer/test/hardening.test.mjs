@@ -11,7 +11,11 @@ import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 
-import { analyzeProgram, detectors } from "../src/index.ts";
+import {
+  analyzeProgram,
+  detectors,
+  getAnalyzerFindingProfile,
+} from "../src/index.ts";
 import {
   createProjectCacheSignatures,
   createProjectCacheIdentity,
@@ -47,7 +51,7 @@ const writeBasicProject = async (directory, files) => {
   }
 };
 
-test("every detector declares an explicit dependency scope", () => {
+test("every detector declares an explicit dependency scope and finding profile", () => {
   assert.ok(detectors.length > 0);
   for (const detector of detectors) {
     assert.ok(
@@ -55,6 +59,22 @@ test("every detector declares an explicit dependency scope", () => {
         detector.dependencyScope === "project",
       `${detector.id} is missing a valid dependency scope`,
     );
+    const profile = getAnalyzerFindingProfile(detector.id);
+    assert.ok(profile, `${detector.id} is missing a finding profile`);
+    assert.ok(
+      ["high", "medium", "low"].includes(profile.impact),
+      `${detector.id} is missing a valid impact`,
+    );
+    assert.ok(
+      ["certain", "strong", "contextual"].includes(profile.confidence),
+      `${detector.id} is missing a valid confidence`,
+    );
+    if (profile.confidence === "contextual") {
+      assert.ok(
+        profile.contextNote?.trim(),
+        `${detector.id} must explain what context can change the conclusion`,
+      );
+    }
   }
 });
 

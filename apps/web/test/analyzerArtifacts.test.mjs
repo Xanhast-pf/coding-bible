@@ -34,6 +34,7 @@ const result = {
         diagnostics: [],
         findings: [
           {
+            confidence: "certain",
             detectorId: "type-only-imports",
             excerpt: 'import { User } from "./types";',
             fix: {
@@ -44,6 +45,7 @@ const result = {
               safety: "safe",
               title: "Mark import as type-only",
             },
+            impact: "low",
             location: { column: 10, endColumn: 14, endLine: 1, line: 1 },
             message: "User is used only as a type.",
             ruleId: "TS-003",
@@ -51,6 +53,8 @@ const result = {
             suggestion: "Use a type-only import.",
           },
           {
+            confidence: "contextual",
+            contextNote: "Confirm the intended numeric parsing semantics.",
             detectorId: "explicit-radix",
             excerpt: "const page = parseInt(rawPage);",
             fix: {
@@ -65,6 +69,7 @@ const result = {
               safety: "review",
               title: "Add an explicit radix",
             },
+            impact: "low",
             location: { column: 14, endColumn: 31, endLine: 2, line: 2 },
             message: "parseInt should specify a radix.",
             ruleId: "JS-002",
@@ -143,9 +148,22 @@ test("browser report exposes severity and fix safety without source contents", (
   assert.equal(report.summary.warnings, 1);
   assert.equal(report.summary.safeFixes, 1);
   assert.equal(report.summary.reviewFixes, 1);
+  assert.deepEqual(report.summary.confidence, {
+    certain: 1,
+    strong: 0,
+    contextual: 1,
+  });
+  assert.deepEqual(report.summary.impact, { high: 0, medium: 0, low: 2 });
   assert.equal(report.project.name, "example-project");
   assert.equal(report.findings[0].fix.patch, "safe-fixes.patch");
   assert.equal(report.findings[1].fix.patch, "review-fixes.patch");
   assert.equal(report.findings[1].severity, "warning");
+  assert.equal(report.findings[0].confidence, "certain");
+  assert.equal(report.findings[1].confidence, "contextual");
+  assert.equal(
+    report.findings[1].contextNote,
+    "Confirm the intended numeric parsing semantics.",
+  );
+  assert.equal(report.findings[1].impact, "low");
   assert.equal(JSON.stringify(report).includes(source), false);
 });

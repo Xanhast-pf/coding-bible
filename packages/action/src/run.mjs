@@ -92,14 +92,26 @@ const createSummary = ({
       "",
       "### Findings",
       "",
-      "| Severity | Rule | Location | Message |",
-      "| --- | --- | --- | --- |",
+      "| Enforcement | Impact | Confidence | Rule | Location | Message |",
+      "| --- | --- | --- | --- | --- | --- |",
     );
     for (const finding of findings.slice(0, 25)) {
       const rule = rulesById.get(finding.ruleId);
       const url = `${canonicalBaseUrl}#${finding.ruleId}`;
       lines.push(
-        `| ${finding.severity} | [${markdownEscape(finding.ruleId)}](${url})${rule?.title ? ` · ${markdownEscape(rule.title)}` : ""} | \`${markdownEscape(finding.filePath)}:${finding.location.line}\` | ${markdownEscape(finding.message)} |`,
+        `| ${finding.severity} | ${finding.impact} | ${finding.confidence} | ` +
+          `[${markdownEscape(finding.ruleId)}](${url})${rule?.title ? ` · ${markdownEscape(rule.title)}` : ""} | ` +
+          `\`${markdownEscape(finding.filePath)}:${finding.location.line}\` | ` +
+          `${markdownEscape(finding.message)}` +
+          `${
+            finding.contextNote
+              ? `<br><sub>${markdownEscape(
+                  finding.confidence === "contextual"
+                    ? `Context required: ${finding.contextNote}`
+                    : `Analyzer note: ${finding.contextNote}`,
+                )}</sub>`
+              : ""
+          } |`,
       );
     }
     if (findings.length > 25) {
@@ -144,7 +156,10 @@ const emitAnnotations = ({ diagnostics, findings, rulesById, stream }) => {
         endColumn: finding.location.endColumn,
         title: `${finding.ruleId}${rule?.title ? ` · ${rule.title}` : ""}`,
       },
-      `${finding.message} ${finding.suggestion} ${canonicalBaseUrl}#${finding.ruleId}`,
+      `${finding.message} ${finding.suggestion} ` +
+        `[${finding.impact} impact · ${finding.confidence} confidence] ` +
+        `${finding.contextNote ? `${finding.confidence === "contextual" ? "Context required" : "Analyzer note"}: ${finding.contextNote} ` : ""}` +
+        `${canonicalBaseUrl}#${finding.ruleId}`,
     );
     emitted += 1;
   }

@@ -9,3 +9,9 @@ export const analyzerPacks = [
     "react",
     "typescript",
 ];
+export const analyzerFindingImpacts = ["high", "medium", "low"];
+export const analyzerFindingConfidences = [
+    "certain",
+    "strong",
+    "contextual",
+];

@@ -61,6 +61,17 @@ export interface AnalyzeOptions {
 
 export type AnalyzerFixSafety = "safe" | "review";
 
+export const analyzerFindingImpacts = ["high", "medium", "low"] as const;
+export type AnalyzerFindingImpact = (typeof analyzerFindingImpacts)[number];
+
+export const analyzerFindingConfidences = [
+  "certain",
+  "strong",
+  "contextual",
+] as const;
+export type AnalyzerFindingConfidence =
+  (typeof analyzerFindingConfidences)[number];
+
 export interface AnalyzerTextEdit {
   start: number;
   end: number;
@@ -89,6 +100,14 @@ export interface AnalyzerFinding {
   fix?: AnalyzerSuggestedFix;
   location: SourceLocation;
   excerpt: string;
+  confidence?: AnalyzerFindingConfidence;
+  contextNote?: string;
+  impact?: AnalyzerFindingImpact;
+}
+
+export interface ResolvedAnalyzerFinding extends AnalyzerFinding {
+  confidence: AnalyzerFindingConfidence;
+  impact: AnalyzerFindingImpact;
 }
 
 export interface AnalyzerDiagnostic {
@@ -100,7 +119,7 @@ export interface AnalyzerDiagnostic {
 export interface AnalyzeResult {
   checksRun: number;
   diagnostics: readonly AnalyzerDiagnostic[];
-  findings: readonly AnalyzerFinding[];
+  findings: readonly ResolvedAnalyzerFinding[];
   ruleIdsChecked: readonly string[];
 }
 
