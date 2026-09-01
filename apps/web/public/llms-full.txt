@@ -3917,6 +3917,7 @@ renderUser(payload);
 **DON'T**
 
 ```ts
+const payload: unknown = readPayload();
 const user = payload as User;
 renderUser(user);
 ```

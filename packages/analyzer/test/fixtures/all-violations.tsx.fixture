@@ -41,6 +41,10 @@ async function loadUser(response: Response) {
   return raw as User;
 }
 
+function forceUser(value: unknown) {
+  return value as User;
+}
+
 export function Dashboard({ user, users }: Props) {
   let activeUser = user;
   const city = user && user.address && user.address.city;
@@ -106,3 +110,4 @@ void normalize;
 void parse;
 void getStatusLabel;
 void loadUser;
+void forceUser;

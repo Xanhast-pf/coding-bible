@@ -30,11 +30,12 @@ export const defaultAnalyzerIgnorePatterns = [
     "**/*.min.{js,jsx,mjs,cjs,ts,tsx,mts,cts}",
     "**/__generated__/**",
 ];
-const validRuleSettings = new Set([
+const analyzerRuleSettings = [
     "error",
     "warning",
     "off",
-]);
+];
+const validRuleSettings = new Set(analyzerRuleSettings);
 const validConfigKeys = new Set([
     "baseline",
     "cache",

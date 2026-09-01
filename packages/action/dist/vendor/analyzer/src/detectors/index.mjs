@@ -15,12 +15,14 @@ import { missingReactListKeyDetector, unstableReactListKeyDetector, } from "./re
 import { reactHookPlacementDetector } from "./reactHooks.mjs";
 import { typeOnlyImportsDetector } from "./typeOnlyImports.mjs";
 import { untrustedAssertionsDetector } from "./untrustedAssertions.mjs";
+import { unsafeUnknownAssertionDetector } from "./unsafeTypeAssertions.mjs";
 export const detectors = [
     preferConstDetector,
     redundantAsyncDetector,
     noExplicitAnyDetector,
     typeOnlyImportsDetector,
     untrustedAssertionsDetector,
+    unsafeUnknownAssertionDetector,
     optionalChainingDetector,
     defaultParameterDetector,
     legacyBuiltinsDetector,

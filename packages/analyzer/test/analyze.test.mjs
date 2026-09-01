@@ -10,15 +10,15 @@ const uniqueRuleIds = (source, language = "tsx") =>
   [...new Set(ruleIds(source, language))].sort();
 
 test("analyzer runs only detectors applicable to the selected language", () => {
-  assert.equal(detectors.length, 23);
+  assert.equal(detectors.length, 24);
 
   const tsResult = analyze({ source: "const value = 1;", language: "ts" });
   const tsxResult = analyze({ source: "const value = 1;", language: "tsx" });
 
-  assert.equal(tsResult.checksRun, 13);
-  assert.equal(tsResult.ruleIdsChecked.length, 13);
-  assert.equal(tsxResult.checksRun, 23);
-  assert.equal(tsxResult.ruleIdsChecked.length, 22);
+  assert.equal(tsResult.checksRun, 14);
+  assert.equal(tsResult.ruleIdsChecked.length, 14);
+  assert.equal(tsxResult.checksRun, 24);
+  assert.equal(tsxResult.ruleIdsChecked.length, 23);
 });
 
 test("syntax errors pause rule analysis instead of returning a misleading clean result", () => {
@@ -84,6 +84,37 @@ test("tracks unsafe external data through local aliases but permits unknown", ()
     ["TS-004"],
   );
   assert.deepEqual(ruleIds(`const user = payload as User;`, "ts"), []);
+});
+
+test("detects unknown escape-hatch assertions without flagging narrowing-friendly casts", () => {
+  assert.deepEqual(
+    ruleIds(
+      `declare const payload: unknown;\nconst user = payload as User;`,
+      "ts",
+    ),
+    ["TS-007"],
+  );
+  assert.deepEqual(
+    ruleIds(
+      `declare const payload: string;\nconst user = payload as unknown as User;`,
+      "ts",
+    ),
+    ["TS-007"],
+  );
+  assert.deepEqual(
+    ruleIds(
+      `declare const payload: unknown;\nconst value = payload as unknown;`,
+      "ts",
+    ),
+    [],
+  );
+  assert.deepEqual(
+    ruleIds(
+      `declare const value: string | number;\nconst text = value as string;`,
+      "ts",
+    ),
+    [],
+  );
 });
 
 test("detects only clearly redundant async functions", () => {

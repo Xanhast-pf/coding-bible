@@ -138,7 +138,7 @@ export const typescriptRules = [
     tags: ["assertions", "safety", "types"],
     bad: {
       language: "ts",
-      code: "const user = payload as User;\nrenderUser(user);",
+      code: "const payload: unknown = readPayload();\nconst user = payload as User;\nrenderUser(user);",
     },
     good: {
       language: "ts",
