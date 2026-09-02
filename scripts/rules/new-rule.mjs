@@ -17,6 +17,7 @@ const valueFor = (name) => {
 };
 const id = valueFor("--id");
 const title = valueFor("--title");
+const createDetector = args.includes("--detector");
 const slugify = (value) =>
   value
     .toLowerCase()
@@ -25,7 +26,7 @@ const slugify = (value) =>
 
 if (!id || !title) {
   console.error(
-    'Usage: pnpm rule:new -- --id REACT-014 --title "Prefer explicit event ownership"',
+    'Usage: pnpm rule:new -- --id REACT-014 --title "Prefer explicit event ownership" [--detector]',
   );
   process.exit(1);
 }
@@ -55,12 +56,57 @@ const content = [
   `  pack: "${layout.pack}",`,
   '  status: "draft",',
   '  tags: ["draft"],',
-  "  detection: { autoFixable: false, detectable: false },",
+  createDetector
+    ? '  detection: { autoFixable: false, detectable: true, strategy: "ast" },'
+    : "  detection: { autoFixable: false, detectable: false },",
   "} satisfies CodingRule;",
   "",
 ].join("\n");
 fs.mkdirSync(directory, { recursive: true });
 fs.writeFileSync(path.join(directory, fileName), content);
+if (createDetector) {
+  const detectorDirectory = path.join(
+    root,
+    "packages/analyzer/src/detectors",
+    layout.directory,
+  );
+  const detectorFile = path.join(detectorDirectory, fileName);
+  if (fs.existsSync(detectorFile)) {
+    throw new Error(
+      `${id} already has an analyzer module at ${path.relative(root, detectorFile)}.`,
+    );
+  }
+
+  const detectorIdentifier = `${ruleIdToIdentifier(id)}Detectors`;
+  const detectorId = `${id.toLowerCase()}-${slugify(title)}`;
+  const detectorContent = [
+    'import type { Detector } from "../../types.ts";',
+    "",
+    `export const ${detectorIdentifier} = [`,
+    "  {",
+    '    dependencyScope: "source-file",',
+    `    id: "${detectorId}",`,
+    `    ruleId: "${id}",`,
+    "    profile: {",
+    '      confidence: "contextual",',
+    '      contextNote: "TODO: explain what project/runtime context can change the conclusion.",',
+    '      impact: "medium",',
+    "    },",
+    "    analyze: () => {",
+    "      // TODO: implement the detector. Keep the finding evidence narrow and deterministic.",
+    "      return [];",
+    "    },",
+    "  },",
+    "] satisfies readonly Detector[];",
+    "",
+  ].join("\n");
+
+  fs.mkdirSync(detectorDirectory, { recursive: true });
+  fs.writeFileSync(detectorFile, detectorContent);
+  console.log(
+    `Created packages/analyzer/src/detectors/${layout.directory}/${fileName}`,
+  );
+}
 console.log(`Created packages/rules/src/rules/${layout.directory}/${fileName}`);
 const generator = path.join(root, "scripts/rules/generate-registries.mjs");
 const generated = spawnSync(process.execPath, [generator], {
@@ -70,5 +116,7 @@ if (generated.status !== 0) {
   process.exit(generated.status ?? 1);
 }
 console.log(
-  "Next: fill in the rule and add DON'T/DO examples before moving it to stable.",
+  createDetector
+    ? "Next: implement the detector, replace its TODO profile metadata, add DON'T/DO examples, then run pnpm check."
+    : "Next: fill in the rule and add DON'T/DO examples before moving it to stable.",
 );

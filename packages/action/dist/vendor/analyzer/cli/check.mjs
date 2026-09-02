@@ -5,6 +5,8 @@ import {
   createAnalyzerRuleSelectionPredicate,
   detectors,
   normalizeAnalyzerRuleSelection,
+  createAnalyzerCustomRuleDetectors,
+  getConfiguredAnalyzerRuleIds,
 } from "../src/index.mjs";
 import {
   applyBaseline,
@@ -167,15 +169,23 @@ export const checkPaths = async (
   signal?.throwIfAborted();
   const loadedConfig = await loadAnalyzerConfig({ cwd, configPath });
   const rootDir = loadedConfig.rootDir;
-  const normalizedRuleSelection = normalizeAnalyzerRuleSelection(ruleSelection);
+  const configuredRuleIds = getConfiguredAnalyzerRuleIds(loadedConfig.config);
+  const normalizedRuleSelection = normalizeAnalyzerRuleSelection(
+    ruleSelection,
+    configuredRuleIds,
+  );
   const ruleSelected = createAnalyzerRuleSelectionPredicate(
     normalizedRuleSelection,
+    configuredRuleIds,
   );
   const resolvedTargets = targets.length
     ? targets.map((target) => path.resolve(cwd, target))
     : [rootDir];
   signal?.throwIfAborted();
   const resolver = createConfigResolver(loadedConfig.config, rootDir);
+  const additionalDetectors = createAnalyzerCustomRuleDetectors(
+    loadedConfig.config.customRules,
+  );
   const isRuleEnabled = (ruleId, fileName) =>
     ruleSelected(ruleId) && resolver.isRuleEnabled(ruleId, fileName);
   const scopedFiles = await getGitScopedFiles({
@@ -344,6 +354,7 @@ export const checkPaths = async (
         sourceProject.program,
         sourceMissingInputs,
         {
+          additionalDetectors,
           dependencyScope: "source-file",
           isRuleEnabled,
           signal,
@@ -388,6 +399,7 @@ export const checkPaths = async (
         project.program,
         projectMissingInputs,
         {
+          additionalDetectors,
           dependencyScope: "project",
           isRuleEnabled,
           signal,

@@ -101,7 +101,7 @@ writeGenerated(
 
 const detectorImports = [];
 const detectorSpreads = [];
-for (const layout of rulePackLayouts.filter(({ analyzer }) => analyzer)) {
+for (const layout of rulePackLayouts) {
   const directory = path.join(
     root,
     "packages/analyzer/src/detectors",

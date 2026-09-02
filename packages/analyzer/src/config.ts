@@ -6,6 +6,7 @@ import {
   type AnalyzerRuleSetting,
 } from "./types.ts";
 import { detectors } from "./detectors/index.ts";
+import { validateAnalyzerCustomRules } from "./customRules.ts";
 import { compileGlobs, matchesAnyGlob, normalizeGlobPath } from "./glob.ts";
 
 export const analyzerConfigFileNames = [
@@ -46,6 +47,7 @@ const analyzerRuleSettings = [
 ] as const satisfies readonly AnalyzerRuleSetting[];
 const validRuleSettings: ReadonlySet<unknown> = new Set(analyzerRuleSettings);
 const validConfigKeys = new Set([
+  "customRules",
   "baseline",
   "cache",
   "include",
@@ -62,6 +64,15 @@ export const analyzerRuleIds = [
   ...new Set(detectors.map((detector) => detector.ruleId)),
 ].sort();
 const validRuleIds = new Set(analyzerRuleIds);
+export const getConfiguredAnalyzerRuleIds = (
+  config: Pick<AnalyzerConfig, "customRules"> = {},
+): readonly string[] =>
+  [
+    ...new Set([
+      ...analyzerRuleIds,
+      ...validateAnalyzerCustomRules(config.customRules).map(({ id }) => id),
+    ]),
+  ].sort();
 
 const toRecord = (value: unknown, message: string): Record<string, unknown> => {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
@@ -90,7 +101,12 @@ const assertSettings = (
   {
     validatePacks = false,
     validateRules = false,
-  }: { validatePacks?: boolean; validateRules?: boolean } = {},
+    ruleIds = validRuleIds,
+  }: {
+    ruleIds?: ReadonlySet<string>;
+    validatePacks?: boolean;
+    validateRules?: boolean;
+  } = {},
 ) => {
   if (value === undefined) {
     return;
@@ -104,7 +120,7 @@ const assertSettings = (
     if (validatePacks && !validPacks.has(key as AnalyzerPack)) {
       throw new Error(`${name} contains unknown analyzer pack "${key}".`);
     }
-    if (validateRules && !validRuleIds.has(key)) {
+    if (validateRules && !ruleIds.has(key)) {
       throw new Error(`${name} contains unknown automated rule "${key}".`);
     }
     if (!validRuleSettings.has(setting)) {
@@ -116,13 +132,14 @@ const assertSettings = (
 const assertRuleIdList = (
   value: readonly string[] | undefined,
   name: string,
+  ruleIds: ReadonlySet<string> = validRuleIds,
 ) => {
   if (value === undefined) {
     return;
   }
 
   for (const ruleId of value) {
-    if (!validRuleIds.has(ruleId)) {
+    if (!ruleIds.has(ruleId)) {
       throw new Error(`${name} contains unknown automated rule "${ruleId}".`);
     }
   }
@@ -130,7 +147,9 @@ const assertRuleIdList = (
 
 export const normalizeAnalyzerRuleSelection = (
   selection: AnalyzerRuleSelection = {},
+  ruleIds: readonly string[] = analyzerRuleIds,
 ): AnalyzerRuleSelection => {
+  const validSelectionRuleIds = new Set(ruleIds);
   const include = selection.include
     ? [
         ...new Set(
@@ -146,8 +165,8 @@ export const normalizeAnalyzerRuleSelection = (
       ].sort()
     : undefined;
 
-  assertRuleIdList(include, "rule selection include");
-  assertRuleIdList(exclude, "rule selection exclude");
+  assertRuleIdList(include, "rule selection include", validSelectionRuleIds);
+  assertRuleIdList(exclude, "rule selection exclude", validSelectionRuleIds);
 
   return {
     ...(exclude?.length ? { exclude } : {}),
@@ -157,8 +176,9 @@ export const normalizeAnalyzerRuleSelection = (
 
 export const createAnalyzerRuleSelectionPredicate = (
   selection: AnalyzerRuleSelection = {},
+  ruleIds: readonly string[] = analyzerRuleIds,
 ) => {
-  const normalized = normalizeAnalyzerRuleSelection(selection);
+  const normalized = normalizeAnalyzerRuleSelection(selection, ruleIds);
   const include = normalized.include ? new Set(normalized.include) : null;
   const exclude = new Set(normalized.exclude ?? []);
 
@@ -168,6 +188,17 @@ export const createAnalyzerRuleSelectionPredicate = (
 
 export const validateAnalyzerConfig = (value: unknown): AnalyzerConfig => {
   const config = toRecord(value, "Coding Bible config must export an object.");
+  const customRules = validateAnalyzerCustomRules(config.customRules);
+  for (const { id } of customRules) {
+    if (validRuleIds.has(id)) {
+      throw new Error(
+        `customRules must not reuse built-in automated rule ID "${id}".`,
+      );
+    }
+  }
+  const configuredRuleIds = new Set(
+    getConfiguredAnalyzerRuleIds({ customRules }),
+  );
 
   for (const key of Object.keys(config)) {
     if (!validConfigKeys.has(key)) {
@@ -202,7 +233,10 @@ export const validateAnalyzerConfig = (value: unknown): AnalyzerConfig => {
     throw new Error("ignoreDefaults must be a boolean.");
   }
   assertSettings(config.packs, "packs", { validatePacks: true });
-  assertSettings(config.rules, "rules", { validateRules: true });
+  assertSettings(config.rules, "rules", {
+    ruleIds: configuredRuleIds,
+    validateRules: true,
+  });
 
   if (
     config.tsconfig !== undefined &&
@@ -234,6 +268,7 @@ export const validateAnalyzerConfig = (value: unknown): AnalyzerConfig => {
         validatePacks: true,
       });
       assertSettings(item.rules, `overrides[${index}].rules`, {
+        ruleIds: configuredRuleIds,
         validateRules: true,
       });
     });
@@ -260,13 +295,25 @@ export const resolveAnalyzerConfigDefaults = (
 
 const packByRulePrefix = new Map<string, AnalyzerPack>([
   ["A11Y", "accessibility"],
+  ["AI", "ai"],
+  ["APOLLO", "apollo"],
+  ["ARCH", "architecture"],
   ["CORE", "core"],
+  ["CSS", "css"],
+  ["DEP", "dependencies"],
+  ["FLAG", "feature-flags"],
   ["GQL", "graphql"],
   ["I18N", "internationalization"],
   ["JS", "javascript"],
   ["LEGEND", "legend-state"],
+  ["NEXT", "nextjs"],
+  ["PERF", "performance"],
   ["REACT", "react"],
+  ["REDUX", "redux"],
+  ["TQ", "tanstack-query"],
+  ["TEST", "testing"],
   ["TS", "typescript"],
+  ["WORK", "workflow"],
 ]);
 
 export const getAnalyzerPack = (ruleId: string): AnalyzerPack | null =>

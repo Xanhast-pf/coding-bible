@@ -15,8 +15,8 @@ const hashDetectorContract = (value: string) => {
 
 const detectorContract = detectors
   .map(
-    ({ dependencyScope, id, languages, ruleId }) =>
-      `${id}:${ruleId}:${dependencyScope}:${languages?.join(",") ?? "*"}`,
+    ({ dependencyScope, id, languages, profile, ruleId }) =>
+      `${id}:${ruleId}:${dependencyScope}:${languages?.join(",") ?? "*"}${profile ? `:${profile.impact}:${profile.confidence}:${profile.contextNote ?? ""}` : ""}`,
   )
   .join("|");
 

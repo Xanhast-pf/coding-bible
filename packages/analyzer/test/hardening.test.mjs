@@ -61,7 +61,7 @@ test("every detector declares an explicit dependency scope and finding profile",
         detector.dependencyScope === "project",
       `${detector.id} is missing a valid dependency scope`,
     );
-    const profile = getAnalyzerFindingProfile(detector.id);
+    const profile = detector.profile ?? getAnalyzerFindingProfile(detector.id);
     assert.ok(profile, `${detector.id} is missing a finding profile`);
     assert.ok(
       ["high", "medium", "low"].includes(profile.impact),

@@ -54,7 +54,7 @@ test("automated rule modules mirror the prefixed rule-file convention", () => {
     ["index.ts", "registry.generated.ts"],
   );
 
-  for (const layout of rulePackLayouts.filter(({ analyzer }) => analyzer)) {
+  for (const layout of rulePackLayouts) {
     const directory = path.join(detectorsRoot, layout.directory);
     if (!fs.existsSync(directory)) continue;
 

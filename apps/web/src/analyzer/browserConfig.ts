@@ -4,6 +4,8 @@ import {
   createAnalyzerFileSelector,
   resolveAnalyzerConfigDefaults,
   validateAnalyzerConfig,
+  createAnalyzerCustomRuleDetectors,
+  getConfiguredAnalyzerRuleIds,
 } from "@coding-bible/analyzer";
 
 import { normalizeRelativeFileName } from "./fileTypes.ts";
@@ -12,9 +14,11 @@ import type { BrowserProjectFile } from "./types";
 const browserConfigFileName = "coding-bible.config.json";
 
 export interface BrowserAnalyzerConfig {
+  additionalDetectors: ReturnType<typeof createAnalyzerCustomRuleDetectors>;
   configFileName: string | null;
   configurationDiagnostics: readonly string[];
   resolver: ReturnType<typeof createAnalyzerConfigResolver>;
+  ruleIds: readonly string[];
   shouldAnalyzeFile: (fileName: string) => boolean;
   tsconfig: string | false | undefined;
 }
@@ -61,8 +65,10 @@ export const loadBrowserAnalyzerConfig = (
 
   return {
     configFileName: configFileName ?? null,
+    additionalDetectors: createAnalyzerCustomRuleDetectors(config.customRules),
     configurationDiagnostics,
     resolver: createAnalyzerConfigResolver(config),
+    ruleIds: getConfiguredAnalyzerRuleIds(config),
     shouldAnalyzeFile: createAnalyzerFileSelector(config),
     tsconfig: config.tsconfig,
   };

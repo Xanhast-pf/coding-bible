@@ -8,6 +8,7 @@ export {
   defaultAnalyzerIgnorePatterns,
   defineConfig,
   getAnalyzerPack,
+  getConfiguredAnalyzerRuleIds,
   normalizeAnalyzerRuleSelection,
   resolveAnalyzerConfigDefaults,
   validateAnalyzerConfig,
@@ -17,6 +18,12 @@ export {
   analyzerDetectorSignature,
   detectors,
 } from "./detectors/index.ts";
+export {
+  createAnalyzerCustomRuleDetectors,
+  defineCustomRule,
+  defineDetector,
+  validateAnalyzerCustomRules,
+} from "./customRules.ts";
 export {
   applyAnalyzerTextEdits,
   createAnalyzerFilePatch,
@@ -31,6 +38,10 @@ export {
   getAnalyzerFindingProfile,
 } from "./findingProfiles.ts";
 export type {
+  AnalyzerDetectorProfile,
+  AnalyzerCustomRuleModuleMatchMode,
+  AnalyzerCustomRuleMatch,
+  AnalyzerCustomRule,
   AnalyzeInput,
   AnalyzeOptions,
   AnalyzeResult,
