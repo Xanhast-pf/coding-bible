@@ -27,12 +27,33 @@ const defaultFileNameByLanguage = {
   tsx: "snippet.tsx",
 } satisfies Record<AnalyzerLanguage, string>;
 
+const resolveAnalyzerDetectors = (
+  options: AnalyzeOptions,
+): readonly Detector[] => {
+  const additional = options.additionalDetectors ?? [];
+  if (!additional.length) return detectors;
+
+  const detectorIds = new Set(detectors.map(({ id }) => id));
+  for (const detector of additional) {
+    if (detectorIds.has(detector.id)) {
+      throw new Error(`Duplicate analyzer detector ID "${detector.id}".`);
+    }
+    if (!detector.profile) {
+      throw new Error(
+        `Additional detector "${detector.id}" must declare an inline finding profile.`,
+      );
+    }
+    detectorIds.add(detector.id);
+  }
+
+  return [...detectors, ...additional];
+};
 const getApplicableDetectors = (
   language: AnalyzerLanguage,
   fileName: string,
   options: AnalyzeOptions,
 ): readonly Detector[] =>
-  detectors.filter(
+  resolveAnalyzerDetectors(options).filter(
     (detector) =>
       (!detector.languages || detector.languages.includes(language)) &&
       (!options.dependencyScope ||
@@ -118,7 +139,7 @@ const analyzeContext = (
   const rawFindings: ResolvedAnalyzerFinding[] = [];
   for (const detector of applicableDetectors) {
     options.signal?.throwIfAborted();
-    const profile = getAnalyzerFindingProfile(detector.id);
+    const profile = detector.profile ?? getAnalyzerFindingProfile(detector.id);
     if (!profile) {
       throw new Error(`Detector "${detector.id}" is missing finding metadata.`);
     }

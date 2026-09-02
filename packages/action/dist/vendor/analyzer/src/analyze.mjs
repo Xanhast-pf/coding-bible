@@ -8,7 +8,23 @@ const defaultFileNameByLanguage = {
     ts: "snippet.ts",
     tsx: "snippet.tsx",
 };
-const getApplicableDetectors = (language, fileName, options) => detectors.filter((detector) => (!detector.languages || detector.languages.includes(language)) &&
+const resolveAnalyzerDetectors = (options) => {
+    const additional = options.additionalDetectors ?? [];
+    if (!additional.length)
+        return detectors;
+    const detectorIds = new Set(detectors.map(({ id }) => id));
+    for (const detector of additional) {
+        if (detectorIds.has(detector.id)) {
+            throw new Error(`Duplicate analyzer detector ID "${detector.id}".`);
+        }
+        if (!detector.profile) {
+            throw new Error(`Additional detector "${detector.id}" must declare an inline finding profile.`);
+        }
+        detectorIds.add(detector.id);
+    }
+    return [...detectors, ...additional];
+};
+const getApplicableDetectors = (language, fileName, options) => resolveAnalyzerDetectors(options).filter((detector) => (!detector.languages || detector.languages.includes(language)) &&
     (!options.dependencyScope ||
         detector.dependencyScope === options.dependencyScope) &&
     (options.isRuleEnabled?.(detector.ruleId, fileName) ?? true));
@@ -69,7 +85,7 @@ const analyzeContext = (context, options) => {
     const rawFindings = [];
     for (const detector of applicableDetectors) {
         options.signal?.throwIfAborted();
-        const profile = getAnalyzerFindingProfile(detector.id);
+        const profile = detector.profile ?? getAnalyzerFindingProfile(detector.id);
         if (!profile) {
             throw new Error(`Detector "${detector.id}" is missing finding metadata.`);
         }

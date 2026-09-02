@@ -106,6 +106,33 @@ This separation matters: different state libraries can legitimately have
 different invariants. The Bible documents the model rather than forcing one
 library's assumptions onto another.
 
+## Extensible by design
+
+Coding Bible is opinionated by default, not closed by design. The public Bible
+contains broadly reusable engineering standards, while teams can layer their own
+organization-specific policy on top without rewriting the analyzer.
+
+Portable declarative custom rules live in `coding-bible.config.*` and run through
+the same analyzer path in the browser, CLI, and GitHub Action. They are intended
+for defensible local policies such as restricted imports and required abstraction
+boundaries. Custom findings keep their own title, rationale, confidence, impact,
+and optional documentation URL so reports and future agent handoffs remain
+self-describing.
+
+Contributors and forks can add full AST/project-aware detectors without hand-
+editing registries:
+
+```bash
+pnpm rule:new -- --id APOLLO-004 --title "Prefer typed cache policies" --detector
+pnpm registries:generate
+pnpm check
+```
+
+The scaffolder creates the canonical rule plus an analyzer module with an inline
+finding profile; generated registries discover detector modules for every rule
+pack. See `docs/principles/extensible-rules.md` and the analyzer README for the
+custom-rule schema and contribution contract.
+
 ## Agent interface
 
 Coding Bible publishes static, generated machine-facing resources from the same

@@ -5,13 +5,25 @@ export type AnalyzerLanguage = (typeof analyzerLanguages)[number];
 
 export const analyzerPacks = [
   "accessibility",
+  "ai",
+  "apollo",
+  "architecture",
   "core",
+  "css",
+  "dependencies",
+  "feature-flags",
   "graphql",
   "internationalization",
   "javascript",
   "legend-state",
+  "nextjs",
+  "performance",
   "react",
+  "redux",
+  "tanstack-query",
+  "testing",
   "typescript",
+  "workflow",
 ] as const;
 export type AnalyzerPack = (typeof analyzerPacks)[number];
 
@@ -24,6 +36,7 @@ export interface AnalyzerConfigOverride {
 }
 
 export interface AnalyzerConfig {
+  customRules?: readonly AnalyzerCustomRule[];
   baseline?: string | false;
   cache?: string | boolean;
   include?: readonly string[];
@@ -54,6 +67,7 @@ export interface AnalyzerRuleSelection {
 }
 
 export interface AnalyzeOptions {
+  additionalDetectors?: readonly Detector[];
   dependencyScope?: AnalyzerDetectorDependencyScope;
   isRuleEnabled?: (ruleId: string, fileName: string) => boolean;
   signal?: AbortSignal;
@@ -71,6 +85,39 @@ export const analyzerFindingConfidences = [
 ] as const;
 export type AnalyzerFindingConfidence =
   (typeof analyzerFindingConfidences)[number];
+
+export interface AnalyzerDetectorProfile {
+  confidence: AnalyzerFindingConfidence;
+  contextNote?: string;
+  impact: AnalyzerFindingImpact;
+}
+
+export type AnalyzerCustomRuleModuleMatchMode = "exact" | "prefix";
+
+export type AnalyzerCustomRuleMatch =
+  | {
+      kind: "import";
+      mode?: AnalyzerCustomRuleModuleMatchMode;
+      source: string;
+    }
+  | {
+      callee: string;
+      kind: "call";
+    };
+
+export interface AnalyzerCustomRule {
+  confidence: AnalyzerFindingConfidence;
+  contextNote?: string;
+  id: string;
+  impact: AnalyzerFindingImpact;
+  languages?: readonly AnalyzerLanguage[];
+  match: AnalyzerCustomRuleMatch;
+  message: string;
+  rationale: string;
+  suggestion: string;
+  title: string;
+  url?: string;
+}
 
 export interface AnalyzerTextEdit {
   start: number;
@@ -95,6 +142,9 @@ export interface SourceLocation {
 export interface AnalyzerFinding {
   detectorId: string;
   ruleId: string;
+  ruleRationale?: string;
+  ruleTitle?: string;
+  ruleUrl?: string;
   message: string;
   suggestion: string;
   fix?: AnalyzerSuggestedFix;
@@ -144,6 +194,7 @@ export interface DetectorContext {
 }
 
 export interface Detector {
+  profile?: AnalyzerDetectorProfile;
   dependencyScope: AnalyzerDetectorDependencyScope;
   id: string;
   ruleId: string;

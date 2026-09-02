@@ -1,0 +1,95 @@
+# Extensible rules
+
+Coding Bible is opinionated by default, not closed by design.
+
+The public rule catalog should capture engineering standards that remain useful
+outside the repository or company that inspired them. A team can still have
+important local policy that should not become universal law. Coding Bible must
+support both without forcing either group to maintain a separate analyzer.
+
+## Two extension paths
+
+### 1. Declarative organization rules
+
+Portable custom rules belong in `coding-bible.config.*`.
+
+They are data, not arbitrary executable plugins. That property is intentional:
+the same rule can be loaded safely by browser Project mode, the CLI, and the
+self-contained GitHub Action.
+
+The first matcher set targets high-value policies that static syntax can defend:
+
+- restricted module imports/re-exports;
+- restricted literal call expressions.
+
+The DSL can expand, but every matcher must remain:
+
+- deterministic;
+- explainable from local evidence;
+- safe to load from JSON in a browser;
+- representable in reports and agent context;
+- compatible across web, CLI, and Action.
+
+A custom rule is self-describing. It owns an ID, title, rationale, message,
+suggestion, impact, confidence, optional context note, optional language scope,
+and optional HTTPS documentation URL.
+
+### 2. Full detectors for contributors and forks
+
+Some rules require TypeScript symbols, project context, control relationships, or
+specialized AST reasoning. Those should use the normal detector API rather than
+stretching the declarative DSL into a programming language.
+
+`pnpm rule:new -- --id ... --title ... --detector` scaffolds the canonical rule
+and an analyzer module together. The detector owns an inline finding profile and
+the generated registry discovers detector modules across every rule pack.
+
+The goal is simple:
+
+> Adding detector #100 should not require understanding or editing ten registries.
+
+Generated files remain generated. A contributor should implement the rule,
+detector, examples, and tests; repository tooling should handle wiring.
+
+## Core and custom policy are peers at runtime
+
+Once a custom rule is loaded, its finding should participate in the normal
+analyzer flow:
+
+- rule enable/disable and severity config;
+- file overrides;
+- browser, CLI, and Action analysis;
+- JSON/SARIF/report output;
+- baselines and fingerprints;
+- future Review Brief / Fix Pack exports.
+
+A custom finding must not become an opaque warning. Its rationale and optional
+documentation URL travel with the finding so a human or AI agent can understand
+why the organization cares about it.
+
+## Trust boundaries
+
+Declarative project rules are portable because they contain no executable code.
+
+Executable third-party detector plugins are deliberately not part of this first
+contract. A future plugin SDK needs an explicit trust, dependency, cache
+invalidation, packaging, and Action-distribution model. Until then, full custom
+detectors belong in a controlled fork or analyzer wrapper through the additive
+detector API.
+
+This constraint protects the local-first browser analyzer and keeps the
+self-contained Action honest.
+
+## Admission principle
+
+Before extending the declarative DSL, ask:
+
+1. Can the policy be detected from static evidence with useful confidence?
+2. Can the matcher semantics be explained in one short paragraph?
+3. Can it run identically in browser, CLI, and Action?
+4. Does it avoid duplicating ESLint, TypeScript, Prettier, compiler, or test
+   responsibilities?
+5. Will the resulting finding give a human or agent enough information to act?
+
+If the answer is no, keep the rule as guidance or implement a full detector
+instead of weakening the analyzer's trust model.

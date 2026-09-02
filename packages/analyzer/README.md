@@ -193,6 +193,84 @@ configuration. Set `tsconfig: false` to disable tsconfig discovery, or provide a
 path to force one config. Otherwise selected files are grouped by their nearest
 `tsconfig.json`, which keeps workspace packages on their own compiler settings.
 
+### Declarative custom rules
+
+Organization-specific policy can be declared directly in
+`coding-bible.config.json` or an executable config module. Declarative rules are
+data, not arbitrary browser-executed code, so the same definition can travel
+through browser Project mode, CLI scans, and the self-contained GitHub Action.
+
+```ts
+export default {
+  customRules: [
+    {
+      id: "ACME-001",
+      title: "Use the organization analytics wrapper",
+      rationale:
+        "The wrapper centralizes consent, event naming, and transport behavior.",
+      confidence: "certain",
+      impact: "high",
+      match: {
+        kind: "import",
+        source: "@vendor/raw-analytics",
+      },
+      message: "Do not import the raw analytics client.",
+      suggestion: "Import @acme/analytics instead.",
+      url: "https://engineering.example.com/standards/ACME-001",
+    },
+    {
+      id: "ACME-002",
+      title: "Use the shared HTTP client",
+      rationale:
+        "The shared client owns authentication, retries, and observability.",
+      confidence: "strong",
+      contextNote:
+        "Approved platform adapters can be excluded with file-specific overrides.",
+      impact: "medium",
+      match: {
+        kind: "call",
+        callee: "fetch",
+      },
+      message: "Direct fetch calls bypass the organization HTTP boundary.",
+      suggestion: "Use the shared HTTP client.",
+    },
+  ],
+  rules: {
+    "ACME-002": "warning",
+  },
+};
+```
+
+Custom rule IDs use the same `PREFIX-000` shape as core rules. The first
+declarative matcher set is intentionally narrow and AST-backed:
+
+- `{ kind: "import", source, mode?: "exact" | "prefix" }` checks static imports
+  and re-exports.
+- `{ kind: "call", callee }` checks a literal call expression such as `fetch`
+  or `window.fetch`.
+
+This DSL should grow only where matching semantics remain explainable and
+portable. Complex organization-specific semantic analysis belongs in a full
+detector maintained by a fork/contributor until a stable plugin contract exists.
+
+### Adding a full detector
+
+Official contributors and forks should not edit generated registries manually.
+Scaffold the canonical rule and detector together:
+
+```bash
+pnpm rule:new -- --id REACT-014 --title "Prefer explicit event ownership" --detector
+```
+
+The detector stub owns an inline `profile` with impact/confidence/context
+metadata. Existing built-ins remain compatible with the legacy profile registry,
+so this authoring improvement does not require a mass migration. Detector modules
+are discovered for every rule pack and wired by `pnpm registries:generate`.
+
+Library consumers building their own analyzer wrapper can also pass
+`additionalDetectors` to `analyze`, `analyzeMany`, or `analyzeProgram`.
+Additional detectors must use unique detector IDs and declare an inline profile.
+
 ## Automated coverage
 
 The current pass runs 24 detector functions covering 23 Bible rules:

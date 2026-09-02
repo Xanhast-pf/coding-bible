@@ -27,12 +27,18 @@ export const analyzeBrowserInput = (
   onProgress: (progress: BrowserAnalyzerProgress) => void = () => {},
 ): BrowserAnalyzeResult => {
   const startedAt = performance.now();
-  const ruleSelection = normalizeAnalyzerRuleSelection(input.ruleSelection);
-  const ruleSelected = createAnalyzerRuleSelectionPredicate(ruleSelection);
   const browserConfig =
     input.mode === "project"
       ? loadBrowserAnalyzerConfig(input.files)
       : loadBrowserAnalyzerConfig([]);
+  const ruleSelection = normalizeAnalyzerRuleSelection(
+    input.ruleSelection,
+    browserConfig.ruleIds,
+  );
+  const ruleSelected = createAnalyzerRuleSelectionPredicate(
+    ruleSelection,
+    browserConfig.ruleIds,
+  );
 
   if (typeof browserConfig.tsconfig === "string") {
     const configuredTsconfig = normalizeRelativeFileName(
@@ -99,6 +105,7 @@ export const analyzeBrowserInput = (
       });
 
       const result = analyzeProgram(project.program, [programInput], {
+        additionalDetectors: browserConfig.additionalDetectors,
         isRuleEnabled: (ruleId, fileName) =>
           ruleSelected(ruleId) &&
           browserConfig.resolver.isRuleEnabled(ruleId, fileName),

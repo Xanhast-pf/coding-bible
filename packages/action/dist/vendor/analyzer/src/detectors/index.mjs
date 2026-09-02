@@ -9,7 +9,7 @@ const hashDetectorContract = (value) => {
     return hash.toString(16).padStart(8, "0");
 };
 const detectorContract = detectors
-    .map(({ dependencyScope, id, languages, ruleId }) => `${id}:${ruleId}:${dependencyScope}:${languages?.join(",") ?? "*"}`)
+    .map(({ dependencyScope, id, languages, profile, ruleId }) => `${id}:${ruleId}:${dependencyScope}:${languages?.join(",") ?? "*"}${profile ? `:${profile.impact}:${profile.confidence}:${profile.contextNote ?? ""}` : ""}`)
     .join("|");
 export const analyzerDetectorCount = detectors.length;
 export const analyzerDetectorSignature = `detectors-v1-${hashDetectorContract(detectorContract)}`;

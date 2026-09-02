@@ -108,7 +108,14 @@ export const createFinding = (
   node: ts.Node,
   details: Pick<
     AnalyzerFinding,
-    "detectorId" | "fix" | "message" | "ruleId" | "suggestion"
+    | "detectorId"
+    | "fix"
+    | "message"
+    | "ruleId"
+    | "ruleRationale"
+    | "ruleTitle"
+    | "ruleUrl"
+    | "suggestion"
   >,
 ): AnalyzerFinding => {
   const start = node.getStart(context.sourceFile);
