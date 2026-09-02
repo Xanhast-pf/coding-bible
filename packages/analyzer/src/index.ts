@@ -7,6 +7,7 @@ export {
   createAnalyzerFileSelector,
   defaultAnalyzerIgnorePatterns,
   defineConfig,
+  getAnalyzerCustomRuleFilePaths,
   getAnalyzerPack,
   getConfiguredAnalyzerRuleIds,
   normalizeAnalyzerRuleSelection,
@@ -19,9 +20,12 @@ export {
   detectors,
 } from "./detectors/index.ts";
 export {
+  analyzerCustomRuleBookFormatVersion,
   createAnalyzerCustomRuleDetectors,
   defineCustomRule,
+  defineCustomRuleBook,
   defineDetector,
+  validateAnalyzerCustomRuleBook,
   validateAnalyzerCustomRules,
 } from "./customRules.ts";
 export {
@@ -39,6 +43,7 @@ export {
 } from "./findingProfiles.ts";
 export type {
   AnalyzerDetectorProfile,
+  AnalyzerCustomRuleBook,
   AnalyzerCustomRuleModuleMatchMode,
   AnalyzerCustomRuleMatch,
   AnalyzerCustomRule,

@@ -36,6 +36,7 @@ export interface AnalyzerConfigOverride {
 }
 
 export interface AnalyzerConfig {
+  customRuleFiles?: readonly string[];
   customRules?: readonly AnalyzerCustomRule[];
   baseline?: string | false;
   cache?: string | boolean;
@@ -117,6 +118,12 @@ export interface AnalyzerCustomRule {
   suggestion: string;
   title: string;
   url?: string;
+}
+
+export interface AnalyzerCustomRuleBook {
+  formatVersion: 1;
+  name: string;
+  rules: readonly AnalyzerCustomRule[];
 }
 
 export interface AnalyzerTextEdit {

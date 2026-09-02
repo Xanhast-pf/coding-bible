@@ -1,11 +1,13 @@
 import {
   analyzerConfigFileNames,
   createAnalyzerConfigResolver,
+  createAnalyzerCustomRuleDetectors,
   createAnalyzerFileSelector,
+  getAnalyzerCustomRuleFilePaths,
+  getConfiguredAnalyzerRuleIds,
   resolveAnalyzerConfigDefaults,
   validateAnalyzerConfig,
-  createAnalyzerCustomRuleDetectors,
-  getConfiguredAnalyzerRuleIds,
+  validateAnalyzerCustomRuleBook,
 } from "@coding-bible/analyzer";
 
 import { normalizeRelativeFileName } from "./fileTypes.ts";
@@ -31,6 +33,37 @@ const findRootConfigFile = (files: readonly BrowserProjectFile[]) => {
   return analyzerConfigFileNames.find((fileName) => fileNames.has(fileName));
 };
 
+const findProjectFile = (
+  files: readonly BrowserProjectFile[],
+  fileName: string,
+) =>
+  files.find((file) => normalizeRelativeFileName(file.fileName) === fileName);
+
+const loadBrowserCustomRules = (
+  config: unknown,
+  files: readonly BrowserProjectFile[],
+) =>
+  getAnalyzerCustomRuleFilePaths(config).flatMap((fileName) => {
+    const ruleFile = findProjectFile(files, fileName);
+    if (!ruleFile) {
+      throw new Error(
+        `Could not load custom rule file "${fileName}": file was not found in the selected project.`,
+      );
+    }
+    try {
+      return validateAnalyzerCustomRuleBook(
+        JSON.parse(ruleFile.source),
+        `custom rule file "${fileName}"`,
+      ).rules;
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : "Unknown custom rule error.";
+      throw new Error(
+        `Could not load custom rule file "${fileName}": ${message}`,
+      );
+    }
+  });
+
 export const loadBrowserAnalyzerConfig = (
   files: readonly BrowserProjectFile[],
 ): BrowserAnalyzerConfig => {
@@ -39,17 +72,18 @@ export const loadBrowserAnalyzerConfig = (
   let loadedConfig = {};
 
   if (configFileName === browserConfigFileName) {
-    const configFile = files.find(
-      ({ fileName }) =>
-        normalizeRelativeFileName(fileName) === browserConfigFileName,
-    );
+    const configFile = findProjectFile(files, browserConfigFileName);
 
     if (!configFile) {
       throw new Error(`Could not read ${browserConfigFileName}.`);
     }
 
     try {
-      loadedConfig = validateAnalyzerConfig(JSON.parse(configFile.source));
+      const rawConfig = JSON.parse(configFile.source);
+      const additionalCustomRules = loadBrowserCustomRules(rawConfig, files);
+      loadedConfig = validateAnalyzerConfig(rawConfig, {
+        additionalCustomRules,
+      });
     } catch (error: unknown) {
       const message =
         error instanceof Error ? error.message : "Unknown config error.";

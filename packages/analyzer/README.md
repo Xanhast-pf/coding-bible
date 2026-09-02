@@ -196,9 +196,11 @@ path to force one config. Otherwise selected files are grouped by their nearest
 ### Declarative custom rules
 
 Organization-specific policy can be declared directly in
-`coding-bible.config.json` or an executable config module. Declarative rules are
-data, not arbitrary browser-executed code, so the same definition can travel
-through browser Project mode, CLI scans, and the self-contained GitHub Action.
+`coding-bible.config.json` or an executable config module. For team-scale policy,
+configs can also reference versioned local JSON rulebooks with `customRuleFiles`.
+Declarative rules are data, not arbitrary browser-executed code, so the same
+definition can travel through browser Project mode, CLI scans, and the
+self-contained GitHub Action.
 
 ```ts
 export default {
@@ -240,6 +242,46 @@ export default {
   },
 };
 ```
+
+Larger teams can keep those rules in reviewable, shareable JSON files instead:
+
+```json
+{
+  "formatVersion": 1,
+  "name": "acme-frontend",
+  "rules": [
+    {
+      "id": "ACME-001",
+      "title": "Use the organization analytics wrapper",
+      "rationale": "The wrapper centralizes analytics policy.",
+      "confidence": "certain",
+      "impact": "high",
+      "match": {
+        "kind": "import",
+        "source": "@vendor/raw-analytics"
+      },
+      "message": "Do not import the raw analytics client.",
+      "suggestion": "Import @acme/analytics instead."
+    }
+  ]
+}
+```
+
+Reference one or more rulebooks from the project config:
+
+```ts
+export default {
+  customRuleFiles: ["config/coding-bible/frontend.json"],
+  rules: {
+    "ACME-001": "warning",
+  },
+};
+```
+
+Rulebook paths are relative to the Coding Bible config, must stay inside that
+directory tree, and must point to local JSON files. Inline and file-backed rules
+are merged into one policy; duplicate IDs fail instead of silently overriding
+each other.
 
 Custom rule IDs use the same `PREFIX-000` shape as core rules. The first
 declarative matcher set is intentionally narrow and AST-backed:

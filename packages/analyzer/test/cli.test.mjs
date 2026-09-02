@@ -1141,6 +1141,78 @@ test("project cache invalidates when analyzer configuration changes", async () =
   });
 });
 
+test("CLI loads versioned local custom rulebooks with normal severity config", async () => {
+  await withFixture(async (directory) => {
+    await mkdir(path.join(directory, "config", "coding-bible"), {
+      recursive: true,
+    });
+    await writeFile(
+      path.join(directory, "config", "coding-bible", "frontend.json"),
+      JSON.stringify({
+        formatVersion: 1,
+        name: "acme-frontend",
+        rules: [
+          {
+            confidence: "certain",
+            id: "ACME-001",
+            impact: "high",
+            match: { kind: "import", source: "@vendor/raw-analytics" },
+            message: "Do not import the raw analytics client.",
+            rationale: "The organization wrapper centralizes analytics policy.",
+            suggestion: "Import @acme/analytics instead.",
+            title: "Use the organization analytics wrapper",
+          },
+        ],
+      }),
+    );
+    await writeFile(
+      path.join(directory, "coding-bible.config.mjs"),
+      `export default {
+  customRuleFiles: ["config/coding-bible/frontend.json"],
+  rules: { "ACME-001": "warning" },
+};\n`,
+    );
+    await writeFile(
+      path.join(directory, "analytics.ts"),
+      'import analytics from "@vendor/raw-analytics";\n',
+    );
+
+    const result = await checkPaths(["."], { cwd: directory });
+    const finding = result.findings.find(({ ruleId }) => ruleId === "ACME-001");
+
+    assert.equal(finding?.severity, "warning");
+    assert.equal(finding?.ruleTitle, "Use the organization analytics wrapper");
+  });
+});
+
+test("CLI reports missing custom rulebook files as configuration errors", async () => {
+  await withFixture(async (directory) => {
+    await writeFile(
+      path.join(directory, "coding-bible.config.json"),
+      JSON.stringify({
+        customRuleFiles: ["config/coding-bible/missing.json"],
+      }),
+    );
+    await writeFile(
+      path.join(directory, "good.ts"),
+      "export const value = 1;\n",
+    );
+
+    const stderr = createWriter();
+    const exitCode = await runCli(["check", "."], {
+      cwd: directory,
+      stderr,
+      stdout: createWriter(),
+    });
+
+    assert.equal(exitCode, 2);
+    assert.match(
+      stderr.value,
+      /Could not load custom rule file "config\/coding-bible\/missing\.json"/u,
+    );
+  });
+});
+
 test("--clear-cache removes warm results before analysis", async () => {
   await withFixture(async (directory) => {
     await writeFile(path.join(directory, "bad.ts"), "const value: any = 1;\n");

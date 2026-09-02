@@ -112,12 +112,13 @@ Coding Bible is opinionated by default, not closed by design. The public Bible
 contains broadly reusable engineering standards, while teams can layer their own
 organization-specific policy on top without rewriting the analyzer.
 
-Portable declarative custom rules live in `coding-bible.config.*` and run through
-the same analyzer path in the browser, CLI, and GitHub Action. They are intended
-for defensible local policies such as restricted imports and required abstraction
-boundaries. Custom findings keep their own title, rationale, confidence, impact,
-and optional documentation URL so reports and future agent handoffs remain
-self-describing.
+Portable declarative custom rules can live inline in `coding-bible.config.*` or
+in versioned local JSON rulebooks referenced through `customRuleFiles`. Both
+forms run through the same analyzer path in the browser, CLI, and GitHub Action.
+They are intended for defensible local policies such as restricted imports and
+required abstraction boundaries. Custom findings keep their own title, rationale,
+confidence, impact, and optional documentation URL so reports and future agent
+handoffs remain self-describing.
 
 Contributors and forks can add full AST/project-aware detectors without hand-
 editing registries:
