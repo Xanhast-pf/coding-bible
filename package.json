@@ -32,7 +32,8 @@
     "typecheck": "pnpm -r --if-present typecheck",
     "registries:generate": "node scripts/rules/generate-registries.mjs",
     "registries:check": "node scripts/rules/generate-registries.mjs --check",
-    "rule:new": "node scripts/rules/new-rule.mjs"
+    "rule:new": "node scripts/rules/new-rule.mjs",
+    "rule:prompt": "node scripts/rules/generate-agent-prompt.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",
