@@ -132,6 +132,8 @@ test("project config can assign severity to declared custom rule IDs", () => {
 
 test("versioned custom rulebooks validate and hydrate into project config", () => {
   const ruleBook = validateAnalyzerCustomRuleBook({
+    $schema:
+      "https://xanhast-pf.github.io/coding-bible/custom-rulebook.schema.json",
     formatVersion: analyzerCustomRuleBookFormatVersion,
     name: "acme-frontend",
     rules: [importRule],
@@ -143,6 +145,10 @@ test("versioned custom rulebooks validate and hydrate into project config", () =
     { additionalCustomRules: ruleBook.rules },
   );
 
+  assert.equal(
+    ruleBook.$schema,
+    "https://xanhast-pf.github.io/coding-bible/custom-rulebook.schema.json",
+  );
   assert.equal(ruleBook.name, "acme-frontend");
   assert.equal(config.customRules?.[0]?.id, "ACME-001");
 });

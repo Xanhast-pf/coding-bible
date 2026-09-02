@@ -283,6 +283,25 @@ directory tree, and must point to local JSON files. Inline and file-backed rules
 are merged into one policy; duplicate IDs fail instead of silently overriding
 each other.
 
+For editor autocomplete and early validation, scaffold a rulebook instead of
+starting from a blank file:
+
+```bash
+pnpm rulebook:new -- \
+  --name acme-frontend \
+  --id ACME-001 \
+  --title "Use the organization analytics wrapper" \
+  --kind import \
+  --target @vendor/raw-analytics
+
+pnpm rulebook:validate -- config/coding-bible/acme-frontend.json
+```
+
+The generated `$schema` points to
+`https://xanhast-pf.github.io/coding-bible/custom-rulebook.schema.json`. The schema
+is an authoring aid; the shared runtime validator used by Web, CLI, and Action is
+still authoritative.
+
 Custom rule IDs use the same `PREFIX-000` shape as core rules. The first
 declarative matcher set is intentionally narrow and AST-backed:
 

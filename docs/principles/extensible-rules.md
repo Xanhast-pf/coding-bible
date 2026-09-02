@@ -39,6 +39,23 @@ A custom rule is self-describing. It owns an ID, title, rationale, message,
 suggestion, impact, confidence, optional context note, optional language scope,
 and optional HTTPS documentation URL.
 
+### Authoring should fail early
+
+A team should not need to run a full repository analysis just to discover that a
+rulebook is malformed. Coding Bible therefore treats authoring UX as part of the
+rule contract:
+
+- `pnpm rulebook:new` scaffolds a valid versioned rulebook with conservative
+  confidence defaults;
+- the generated rulebook points at the public JSON Schema for editor autocomplete
+  and inline validation;
+- `pnpm rulebook:validate` runs the same runtime validator used by the analyzer and
+  also catches collisions across multiple rulebooks or with built-in automated IDs;
+- the JSON Schema is generated and checked for drift in the normal repository gate.
+
+The schema improves authoring, but runtime validation remains authoritative. A JSON
+Schema editor hint must never become a second implementation of analyzer semantics.
+
 ### 2. Full detectors for contributors and forks
 
 Some rules require TypeScript symbols, project context, control relationships, or

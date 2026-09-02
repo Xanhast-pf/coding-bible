@@ -91,6 +91,23 @@ pnpm rule:prompt -- \
 Treat the generated prompt as disposable context. Do not commit generated prompt
 files unless they are intentionally part of project documentation.
 
+## Custom rulebook authoring
+
+Use `pnpm rulebook:new` to scaffold organization rulebooks instead of copying an
+old JSON file and guessing which fields are current. The scaffold uses the public
+custom-rulebook schema and starts at contextual confidence so authors must make an
+explicit decision before claiming stronger certainty.
+
+Validate rulebooks before wiring them into project config:
+
+```bash
+pnpm rulebook:validate -- config/coding-bible/frontend.json
+```
+
+`apps/web/public/custom-rulebook.schema.json` is generated. Do not edit it by
+hand; update `scripts/rules/generate-custom-rulebook-schema.mjs`, regenerate it,
+and keep `pnpm rulebook:schema:check` green.
+
 ## Agent interface changes
 
 The public agent files under `apps/web/public` are generated from the canonical
@@ -164,7 +181,12 @@ If affected tests are temporarily disruptive, prefer the narrow bypass:
 SKIP_AFFECTED_TESTS=1 git commit -m "message"
 ```
 
-`SKIP_TYPECHECK`, `SKIP_AGENT_INTERFACE`, `SKIP_ACTION_RUNTIME`, `SKIP_KNIP`, and `SKIP_BIBLE`
-exist for exceptional local work, but the full `pnpm check` gate must pass before
-code is pushed or merged. Pre-push and CI intentionally run the complete suite
-rather than inheriting pre-commit bypasses.
+`SKIP_TYPECHECK`, `SKIP_AGENT_INTERFACE`, `SKIP_ACTION_RUNTIME`, `SKIP_KNIP`,
+and `SKIP_BIBLE` exist for exceptional local work. Before handing work off, run
+`pnpm check`: it regenerates committed artifacts, applies safe ESLint/Prettier
+maintenance, then runs the complete verification suite.
+
+Pre-push and CI intentionally run `pnpm check:ci` instead. That strict variant
+does not regenerate or auto-fix committed source, so it fails when the commit
+itself is stale or misformatted rather than silently repairing the runner's
+working tree.

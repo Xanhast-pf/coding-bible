@@ -121,6 +121,7 @@ export interface AnalyzerCustomRule {
 }
 
 export interface AnalyzerCustomRuleBook {
+  $schema?: string;
   formatVersion: 1;
   name: string;
   rules: readonly AnalyzerCustomRule[];
