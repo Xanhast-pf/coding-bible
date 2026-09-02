@@ -81,6 +81,8 @@ without approximation.
   instead of inventing rule-specific configuration.
 - Add validation/integration coverage for the policy shape and at least one
   realistic violating and non-violating case.
+- If the checkout provides `rulebook:new` / `rulebook:validate`, use those instead
+  of hand-copying an old rulebook contract.
 - Confirm the same declarative rule behaves consistently in the supported
   consumers.
 
@@ -125,18 +127,16 @@ Before calling the task complete:
 9. Run repository generation/build steps required by the changed surfaces.
 10. Run `pnpm check` and leave the repository green.
 
-Typical final commands include:
+The normal final command is:
 
 ```bash
-pnpm format
-pnpm registries:generate
-pnpm agent:generate
-pnpm action:build
 pnpm check
 ```
 
-Run only the generation steps relevant to the files you changed, but always run
-the final `pnpm check` before considering the implementation complete.
+`pnpm check` owns deterministic generation, ESLint auto-fixes, and Prettier before
+running the strict repository verification sequence. Do not duplicate those
+mechanical steps manually unless you are debugging one of them. CI and pre-push
+use the non-mutating `pnpm check:ci` variant.
 
 ## Final response
 

@@ -44,7 +44,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Verify repository
-        run: pnpm check
+        run: pnpm check:ci
 
       - name: Upload Pages artifact
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'

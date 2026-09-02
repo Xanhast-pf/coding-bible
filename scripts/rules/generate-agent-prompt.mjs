@@ -175,10 +175,17 @@ const describeCapabilities = () => {
   const customRuleSource = readCapabilitySource(
     "packages/analyzer/src/customRules.ts",
   );
+  const rulebookNewSource = readCapabilitySource(
+    "scripts/rules/new-rulebook.mjs",
+  );
+  const rulebookValidateSource = readCapabilitySource(
+    "scripts/rules/validate-rulebook.mjs",
+  );
 
   return [
     `- Declarative custom-rule engine: ${customRuleSource ? "available" : "not detected"}.`,
     `- Versioned local rulebooks via \`customRuleFiles\`: ${configSource.includes("customRuleFiles") ? "available" : "not detected in this checkout"}.`,
+    `- Rulebook scaffolding / validation: ${rulebookNewSource && rulebookValidateSource ? "available" : "not detected in this checkout"}.`,
     `- \`rule:new --detector\` scaffolding: ${newRuleSource.includes("--detector") ? "available" : "not detected in this checkout"}.`,
     "- The current source files remain authoritative; do not infer unsupported matcher kinds from this capability summary.",
   ].join("\n");

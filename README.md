@@ -81,12 +81,40 @@ pnpm check
 pnpm dev
 ```
 
-`pnpm check` is the authoritative repository gate. It runs ESLint, Prettier
-verification, typechecking, Knip, the Node test suites, a production build, and
-finally a full Coding Bible scan. TypeScript is installed at the workspace root
-because multiple workspace packages use `tsc`. pnpm is also configured to allow
-the `esbuild` lifecycle script required by Vite, so a fresh install does not
-require a manual `pnpm approve-builds` step.
+`pnpm check` is the developer-facing full repository gate. It intentionally
+self-heals deterministic maintenance first: regenerate committed artifacts, apply
+ESLint fixes, and run Prettier across the resulting tree. It then switches to
+read-only verification: generated-artifact drift, formatting, lint, typechecking,
+Knip, tests, package builds, and finally the full Coding Bible dogfood scan.
+
+`pnpm check:ci` runs only that strict verification phase. CI and pre-push use it
+so a runner or Git hook can never make an uncommitted fix and then report success
+for a commit that does not contain the fix.
+
+In short:
+
+```text
+pnpm check
+  generate
+  -> ESLint --fix
+  -> Prettier --write
+  -> strict verification
+
+pnpm check:ci
+  generated-artifact checks
+  -> Prettier check
+  -> ESLint
+  -> typecheck
+  -> Knip
+  -> tests
+  -> package builds
+  -> Coding Bible
+```
+
+TypeScript is installed at the workspace root because multiple workspace packages
+use `tsc`. pnpm is also configured to allow the `esbuild` lifecycle script
+required by Vite, so a fresh install does not require a manual
+`pnpm approve-builds` step.
 
 ## Source distillation
 
@@ -143,6 +171,23 @@ pnpm rule:prompt -- \
 Use `--mode declarative` or `--mode detector` when the implementation path is
 already known; the default `auto` mode instructs the agent to choose the smallest
 defensible implementation after inspecting the current analyzer contracts.
+
+For organization policy, the authoring loop is also scaffolded and editor-friendly:
+
+```bash
+pnpm rulebook:new -- \
+  --name acme-frontend \
+  --id ACME-001 \
+  --title "Use the organization analytics wrapper" \
+  --kind import \
+  --target @vendor/raw-analytics
+
+pnpm rulebook:validate -- config/coding-bible/acme-frontend.json
+```
+
+Generated rulebooks include the published JSON Schema for autocomplete and inline
+editor validation. Runtime validation remains authoritative, and the schema itself
+is generated/checked as part of the repository quality gate.
 
 The scaffolder creates the canonical rule plus an analyzer module with an inline
 finding profile; generated registries discover detector modules for every rule
@@ -382,9 +427,9 @@ SKIP_KNIP=1
 SKIP_BIBLE=1
 ```
 
-They are intentionally opt-in. Pre-push and CI still run the complete `pnpm
-check` gate: full lint, formatting verification, typecheck, Knip, all tests,
-production build, and finally the full Coding Bible project scan.
+They are intentionally opt-in. Pre-push and CI run `pnpm check:ci`, the strict
+non-healing gate. Local `pnpm check` runs generation and mechanical fixes first,
+then executes that same verification sequence.
 
 Each rule also exposes a `tldr;` action that copies an AI-optimized prompt with
 the rule rationale, examples, exceptions, and canonical deep link. The rule-list

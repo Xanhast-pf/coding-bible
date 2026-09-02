@@ -2,7 +2,12 @@ import ts from "../../typescript/typescript.cjs";
 import { analyzerFindingConfidences, analyzerFindingImpacts, analyzerLanguages, } from "./types.mjs";
 import { createFinding, nodesOfKind } from "./utils.mjs";
 export const analyzerCustomRuleBookFormatVersion = 1;
-const validCustomRuleBookKeys = new Set(["formatVersion", "name", "rules"]);
+const validCustomRuleBookKeys = new Set([
+    "$schema",
+    "formatVersion",
+    "name",
+    "rules",
+]);
 const customRuleIdPattern = /^[A-Z][A-Z0-9]*-\d{3}$/u;
 const validConfidences = new Set(analyzerFindingConfidences);
 const validImpacts = new Set(analyzerFindingImpacts);
@@ -118,12 +123,16 @@ export const validateAnalyzerCustomRuleBook = (value, sourceName = "custom ruleb
     if (book.formatVersion !== analyzerCustomRuleBookFormatVersion) {
         throw new Error(`${sourceName}.formatVersion must be ${analyzerCustomRuleBookFormatVersion}.`);
     }
+    const schema = book.$schema === undefined
+        ? undefined
+        : requireText(book.$schema, `${sourceName}.$schema`);
     const name = requireText(book.name, `${sourceName}.name`);
     const rules = validateAnalyzerCustomRules(book.rules, `${sourceName}.rules`);
     if (!rules.length) {
         throw new Error(`${sourceName}.rules must contain at least one rule.`);
     }
     return {
+        ...(schema ? { $schema: schema } : {}),
         formatVersion: analyzerCustomRuleBookFormatVersion,
         name,
         rules,
