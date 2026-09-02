@@ -264,6 +264,57 @@ test("browser project analysis honors JSON config includes, ignores, severities,
   );
 });
 
+test("browser project analysis loads versioned local custom rulebooks", () => {
+  const result = analyzeBrowserInput(
+    {
+      files: [
+        {
+          fileName: "coding-bible.config.json",
+          source: JSON.stringify({
+            customRuleFiles: ["config/coding-bible/frontend.json"],
+            rules: { "ACME-001": "warning" },
+          }),
+        },
+        {
+          fileName: "config/coding-bible/frontend.json",
+          source: JSON.stringify({
+            formatVersion: 1,
+            name: "acme-frontend",
+            rules: [
+              {
+                confidence: "certain",
+                id: "ACME-001",
+                impact: "high",
+                match: {
+                  kind: "import",
+                  source: "@vendor/raw-analytics",
+                },
+                message: "Do not import the raw analytics client.",
+                rationale:
+                  "The organization wrapper centralizes analytics policy.",
+                suggestion: "Import @acme/analytics instead.",
+                title: "Use the organization analytics wrapper",
+              },
+            ],
+          }),
+        },
+        {
+          fileName: "src/analytics.ts",
+          source: 'import analytics from "@vendor/raw-analytics";\n',
+        },
+      ],
+      mode: "project",
+    },
+    libraryFiles,
+  );
+
+  const findings = result.files.flatMap(({ result: fileResult }) =>
+    fileResult.findings.map(({ ruleId, severity }) => [ruleId, severity]),
+  );
+  assert.equal(result.sourceFileCount, 1);
+  assert.deepEqual(findings, [["ACME-001", "warning"]]);
+});
+
 test("browser project analysis skips default vendor and compiled source paths", () => {
   const result = analyzeBrowserInput(
     {

@@ -6,9 +6,11 @@ import {
   analyzerConfigFileNames,
   createAnalyzerConfigResolver,
   defaultAnalyzerIgnorePatterns,
+  getAnalyzerCustomRuleFilePaths,
   getAnalyzerPack,
   resolveAnalyzerConfigDefaults,
   validateAnalyzerConfig,
+  validateAnalyzerCustomRuleBook,
 } from "../src/index.ts";
 import { normalizePath } from "./glob.mjs";
 
@@ -33,6 +35,27 @@ const loadConfigModule = async (filePath) => {
   url.searchParams.set("coding-bible", String(Date.now()));
   const module = await import(url.href);
   return module.default ?? module;
+};
+
+const loadCustomRuleFiles = async (config, rootDir) => {
+  const rules = [];
+  for (const filePath of getAnalyzerCustomRuleFilePaths(config)) {
+    try {
+      const source = await readFile(path.resolve(rootDir, filePath), "utf8");
+      const ruleBook = validateAnalyzerCustomRuleBook(
+        JSON.parse(source),
+        `custom rule file "${filePath}"`,
+      );
+      rules.push(...ruleBook.rules);
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Unknown custom rule error.";
+      throw new Error(
+        `Could not load custom rule file "${filePath}": ${message}`,
+      );
+    }
+  }
+  return rules;
 };
 
 const findConfigPath = async (cwd, explicitPath) => {
@@ -72,15 +95,18 @@ export const loadAnalyzerConfig = async ({
 } = {}) => {
   const startedAt = performance.now();
   const resolvedPath = await findConfigPath(cwd, configPath);
-  const loaded = resolvedPath
-    ? validateAnalyzerConfig(await loadConfigModule(resolvedPath))
-    : {};
+  const rootDir = resolvedPath ? path.dirname(resolvedPath) : cwd;
+  const rawConfig = resolvedPath ? await loadConfigModule(resolvedPath) : {};
+  const additionalCustomRules = resolvedPath
+    ? await loadCustomRuleFiles(rawConfig, rootDir)
+    : [];
+  const loaded = validateAnalyzerConfig(rawConfig, { additionalCustomRules });
   const config = resolveAnalyzerConfigDefaults(loaded);
 
   return {
     config,
     configPath: resolvedPath,
-    rootDir: resolvedPath ? path.dirname(resolvedPath) : cwd,
+    rootDir,
     loadMs: performance.now() - startedAt,
   };
 };

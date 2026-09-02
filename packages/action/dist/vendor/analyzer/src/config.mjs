@@ -38,6 +38,7 @@ const analyzerRuleSettings = [
 ];
 const validRuleSettings = new Set(analyzerRuleSettings);
 const validConfigKeys = new Set([
+    "customRuleFiles",
     "customRules",
     "baseline",
     "cache",
@@ -75,6 +76,48 @@ const assertStringArray = (value, name) => {
         value.some((item) => typeof item !== "string" || !item.trim())) {
         throw new Error(`${name} must be an array of non-empty strings.`);
     }
+};
+const windowsAbsolutePathPattern = /^[A-Za-z]:\//u;
+const normalizeAnalyzerCustomRuleFilePath = (value, index) => {
+    const normalized = value.trim().replace(/\\/g, "/");
+    if (normalized.startsWith("/") ||
+        windowsAbsolutePathPattern.test(normalized)) {
+        throw new Error(`customRuleFiles[${index}] must be relative to the Coding Bible config.`);
+    }
+    const segments = normalized.split("/");
+    if (segments.includes("..")) {
+        throw new Error(`customRuleFiles[${index}] must not escape the Coding Bible config directory.`);
+    }
+    const canonical = segments
+        .filter((segment) => segment && segment !== ".")
+        .join("/");
+    if (!canonical) {
+        throw new Error(`customRuleFiles[${index}] must not be empty.`);
+    }
+    if (!canonical.toLowerCase().endsWith(".json")) {
+        throw new Error(`customRuleFiles[${index}] must reference a JSON file.`);
+    }
+    return canonical;
+};
+export const getAnalyzerCustomRuleFilePaths = (value) => {
+    const config = toRecord(value, "Coding Bible config must export an object.");
+    if (config.customRuleFiles === undefined) {
+        return [];
+    }
+    if (!Array.isArray(config.customRuleFiles) ||
+        config.customRuleFiles.length === 0 ||
+        config.customRuleFiles.some((item) => typeof item !== "string" || !item.trim())) {
+        throw new Error("customRuleFiles must be an array containing at least one non-empty path.");
+    }
+    const paths = config.customRuleFiles.map((filePath, index) => normalizeAnalyzerCustomRuleFilePath(filePath, index));
+    const seen = new Set();
+    for (const filePath of paths) {
+        if (seen.has(filePath)) {
+            throw new Error(`customRuleFiles duplicates "${filePath}".`);
+        }
+        seen.add(filePath);
+    }
+    return paths;
 };
 const assertSettings = (value, name, { validatePacks = false, validateRules = false, ruleIds = validRuleIds, } = {}) => {
     if (value === undefined) {
@@ -131,9 +174,14 @@ export const createAnalyzerRuleSelectionPredicate = (selection = {}, ruleIds = a
     const exclude = new Set(normalized.exclude ?? []);
     return (ruleId) => (!include || include.has(ruleId)) && !exclude.has(ruleId);
 };
-export const validateAnalyzerConfig = (value) => {
+export const validateAnalyzerConfig = (value, { additionalCustomRules = [], } = {}) => {
     const config = toRecord(value, "Coding Bible config must export an object.");
-    const customRules = validateAnalyzerCustomRules(config.customRules);
+    const customRuleFiles = getAnalyzerCustomRuleFilePaths(config);
+    const inlineCustomRules = validateAnalyzerCustomRules(config.customRules);
+    const customRules = validateAnalyzerCustomRules([
+        ...inlineCustomRules,
+        ...additionalCustomRules,
+    ]);
     for (const { id } of customRules) {
         if (validRuleIds.has(id)) {
             throw new Error(`customRules must not reuse built-in automated rule ID "${id}".`);
@@ -196,7 +244,13 @@ export const validateAnalyzerConfig = (value) => {
             });
         });
     }
-    return config;
+    return {
+        ...config,
+        ...(customRuleFiles.length ? { customRuleFiles } : {}),
+        ...(config.customRules !== undefined || additionalCustomRules.length
+            ? { customRules }
+            : {}),
+    };
 };
 export const resolveAnalyzerConfigDefaults = (config) => ({
     ...config,

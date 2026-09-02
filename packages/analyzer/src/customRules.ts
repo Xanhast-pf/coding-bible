@@ -5,6 +5,7 @@ import {
   analyzerFindingImpacts,
   analyzerLanguages,
   type AnalyzerCustomRule,
+  type AnalyzerCustomRuleBook,
   type AnalyzerCustomRuleMatch,
   type AnalyzerFindingConfidence,
   type AnalyzerFindingImpact,
@@ -12,6 +13,8 @@ import {
 } from "./types.ts";
 import { createFinding, nodesOfKind } from "./utils.ts";
 
+export const analyzerCustomRuleBookFormatVersion = 1 as const;
+const validCustomRuleBookKeys = new Set(["formatVersion", "name", "rules"]);
 const customRuleIdPattern = /^[A-Z][A-Z0-9]*-\d{3}$/u;
 const validConfidences = new Set<unknown>(analyzerFindingConfidences);
 const validImpacts = new Set<unknown>(analyzerFindingImpacts);
@@ -74,43 +77,44 @@ const validateMatch = (
 
 export const validateAnalyzerCustomRules = (
   value: unknown,
+  name = "customRules",
 ): readonly AnalyzerCustomRule[] => {
   if (value === undefined) return [];
   if (!Array.isArray(value)) {
-    throw new Error("customRules must be an array.");
+    throw new Error(`${name} must be an array.`);
   }
 
   const seenIds = new Set<string>();
   return value.map((item, index) => {
-    const name = `customRules[${index}]`;
-    const rule = toRecord(item, `${name} must be an object.`);
-    const id = requireText(rule.id, `${name}.id`).toUpperCase();
+    const itemName = `${name}[${index}]`;
+    const rule = toRecord(item, `${itemName} must be an object.`);
+    const id = requireText(rule.id, `${itemName}.id`).toUpperCase();
     if (!customRuleIdPattern.test(id)) {
-      throw new Error(`${name}.id must match PREFIX-000.`);
+      throw new Error(`${itemName}.id must match PREFIX-000.`);
     }
     if (seenIds.has(id)) {
-      throw new Error(`${name}.id duplicates custom rule "${id}".`);
+      throw new Error(`${itemName}.id duplicates custom rule "${id}".`);
     }
     seenIds.add(id);
 
     const confidence = rule.confidence;
     if (!isAnalyzerFindingConfidence(confidence)) {
       throw new Error(
-        `${name}.confidence must be "certain", "strong", or "contextual".`,
+        `${itemName}.confidence must be "certain", "strong", or "contextual".`,
       );
     }
     const impact = rule.impact;
     if (!isAnalyzerFindingImpact(impact)) {
-      throw new Error(`${name}.impact must be "high", "medium", or "low".`);
+      throw new Error(`${itemName}.impact must be "high", "medium", or "low".`);
     }
 
     const contextNote =
       rule.contextNote === undefined
         ? undefined
-        : requireText(rule.contextNote, `${name}.contextNote`);
+        : requireText(rule.contextNote, `${itemName}.contextNote`);
     if (confidence === "contextual" && !contextNote) {
       throw new Error(
-        `${name}.contextNote is required for contextual findings.`,
+        `${itemName}.contextNote is required for contextual findings.`,
       );
     }
 
@@ -122,7 +126,7 @@ export const validateAnalyzerCustomRules = (
         rule.languages.some((language) => !validLanguages.has(language))
       ) {
         throw new Error(
-          `${name}.languages must contain one or more of: ${analyzerLanguages.join(", ")}.`,
+          `${itemName}.languages must contain one or more of: ${analyzerLanguages.join(", ")}.`,
         );
       }
       languages = [
@@ -131,9 +135,11 @@ export const validateAnalyzerCustomRules = (
     }
 
     const url =
-      rule.url === undefined ? undefined : requireText(rule.url, `${name}.url`);
+      rule.url === undefined
+        ? undefined
+        : requireText(rule.url, `${itemName}.url`);
     if (url && !url.startsWith("https://")) {
-      throw new Error(`${name}.url must use HTTPS.`);
+      throw new Error(`${itemName}.url must use HTTPS.`);
     }
 
     return {
@@ -142,19 +148,52 @@ export const validateAnalyzerCustomRules = (
       id,
       impact,
       ...(languages ? { languages } : {}),
-      match: validateMatch(rule.match, `${name}.match`),
-      message: requireText(rule.message, `${name}.message`),
-      rationale: requireText(rule.rationale, `${name}.rationale`),
-      suggestion: requireText(rule.suggestion, `${name}.suggestion`),
-      title: requireText(rule.title, `${name}.title`),
+      match: validateMatch(rule.match, `${itemName}.match`),
+      message: requireText(rule.message, `${itemName}.message`),
+      rationale: requireText(rule.rationale, `${itemName}.rationale`),
+      suggestion: requireText(rule.suggestion, `${itemName}.suggestion`),
+      title: requireText(rule.title, `${itemName}.title`),
       ...(url ? { url } : {}),
     };
   });
 };
 
+export const validateAnalyzerCustomRuleBook = (
+  value: unknown,
+  sourceName = "custom rulebook",
+): AnalyzerCustomRuleBook => {
+  const book = toRecord(value, `${sourceName} must be an object.`);
+  for (const key of Object.keys(book)) {
+    if (!validCustomRuleBookKeys.has(key)) {
+      throw new Error(`${sourceName} contains unknown option "${key}".`);
+    }
+  }
+  if (book.formatVersion !== analyzerCustomRuleBookFormatVersion) {
+    throw new Error(
+      `${sourceName}.formatVersion must be ${analyzerCustomRuleBookFormatVersion}.`,
+    );
+  }
+  const name = requireText(book.name, `${sourceName}.name`);
+  const rules = validateAnalyzerCustomRules(book.rules, `${sourceName}.rules`);
+  if (!rules.length) {
+    throw new Error(`${sourceName}.rules must contain at least one rule.`);
+  }
+  return {
+    formatVersion: analyzerCustomRuleBookFormatVersion,
+    name,
+    rules,
+  };
+};
+
 export const defineCustomRule = <const TRule extends AnalyzerCustomRule>(
   rule: TRule,
 ): TRule => rule;
+
+export const defineCustomRuleBook = <
+  const TRuleBook extends AnalyzerCustomRuleBook,
+>(
+  ruleBook: TRuleBook,
+): TRuleBook => ruleBook;
 
 export const defineDetector = <const TDetector extends Detector>(
   detector: TDetector,

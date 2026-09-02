@@ -3,8 +3,11 @@ import test from "node:test";
 
 import {
   analyze,
+  analyzerCustomRuleBookFormatVersion,
   createAnalyzerCustomRuleDetectors,
+  getAnalyzerCustomRuleFilePaths,
   validateAnalyzerConfig,
+  validateAnalyzerCustomRuleBook,
   validateAnalyzerCustomRules,
 } from "../src/index.ts";
 
@@ -125,4 +128,71 @@ test("project config can assign severity to declared custom rule IDs", () => {
   });
 
   assert.equal(config.rules?.["ACME-001"], "warning");
+});
+
+test("versioned custom rulebooks validate and hydrate into project config", () => {
+  const ruleBook = validateAnalyzerCustomRuleBook({
+    formatVersion: analyzerCustomRuleBookFormatVersion,
+    name: "acme-frontend",
+    rules: [importRule],
+  });
+  const config = validateAnalyzerConfig(
+    {
+      customRuleFiles: ["./config/coding-bible/frontend.json"],
+    },
+    { additionalCustomRules: ruleBook.rules },
+  );
+
+  assert.equal(ruleBook.name, "acme-frontend");
+  assert.equal(config.customRules?.[0]?.id, "ACME-001");
+});
+
+test("custom rule file paths stay local, JSON-only, and duplicate-free", () => {
+  assert.deepEqual(
+    getAnalyzerCustomRuleFilePaths({
+      customRuleFiles: ["./config/coding-bible/frontend.json"],
+    }),
+    ["config/coding-bible/frontend.json"],
+  );
+  assert.throws(
+    () =>
+      getAnalyzerCustomRuleFilePaths({
+        customRuleFiles: ["../outside.json"],
+      }),
+    /must not escape/u,
+  );
+  assert.throws(
+    () =>
+      getAnalyzerCustomRuleFilePaths({
+        customRuleFiles: ["rules/frontend.ts"],
+      }),
+    /must reference a JSON file/u,
+  );
+  assert.throws(
+    () =>
+      getAnalyzerCustomRuleFilePaths({
+        customRuleFiles: ["rules/frontend.json", "./rules/frontend.json"],
+      }),
+    /duplicates/u,
+  );
+});
+
+test("rulebook validation rejects unsupported versions and duplicate merged IDs", () => {
+  assert.throws(
+    () =>
+      validateAnalyzerCustomRuleBook({
+        formatVersion: 2,
+        name: "future",
+        rules: [importRule],
+      }),
+    /formatVersion must be 1/u,
+  );
+  assert.throws(
+    () =>
+      validateAnalyzerConfig(
+        { customRules: [importRule] },
+        { additionalCustomRules: [importRule] },
+      ),
+    /duplicates custom rule "ACME-001"/u,
+  );
 });

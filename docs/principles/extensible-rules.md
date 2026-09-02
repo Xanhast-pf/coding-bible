@@ -11,11 +11,16 @@ support both without forcing either group to maintain a separate analyzer.
 
 ### 1. Declarative organization rules
 
-Portable custom rules belong in `coding-bible.config.*`.
+Portable custom rules can live inline in `coding-bible.config.*` or in versioned
+local JSON rulebooks referenced through `customRuleFiles`.
 
 They are data, not arbitrary executable plugins. That property is intentional:
 the same rule can be loaded safely by browser Project mode, the CLI, and the
 self-contained GitHub Action.
+
+Rulebooks use an explicit `formatVersion`, stay relative to the Coding Bible
+config directory, and merge with inline rules into one validated policy. Duplicate
+IDs, path escapes, unsupported versions, and missing files fail loudly.
 
 The first matcher set targets high-value policies that static syntax can defend:
 
