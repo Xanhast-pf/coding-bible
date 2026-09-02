@@ -129,6 +129,21 @@ pnpm registries:generate
 pnpm check
 ```
 
+When a developer wants an AI coding agent to help author the rule or detector,
+Coding Bible can generate a focused, vendor-neutral implementation brief from the
+current checkout:
+
+```bash
+pnpm rule:prompt -- \
+  --id ACME-004 \
+  --title "Use the shared HTTP client" \
+  --goal "Application code must not call fetch directly outside the approved HTTP boundary."
+```
+
+Use `--mode declarative` or `--mode detector` when the implementation path is
+already known; the default `auto` mode instructs the agent to choose the smallest
+defensible implementation after inspecting the current analyzer contracts.
+
 The scaffolder creates the canonical rule plus an analyzer module with an inline
 finding profile; generated registries discover detector modules for every rule
 pack. See `docs/principles/extensible-rules.md` and the analyzer README for the

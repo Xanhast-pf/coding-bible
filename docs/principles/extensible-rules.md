@@ -56,6 +56,23 @@ The goal is simple:
 Generated files remain generated. A contributor should implement the rule,
 detector, examples, and tests; repository tooling should handle wiring.
 
+### AI-assisted authoring is a context handoff
+
+Coding Bible may help a developer hand rule-authoring work to an AI agent, but it
+must do so by exporting the architectural constraints rather than asking the
+agent to rediscover them from scratch.
+
+`pnpm rule:prompt` generates a compact implementation brief containing the
+requested policy, the current extension capabilities, the declarative-vs-detector
+decision boundary, required repository files to inspect, testing expectations,
+and the final quality gates. The prompt stays vendor-neutral: Coding Bible
+provides focused engineering context and lets the developer choose the agent.
+
+The brief must never tell an agent to make findings disappear at any cost. It
+should bias toward the smallest defensible implementation, honest confidence,
+narrow evidence, realistic negative tests, and explicit human review when static
+analysis cannot prove the conclusion.
+
 ## Core and custom policy are peers at runtime
 
 Once a custom rule is loaded, its finding should participate in the normal

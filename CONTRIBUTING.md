@@ -64,6 +64,33 @@ For every detector change:
 11. Keep report fingerprints independent of line numbers so baselines, agents,
     and PR tooling can recognize a finding after unrelated lines move.
 
+## AI-assisted rule authoring
+
+`pnpm rule:prompt` generates a vendor-neutral implementation brief for a coding
+agent. The prompt is guidance, not an analyzer bypass: the resulting change must
+still satisfy the same evidence, fixture, registry, dogfooding, and `pnpm check`
+requirements as a human-authored rule.
+
+Prefer `--mode auto` when the developer wants the agent to decide between the
+portable declarative rule DSL and a full detector. Use `--mode declarative` or
+`--mode detector` to constrain that choice. The generated brief intentionally
+tells the agent to inspect the current contracts instead of inventing matchers,
+editing generated registries, weakening confidence, or duplicating ESLint,
+TypeScript, Prettier, compiler, or test responsibilities.
+
+Example:
+
+```bash
+pnpm rule:prompt -- \
+  --id ACME-004 \
+  --title "Use the shared HTTP client" \
+  --goal "Application code must not call fetch directly outside the approved HTTP boundary." \
+  --output /tmp/ACME-004-agent-brief.md
+```
+
+Treat the generated prompt as disposable context. Do not commit generated prompt
+files unless they are intentionally part of project documentation.
+
 ## Agent interface changes
 
 The public agent files under `apps/web/public` are generated from the canonical
