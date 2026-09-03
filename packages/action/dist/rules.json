@@ -2960,7 +2960,7 @@
     {
       "bad": {
         "language": "tsx",
-        "code": "useQuery({\n  queryKey: [\"todo\"],\n  queryFn: () => fetchTodo(todoId),\n});"
+        "code": "const useTodo = (todoId: string) =>\n  useQuery({\n    queryKey: [\"todo\"],\n    queryFn: () => fetchTodo(todoId),\n  });"
       },
       "canonicalUrl": "https://xanhast-pf.github.io/coding-bible/#TQ-001",
       "detection": {
@@ -2970,7 +2970,7 @@
       },
       "good": {
         "language": "tsx",
-        "code": "useQuery({\n  queryKey: [\"todo\", todoId],\n  queryFn: () => fetchTodo(todoId),\n});"
+        "code": "const useTodo = (todoId: string) =>\n  useQuery({\n    queryKey: [\"todo\", todoId],\n    queryFn: () => fetchTodo(todoId),\n  });"
       },
       "id": "TQ-001",
       "level": "must",

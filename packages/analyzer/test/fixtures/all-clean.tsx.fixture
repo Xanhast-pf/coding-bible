@@ -46,6 +46,27 @@ async function loadUser(response: Response): Promise<User> {
   return raw;
 }
 
+
+const localeDateLabel = new Intl.DateTimeFormat(locale, {
+  dateStyle: "medium",
+}).format(today);
+
+store$.assign({ data: response.data, isLoading: false });
+
+export const store = configureStore({
+  reducer: {
+    settings: settingsReducer,
+    user: userReducer,
+  },
+});
+
+export function useTodo(todoId: string) {
+  return useQuery({
+    queryKey: ["todo", todoId],
+    queryFn: () => fetchTodo(todoId),
+  });
+}
+
 export function Dashboard({ user, users }: Props) {
   const activeUser = user;
   const city = user?.address?.city;
@@ -91,3 +112,5 @@ export function Dashboard({ user, users }: Props) {
 void normalize;
 void parse;
 void loadUser;
+
+void localeDateLabel;

@@ -19,7 +19,7 @@ const reviewEnd = reviewStart + "parseInt(rawPage)".length;
 
 const result = {
   analyzer: {
-    detectorCount: 23,
+    detectorCount: 27,
     detectorSignature: "detectors-v1-test",
     findingProfileSignature: "finding-profiles-v1-test",
   },

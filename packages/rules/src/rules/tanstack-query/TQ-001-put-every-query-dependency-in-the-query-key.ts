@@ -13,11 +13,11 @@ export const tq001Rule = {
   tags: ["cache", "query-keys", "tanstack-query"],
   bad: {
     language: "tsx",
-    code: 'useQuery({\n  queryKey: ["todo"],\n  queryFn: () => fetchTodo(todoId),\n});',
+    code: 'const useTodo = (todoId: string) =>\n  useQuery({\n    queryKey: ["todo"],\n    queryFn: () => fetchTodo(todoId),\n  });',
   },
   good: {
     language: "tsx",
-    code: 'useQuery({\n  queryKey: ["todo", todoId],\n  queryFn: () => fetchTodo(todoId),\n});',
+    code: 'const useTodo = (todoId: string) =>\n  useQuery({\n    queryKey: ["todo", todoId],\n    queryFn: () => fetchTodo(todoId),\n  });',
   },
   references: [
     {

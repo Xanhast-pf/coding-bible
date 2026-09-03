@@ -334,7 +334,7 @@ Additional detectors must use unique detector IDs and declare an inline profile.
 
 ## Automated coverage
 
-The current pass runs 24 detector functions covering 23 Bible rules:
+The current pass runs 28 detector functions covering 27 Bible rules:
 
 JSX-aware React, accessibility, and Legend-State detectors also run on legacy `.js` sources because many established React codebases use JSX without the `.jsx` extension.
 
@@ -353,7 +353,9 @@ JSX-aware React, accessibility, and Legend-State detectors also run on legacy `.
 - `A11Y-004` buttons without a detectable accessible name
 - `GQL-002` runtime interpolation inside `gql`/`graphql` templates
 - `I18N-001` hardcoded user-visible JSX text in files that already import a supported localization API
+- `I18N-003` manually assembled locale-sensitive date/time display strings
 - `LEGEND-001` Legend-State `get()` subscriptions inside `observer` renders
+- `LEGEND-004` adjacent sibling observable `set()` calls that should usually be batched
 - `REACT-004` state that is only synchronized from Effect dependencies
 - `REACT-006` missing list keys
 - `REACT-006` unstable index/generated list keys
@@ -362,10 +364,14 @@ JSX-aware React, accessibility, and Legend-State detectors also run on legacy `.
 - `REACT-010` direct invocation of local React components
 - `REACT-011` mutation of values received through component inputs
 - `REACT-012` exhaustive-deps suppressions
+- `REDUX-009` multiple exported Redux Toolkit stores in one application module
+- `TQ-001` direct `queryFn` dependencies missing from TanStack Query keys
 
 `AnalyzeResult.ruleIdsChecked` reports the exact automated rule set applicable to
 the language and active configuration. A clean result means "clean for the
 applicable automated subset," never "all Coding Bible rules were reviewed."
+The full 128-rule automation classification and prioritized detector backlog live in
+`docs/analyzer-automation-matrix.md` and are generated from the reviewed automation policy.
 Malformed source is reported through diagnostics and rule checks pause for that
 file.
 

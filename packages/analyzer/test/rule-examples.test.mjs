@@ -9,6 +9,8 @@ import {
   javascriptRules,
   legendStateRules,
   reactRules,
+  reduxRules,
+  tanstackQueryRules,
   typescriptRules,
 } from "../../rules/src/rules/index.ts";
 import { analyze, detectors } from "../src/index.ts";
@@ -30,6 +32,8 @@ const rules = [
   ...javascriptRules,
   ...legendStateRules,
   ...reactRules,
+  ...reduxRules,
+  ...tanstackQueryRules,
   ...typescriptRules,
 ];
 const rulesById = new Map(rules.map((rule) => [rule.id, rule]));
@@ -38,7 +42,7 @@ const automatedRuleIds = [
 ].sort();
 
 test("every automated rule catches its own DON'T example", () => {
-  assert.equal(automatedRuleIds.length, 23);
+  assert.equal(automatedRuleIds.length, 27);
 
   for (const ruleId of automatedRuleIds) {
     const rule = rulesById.get(ruleId);
