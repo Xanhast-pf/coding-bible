@@ -70,7 +70,7 @@ jobs:
           fail-on: error
 
   released-action:
-    name: Released Action dogfood · v0.25.0
+    name: Released Action dogfood · v0.27.0
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -81,8 +81,8 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Review with published Coding Bible v0.25.0
-        uses: Xanhast-pf/coding-bible@v0.25.0
+      - name: Review with published Coding Bible v0.27.0
+        uses: Xanhast-pf/coding-bible@v0.27.0
         with:
           scope: project
           fail-on: error

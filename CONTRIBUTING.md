@@ -140,11 +140,15 @@ When changing the Action:
    self-contained and generated with `pnpm action:build`.
 5. Run `pnpm action:check` after analyzer or rule-interface changes. Drift in
    `packages/action/dist` is a release-blocking failure.
-6. Keep failure semantics explicit through `fail-on`; syntax diagnostics remain
+6. Keep the released-Action dogfood job pinned to the immutable release matching
+   `packages/action/package.json`. `scripts/test/action-release-contract.test.mjs`
+   guards the package version, runtime version, SARIF expectation, workflow label,
+   and published `uses:` reference as one release contract.
+7. Keep failure semantics explicit through `fail-on`; syntax diagnostics remain
    failures unless the consumer chooses `none`.
-7. Do not imply semantic-rule coverage. Report the deterministic rule count
+8. Do not imply semantic-rule coverage. Report the deterministic rule count
    actually exercised by the analyzer.
-8. Add regression coverage for Git diff edge cases, annotation escaping, SARIF,
+9. Add regression coverage for Git diff edge cases, annotation escaping, SARIF,
    and any new input/output contract.
 
 ## MCP changes
