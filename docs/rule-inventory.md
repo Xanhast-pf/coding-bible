@@ -26,3 +26,22 @@ Stable rules with paired **DON'T / DO** examples: **128 / 128**
 | `testing` | 6 |
 | `typescript` | 7 |
 | `workflow` | 4 |
+
+## Analyzer automation
+
+The analyzer intentionally automates only the subset that static evidence can
+defend. The reviewed 128-rule classification and prioritized detector backlog
+are generated in [`analyzer-automation-matrix.md`](./analyzer-automation-matrix.md).
+
+The current classification is:
+
+- **27** automated rules;
+- **12** high-confidence automation candidates;
+- **42** contextual candidates;
+- **43** human / agent review rules;
+- **4** rules primarily owned by external tooling.
+
+These classifications are a trust boundary, not a completeness score. New
+detectors are promoted Canary-first and must survive positive, negative,
+adversarial, mutation, and consumer-parity contracts before they count as
+automated.

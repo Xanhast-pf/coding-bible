@@ -1,0 +1,1011 @@
+{
+  "formatVersion": 1,
+  "ruleCount": 128,
+  "statuses": [
+    "automated",
+    "high-confidence-candidate",
+    "contextual-candidate",
+    "human-agent-review",
+    "external-tool"
+  ],
+  "classificationPrinciple": "Automate only what static evidence can defend; breadth must never be purchased with false-positive noise.",
+  "rules": [
+    {
+      "ruleId": "A11Y-001",
+      "pack": "accessibility",
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer and required by Canary promotion contracts."
+    },
+    {
+      "ruleId": "A11Y-002",
+      "pack": "accessibility",
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer and required by Canary promotion contracts."
+    },
+    {
+      "ruleId": "A11Y-003",
+      "pack": "accessibility",
+      "status": "high-confidence-candidate",
+      "priorityScore": 84,
+      "reason": "A narrow static/project-aware detector appears defensible with strong negative coverage.",
+      "blocker": "Needs style/CSS evidence that focus indicators are not removed without an equivalent visible replacement."
+    },
+    {
+      "ruleId": "A11Y-004",
+      "pack": "accessibility",
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer and required by Canary promotion contracts."
+    },
+    {
+      "ruleId": "A11Y-005",
+      "pack": "accessibility",
+      "status": "contextual-candidate",
+      "priorityScore": 68,
+      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
+      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+    },
+    {
+      "ruleId": "A11Y-006",
+      "pack": "accessibility",
+      "status": "high-confidence-candidate",
+      "priorityScore": 82,
+      "reason": "A narrow static/project-aware detector appears defensible with strong negative coverage.",
+      "blocker": "Needs style/CSS animation evidence plus reduced-motion handling."
+    },
+    {
+      "ruleId": "AI-001",
+      "pack": "ai",
+      "status": "human-agent-review",
+      "priorityScore": 20,
+      "reason": "Keep as canonical guidance for humans/agents rather than forcing a heuristic detector.",
+      "blocker": "Requires engineering intent, architecture, product context, or review history that static analysis should not guess."
+    },
+    {
+      "ruleId": "AI-002",
+      "pack": "ai",
+      "status": "human-agent-review",
+      "priorityScore": 20,
+      "reason": "Keep as canonical guidance for humans/agents rather than forcing a heuristic detector.",
+      "blocker": "Requires engineering intent, architecture, product context, or review history that static analysis should not guess."
+    },
+    {
+      "ruleId": "AI-003",
+      "pack": "ai",
+      "status": "human-agent-review",
+      "priorityScore": 20,
+      "reason": "Keep as canonical guidance for humans/agents rather than forcing a heuristic detector.",
+      "blocker": "Requires engineering intent, architecture, product context, or review history that static analysis should not guess."
+    },
+    {
+      "ruleId": "AI-004",
+      "pack": "ai",
+      "status": "human-agent-review",
+      "priorityScore": 20,
+      "reason": "Keep as canonical guidance for humans/agents rather than forcing a heuristic detector.",
+      "blocker": "Requires engineering intent, architecture, product context, or review history that static analysis should not guess."
+    },
+    {
+      "ruleId": "AI-005",
+      "pack": "ai",
+      "status": "human-agent-review",
+      "priorityScore": 20,
+      "reason": "Keep as canonical guidance for humans/agents rather than forcing a heuristic detector.",
+      "blocker": "Requires engineering intent, architecture, product context, or review history that static analysis should not guess."
+    },
+    {
+      "ruleId": "AI-006",
+      "pack": "ai",
+      "status": "human-agent-review",
+      "priorityScore": 20,
+      "reason": "Keep as canonical guidance for humans/agents rather than forcing a heuristic detector.",
+      "blocker": "Requires engineering intent, architecture, product context, or review history that static analysis should not guess."
+    },
+    {
+      "ruleId": "AI-007",
+      "pack": "ai",
+      "status": "human-agent-review",
+      "priorityScore": 20,
+      "reason": "Keep as canonical guidance for humans/agents rather than forcing a heuristic detector.",
+      "blocker": "Requires engineering intent, architecture, product context, or review history that static analysis should not guess."
+    },
+    {
+      "ruleId": "APOLLO-001",
+      "pack": "apollo",
+      "status": "contextual-candidate",
+      "priorityScore": 68,
+      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
+      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+    },
+    {
+      "ruleId": "APOLLO-002",
+      "pack": "apollo",
+      "status": "contextual-candidate",
+      "priorityScore": 56,
+      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
+      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+    },
+    {
+      "ruleId": "APOLLO-003",
+      "pack": "apollo",
+      "status": "contextual-candidate",
+      "priorityScore": 56,
+      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
+      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+    },
+    {
+      "ruleId": "APOLLO-004",
+      "pack": "apollo",
+      "status": "contextual-candidate",
+      "priorityScore": 68,
+      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
+      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+    },
+    {
+      "ruleId": "APOLLO-005",
+      "pack": "apollo",
+      "status": "contextual-candidate",
+      "priorityScore": 56,
+      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
+      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+    },
+    {
+      "ruleId": "APOLLO-006",
+      "pack": "apollo",
+      "status": "contextual-candidate",
+      "priorityScore": 68,
+      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
+      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+    },
+    {
+      "ruleId": "ARCH-001",
+      "pack": "architecture",
+      "status": "human-agent-review",
+      "priorityScore": 20,
+      "reason": "Keep as canonical guidance for humans/agents rather than forcing a heuristic detector.",
+      "blocker": "Requires engineering intent, architecture, product context, or review history that static analysis should not guess."
+    },
+    {
+      "ruleId": "ARCH-002",
+      "pack": "architecture",
+      "status": "human-agent-review",
+      "priorityScore": 20,
+      "reason": "Keep as canonical guidance for humans/agents rather than forcing a heuristic detector.",
+      "blocker": "Requires engineering intent, architecture, product context, or review history that static analysis should not guess."
+    },
+    {
+      "ruleId": "ARCH-003",
+      "pack": "architecture",
+      "status": "human-agent-review",
+      "priorityScore": 20,
+      "reason": "Keep as canonical guidance for humans/agents rather than forcing a heuristic detector.",
+      "blocker": "Requires engineering intent, architecture, product context, or review history that static analysis should not guess."
+    },
+    {
+      "ruleId": "ARCH-004",
+      "pack": "architecture",
+      "status": "human-agent-review",
+      "priorityScore": 20,
+      "reason": "Keep as canonical guidance for humans/agents rather than forcing a heuristic detector.",
+      "blocker": "Requires engineering intent, architecture, product context, or review history that static analysis should not guess."
+    },
+    {
+      "ruleId": "ARCH-005",
+      "pack": "architecture",
+      "status": "human-agent-review",
+      "priorityScore": 20,
+      "reason": "Keep as canonical guidance for humans/agents rather than forcing a heuristic detector.",
+      "blocker": "Requires engineering intent, architecture, product context, or review history that static analysis should not guess."
+    },
+    {
+      "ruleId": "ARCH-006",
+      "pack": "architecture",
+      "status": "human-agent-review",
+      "priorityScore": 20,
+      "reason": "Keep as canonical guidance for humans/agents rather than forcing a heuristic detector.",
+      "blocker": "Requires engineering intent, architecture, product context, or review history that static analysis should not guess."
+    },
+    {
+      "ruleId": "ARCH-007",
+      "pack": "architecture",
+      "status": "human-agent-review",
+      "priorityScore": 20,
+      "reason": "Keep as canonical guidance for humans/agents rather than forcing a heuristic detector.",
+      "blocker": "Requires engineering intent, architecture, product context, or review history that static analysis should not guess."
+    },
+    {
+      "ruleId": "CORE-001",
+      "pack": "core",
+      "status": "human-agent-review",
+      "priorityScore": 20,
+      "reason": "Keep as canonical guidance for humans/agents rather than forcing a heuristic detector.",
+      "blocker": "Requires engineering intent, architecture, product context, or review history that static analysis should not guess."
+    },
+    {
+      "ruleId": "CORE-002",
+      "pack": "core",
+      "status": "human-agent-review",
+      "priorityScore": 20,
+      "reason": "Keep as canonical guidance for humans/agents rather than forcing a heuristic detector.",
+      "blocker": "Requires engineering intent, architecture, product context, or review history that static analysis should not guess."
+    },
+    {
+      "ruleId": "CORE-003",
+      "pack": "core",
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer and required by Canary promotion contracts."
+    },
+    {
+      "ruleId": "CORE-004",
+      "pack": "core",
+      "status": "human-agent-review",
+      "priorityScore": 20,
+      "reason": "Keep as canonical guidance for humans/agents rather than forcing a heuristic detector.",
+      "blocker": "Requires engineering intent, architecture, product context, or review history that static analysis should not guess."
+    },
+    {
+      "ruleId": "CORE-005",
+      "pack": "core",
+      "status": "external-tool",
+      "priorityScore": 0,
+      "reason": "An established tool owns the primary diagnostic more directly.",
+      "blocker": "Dead-code ownership is primarily TypeScript/ESLint/Knip; Coding Bible should consume or contextualize those signals rather than duplicate them."
+    },
+    {
+      "ruleId": "CORE-006",
+      "pack": "core",
+      "status": "contextual-candidate",
+      "priorityScore": 56,
+      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
+      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+    },
+    {
+      "ruleId": "CORE-007",
+      "pack": "core",
+      "status": "human-agent-review",
+      "priorityScore": 20,
+      "reason": "Keep as canonical guidance for humans/agents rather than forcing a heuristic detector.",
+      "blocker": "Requires engineering intent, architecture, product context, or review history that static analysis should not guess."
+    },
+    {
+      "ruleId": "CORE-008",
+      "pack": "core",
+      "status": "contextual-candidate",
+      "priorityScore": 44,
+      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
+      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+    },
+    {
+      "ruleId": "CORE-009",
+      "pack": "core",
+      "status": "human-agent-review",
+      "priorityScore": 20,
+      "reason": "Keep as canonical guidance for humans/agents rather than forcing a heuristic detector.",
+      "blocker": "Requires engineering intent, architecture, product context, or review history that static analysis should not guess."
+    },
+    {
+      "ruleId": "CORE-010",
+      "pack": "core",
+      "status": "contextual-candidate",
+      "priorityScore": 63,
+      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
+      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+    },
+    {
+      "ruleId": "CORE-011",
+      "pack": "core",
+      "status": "contextual-candidate",
+      "priorityScore": 51,
+      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
+      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+    },
+    {
+      "ruleId": "CSS-001",
+      "pack": "css",
+      "status": "human-agent-review",
+      "priorityScore": 20,
+      "reason": "Keep as canonical guidance for humans/agents rather than forcing a heuristic detector.",
+      "blocker": "Requires engineering intent, architecture, product context, or review history that static analysis should not guess."
+    },
+    {
+      "ruleId": "CSS-002",
+      "pack": "css",
+      "status": "human-agent-review",
+      "priorityScore": 20,
+      "reason": "Keep as canonical guidance for humans/agents rather than forcing a heuristic detector.",
+      "blocker": "Requires engineering intent, architecture, product context, or review history that static analysis should not guess."
+    },
+    {
+      "ruleId": "CSS-003",
+      "pack": "css",
+      "status": "human-agent-review",
+      "priorityScore": 20,
+      "reason": "Keep as canonical guidance for humans/agents rather than forcing a heuristic detector.",
+      "blocker": "Requires engineering intent, architecture, product context, or review history that static analysis should not guess."
+    },
+    {
+      "ruleId": "CSS-004",
+      "pack": "css",
+      "status": "human-agent-review",
+      "priorityScore": 20,
+      "reason": "Keep as canonical guidance for humans/agents rather than forcing a heuristic detector.",
+      "blocker": "Requires engineering intent, architecture, product context, or review history that static analysis should not guess."
+    },
+    {
+      "ruleId": "DEP-001",
+      "pack": "dependencies",
+      "status": "human-agent-review",
+      "priorityScore": 20,
+      "reason": "Keep as canonical guidance for humans/agents rather than forcing a heuristic detector.",
+      "blocker": "Requires engineering intent, architecture, product context, or review history that static analysis should not guess."
+    },
+    {
+      "ruleId": "DEP-002",
+      "pack": "dependencies",
+      "status": "human-agent-review",
+      "priorityScore": 20,
+      "reason": "Keep as canonical guidance for humans/agents rather than forcing a heuristic detector.",
+      "blocker": "Requires engineering intent, architecture, product context, or review history that static analysis should not guess."
+    },
+    {
+      "ruleId": "DEP-003",
+      "pack": "dependencies",
+      "status": "external-tool",
+      "priorityScore": 0,
+      "reason": "An established tool owns the primary diagnostic more directly.",
+      "blocker": "Unused dependency detection is already owned well by Knip/package tooling."
+    },
+    {
+      "ruleId": "DEP-004",
+      "pack": "dependencies",
+      "status": "human-agent-review",
+      "priorityScore": 20,
+      "reason": "Keep as canonical guidance for humans/agents rather than forcing a heuristic detector.",
+      "blocker": "Requires engineering intent, architecture, product context, or review history that static analysis should not guess."
+    },
+    {
+      "ruleId": "FLAG-001",
+      "pack": "feature-flags",
+      "status": "human-agent-review",
+      "priorityScore": 20,
+      "reason": "Keep as canonical guidance for humans/agents rather than forcing a heuristic detector.",
+      "blocker": "Requires engineering intent, architecture, product context, or review history that static analysis should not guess."
+    },
+    {
+      "ruleId": "FLAG-002",
+      "pack": "feature-flags",
+      "status": "contextual-candidate",
+      "priorityScore": 68,
+      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
+      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+    },
+    {
+      "ruleId": "FLAG-003",
+      "pack": "feature-flags",
+      "status": "contextual-candidate",
+      "priorityScore": 56,
+      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
+      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+    },
+    {
+      "ruleId": "FLAG-004",
+      "pack": "feature-flags",
+      "status": "contextual-candidate",
+      "priorityScore": 68,
+      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
+      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+    },
+    {
+      "ruleId": "GQL-001",
+      "pack": "graphql",
+      "status": "high-confidence-candidate",
+      "priorityScore": 92,
+      "reason": "A narrow static/project-aware detector appears defensible with strong negative coverage.",
+      "blocker": "Needs standalone GraphQL source support or a clearly documented embedded-document-only contract."
+    },
+    {
+      "ruleId": "GQL-002",
+      "pack": "graphql",
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer and required by Canary promotion contracts."
+    },
+    {
+      "ruleId": "GQL-003",
+      "pack": "graphql",
+      "status": "contextual-candidate",
+      "priorityScore": 56,
+      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
+      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+    },
+    {
+      "ruleId": "GQL-004",
+      "pack": "graphql",
+      "status": "external-tool",
+      "priorityScore": 0,
+      "reason": "An established tool owns the primary diagnostic more directly.",
+      "blocker": "Schema validation is best delegated to GraphQL validation/codegen/lint tooling with the actual schema."
+    },
+    {
+      "ruleId": "GQL-005",
+      "pack": "graphql",
+      "status": "contextual-candidate",
+      "priorityScore": 68,
+      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
+      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+    },
+    {
+      "ruleId": "GQL-006",
+      "pack": "graphql",
+      "status": "contextual-candidate",
+      "priorityScore": 68,
+      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
+      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+    },
+    {
+      "ruleId": "I18N-001",
+      "pack": "internationalization",
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer and required by Canary promotion contracts."
+    },
+    {
+      "ruleId": "I18N-002",
+      "pack": "internationalization",
+      "status": "contextual-candidate",
+      "priorityScore": 68,
+      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
+      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+    },
+    {
+      "ruleId": "I18N-003",
+      "pack": "internationalization",
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer and required by Canary promotion contracts."
+    },
+    {
+      "ruleId": "I18N-004",
+      "pack": "internationalization",
+      "status": "contextual-candidate",
+      "priorityScore": 56,
+      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
+      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+    },
+    {
+      "ruleId": "JS-001",
+      "pack": "javascript",
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer and required by Canary promotion contracts."
+    },
+    {
+      "ruleId": "JS-002",
+      "pack": "javascript",
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer and required by Canary promotion contracts."
+    },
+    {
+      "ruleId": "JS-003",
+      "pack": "javascript",
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer and required by Canary promotion contracts."
+    },
+    {
+      "ruleId": "JS-004",
+      "pack": "javascript",
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer and required by Canary promotion contracts."
+    },
+    {
+      "ruleId": "JS-005",
+      "pack": "javascript",
+      "status": "contextual-candidate",
+      "priorityScore": 56,
+      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
+      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+    },
+    {
+      "ruleId": "JS-006",
+      "pack": "javascript",
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer and required by Canary promotion contracts."
+    },
+    {
+      "ruleId": "JS-007",
+      "pack": "javascript",
+      "status": "contextual-candidate",
+      "priorityScore": 44,
+      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
+      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+    },
+    {
+      "ruleId": "LEGEND-001",
+      "pack": "legend-state",
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer and required by Canary promotion contracts."
+    },
+    {
+      "ruleId": "LEGEND-002",
+      "pack": "legend-state",
+      "status": "contextual-candidate",
+      "priorityScore": 68,
+      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
+      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+    },
+    {
+      "ruleId": "LEGEND-003",
+      "pack": "legend-state",
+      "status": "high-confidence-candidate",
+      "priorityScore": 88,
+      "reason": "A narrow static/project-aware detector appears defensible with strong negative coverage.",
+      "blocker": "Needs Legend observable symbol identity and mutation-flow checks around peek()/set()."
+    },
+    {
+      "ruleId": "LEGEND-004",
+      "pack": "legend-state",
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer and required by Canary promotion contracts."
+    },
+    {
+      "ruleId": "LEGEND-005",
+      "pack": "legend-state",
+      "status": "contextual-candidate",
+      "priorityScore": 56,
+      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
+      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+    },
+    {
+      "ruleId": "LEGEND-006",
+      "pack": "legend-state",
+      "status": "high-confidence-candidate",
+      "priorityScore": 80,
+      "reason": "A narrow static/project-aware detector appears defensible with strong negative coverage.",
+      "blocker": "Needs persistence/sync API identity plus conservative serializability analysis."
+    },
+    {
+      "ruleId": "NEXT-001",
+      "pack": "nextjs",
+      "status": "contextual-candidate",
+      "priorityScore": 56,
+      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
+      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+    },
+    {
+      "ruleId": "NEXT-002",
+      "pack": "nextjs",
+      "status": "contextual-candidate",
+      "priorityScore": 56,
+      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
+      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+    },
+    {
+      "ruleId": "NEXT-003",
+      "pack": "nextjs",
+      "status": "high-confidence-candidate",
+      "priorityScore": 91,
+      "reason": "A narrow static/project-aware detector appears defensible with strong negative coverage.",
+      "blocker": "Needs project-aware Server/Client Component boundary resolution and prop-value serializability."
+    },
+    {
+      "ruleId": "NEXT-004",
+      "pack": "nextjs",
+      "status": "high-confidence-candidate",
+      "priorityScore": 93,
+      "reason": "A narrow static/project-aware detector appears defensible with strong negative coverage.",
+      "blocker": "Needs project import-graph analysis for client-to-server-only leakage."
+    },
+    {
+      "ruleId": "NEXT-005",
+      "pack": "nextjs",
+      "status": "high-confidence-candidate",
+      "priorityScore": 83,
+      "reason": "A narrow static/project-aware detector appears defensible with strong negative coverage.",
+      "blocker": "Needs Server Component identification plus conservative same-app HTTP indirection detection."
+    },
+    {
+      "ruleId": "NEXT-006",
+      "pack": "nextjs",
+      "status": "contextual-candidate",
+      "priorityScore": 56,
+      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
+      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+    },
+    {
+      "ruleId": "PERF-001",
+      "pack": "performance",
+      "status": "human-agent-review",
+      "priorityScore": 20,
+      "reason": "Keep as canonical guidance for humans/agents rather than forcing a heuristic detector.",
+      "blocker": "Requires engineering intent, architecture, product context, or review history that static analysis should not guess."
+    },
+    {
+      "ruleId": "PERF-002",
+      "pack": "performance",
+      "status": "human-agent-review",
+      "priorityScore": 20,
+      "reason": "Keep as canonical guidance for humans/agents rather than forcing a heuristic detector.",
+      "blocker": "Requires engineering intent, architecture, product context, or review history that static analysis should not guess."
+    },
+    {
+      "ruleId": "PERF-003",
+      "pack": "performance",
+      "status": "contextual-candidate",
+      "priorityScore": 44,
+      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
+      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+    },
+    {
+      "ruleId": "PERF-004",
+      "pack": "performance",
+      "status": "human-agent-review",
+      "priorityScore": 20,
+      "reason": "Keep as canonical guidance for humans/agents rather than forcing a heuristic detector.",
+      "blocker": "Requires engineering intent, architecture, product context, or review history that static analysis should not guess."
+    },
+    {
+      "ruleId": "REACT-001",
+      "pack": "react",
+      "status": "human-agent-review",
+      "priorityScore": 20,
+      "reason": "Keep as canonical guidance for humans/agents rather than forcing a heuristic detector.",
+      "blocker": "Requires engineering intent, architecture, product context, or review history that static analysis should not guess."
+    },
+    {
+      "ruleId": "REACT-002",
+      "pack": "react",
+      "status": "contextual-candidate",
+      "priorityScore": 44,
+      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
+      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+    },
+    {
+      "ruleId": "REACT-003",
+      "pack": "react",
+      "status": "human-agent-review",
+      "priorityScore": 20,
+      "reason": "Keep as canonical guidance for humans/agents rather than forcing a heuristic detector.",
+      "blocker": "Requires engineering intent, architecture, product context, or review history that static analysis should not guess."
+    },
+    {
+      "ruleId": "REACT-004",
+      "pack": "react",
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer and required by Canary promotion contracts."
+    },
+    {
+      "ruleId": "REACT-005",
+      "pack": "react",
+      "status": "contextual-candidate",
+      "priorityScore": 56,
+      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
+      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+    },
+    {
+      "ruleId": "REACT-006",
+      "pack": "react",
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer and required by Canary promotion contracts."
+    },
+    {
+      "ruleId": "REACT-007",
+      "pack": "react",
+      "status": "contextual-candidate",
+      "priorityScore": 68,
+      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
+      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+    },
+    {
+      "ruleId": "REACT-008",
+      "pack": "react",
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer and required by Canary promotion contracts."
+    },
+    {
+      "ruleId": "REACT-009",
+      "pack": "react",
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer and required by Canary promotion contracts."
+    },
+    {
+      "ruleId": "REACT-010",
+      "pack": "react",
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer and required by Canary promotion contracts."
+    },
+    {
+      "ruleId": "REACT-011",
+      "pack": "react",
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer and required by Canary promotion contracts."
+    },
+    {
+      "ruleId": "REACT-012",
+      "pack": "react",
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer and required by Canary promotion contracts."
+    },
+    {
+      "ruleId": "REACT-013",
+      "pack": "react",
+      "status": "human-agent-review",
+      "priorityScore": 20,
+      "reason": "Keep as canonical guidance for humans/agents rather than forcing a heuristic detector.",
+      "blocker": "Requires engineering intent, architecture, product context, or review history that static analysis should not guess."
+    },
+    {
+      "ruleId": "REDUX-001",
+      "pack": "redux",
+      "status": "high-confidence-candidate",
+      "priorityScore": 86,
+      "reason": "A narrow static/project-aware detector appears defensible with strong negative coverage.",
+      "blocker": "Needs precise Redux identity/legacy-pattern detection without treating every reducer switch as Redux."
+    },
+    {
+      "ruleId": "REDUX-002",
+      "pack": "redux",
+      "status": "contextual-candidate",
+      "priorityScore": 68,
+      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
+      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+    },
+    {
+      "ruleId": "REDUX-003",
+      "pack": "redux",
+      "status": "high-confidence-candidate",
+      "priorityScore": 84,
+      "reason": "A narrow static/project-aware detector appears defensible with strong negative coverage.",
+      "blocker": "Needs Redux state/action boundary identification plus conservative serializability checks."
+    },
+    {
+      "ruleId": "REDUX-004",
+      "pack": "redux",
+      "status": "contextual-candidate",
+      "priorityScore": 68,
+      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
+      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+    },
+    {
+      "ruleId": "REDUX-005",
+      "pack": "redux",
+      "status": "contextual-candidate",
+      "priorityScore": 56,
+      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
+      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+    },
+    {
+      "ruleId": "REDUX-006",
+      "pack": "redux",
+      "status": "contextual-candidate",
+      "priorityScore": 56,
+      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
+      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+    },
+    {
+      "ruleId": "REDUX-007",
+      "pack": "redux",
+      "status": "contextual-candidate",
+      "priorityScore": 44,
+      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
+      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+    },
+    {
+      "ruleId": "REDUX-008",
+      "pack": "redux",
+      "status": "human-agent-review",
+      "priorityScore": 20,
+      "reason": "Keep as canonical guidance for humans/agents rather than forcing a heuristic detector.",
+      "blocker": "Requires engineering intent, architecture, product context, or review history that static analysis should not guess."
+    },
+    {
+      "ruleId": "REDUX-009",
+      "pack": "redux",
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer and required by Canary promotion contracts."
+    },
+    {
+      "ruleId": "REDUX-010",
+      "pack": "redux",
+      "status": "human-agent-review",
+      "priorityScore": 20,
+      "reason": "Keep as canonical guidance for humans/agents rather than forcing a heuristic detector.",
+      "blocker": "Requires engineering intent, architecture, product context, or review history that static analysis should not guess."
+    },
+    {
+      "ruleId": "REDUX-011",
+      "pack": "redux",
+      "status": "contextual-candidate",
+      "priorityScore": 56,
+      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
+      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+    },
+    {
+      "ruleId": "TQ-001",
+      "pack": "tanstack-query",
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer and required by Canary promotion contracts."
+    },
+    {
+      "ruleId": "TQ-002",
+      "pack": "tanstack-query",
+      "status": "high-confidence-candidate",
+      "priorityScore": 89,
+      "reason": "A narrow static/project-aware detector appears defensible with strong negative coverage.",
+      "blocker": "Needs query-key AST/value analysis for unstable or non-serializable identity."
+    },
+    {
+      "ruleId": "TQ-003",
+      "pack": "tanstack-query",
+      "status": "contextual-candidate",
+      "priorityScore": 56,
+      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
+      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+    },
+    {
+      "ruleId": "TQ-004",
+      "pack": "tanstack-query",
+      "status": "contextual-candidate",
+      "priorityScore": 68,
+      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
+      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+    },
+    {
+      "ruleId": "TQ-005",
+      "pack": "tanstack-query",
+      "status": "high-confidence-candidate",
+      "priorityScore": 90,
+      "reason": "A narrow static/project-aware detector appears defensible with strong negative coverage.",
+      "blocker": "Needs query-function identity tracing so fetch response checks are enforced only for actual query functions."
+    },
+    {
+      "ruleId": "TEST-001",
+      "pack": "testing",
+      "status": "human-agent-review",
+      "priorityScore": 20,
+      "reason": "Keep as canonical guidance for humans/agents rather than forcing a heuristic detector.",
+      "blocker": "Requires engineering intent, architecture, product context, or review history that static analysis should not guess."
+    },
+    {
+      "ruleId": "TEST-002",
+      "pack": "testing",
+      "status": "human-agent-review",
+      "priorityScore": 20,
+      "reason": "Keep as canonical guidance for humans/agents rather than forcing a heuristic detector.",
+      "blocker": "Requires engineering intent, architecture, product context, or review history that static analysis should not guess."
+    },
+    {
+      "ruleId": "TEST-003",
+      "pack": "testing",
+      "status": "human-agent-review",
+      "priorityScore": 20,
+      "reason": "Keep as canonical guidance for humans/agents rather than forcing a heuristic detector.",
+      "blocker": "Requires engineering intent, architecture, product context, or review history that static analysis should not guess."
+    },
+    {
+      "ruleId": "TEST-004",
+      "pack": "testing",
+      "status": "human-agent-review",
+      "priorityScore": 20,
+      "reason": "Keep as canonical guidance for humans/agents rather than forcing a heuristic detector.",
+      "blocker": "Requires engineering intent, architecture, product context, or review history that static analysis should not guess."
+    },
+    {
+      "ruleId": "TEST-005",
+      "pack": "testing",
+      "status": "contextual-candidate",
+      "priorityScore": 44,
+      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
+      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+    },
+    {
+      "ruleId": "TEST-006",
+      "pack": "testing",
+      "status": "human-agent-review",
+      "priorityScore": 20,
+      "reason": "Keep as canonical guidance for humans/agents rather than forcing a heuristic detector.",
+      "blocker": "Requires engineering intent, architecture, product context, or review history that static analysis should not guess."
+    },
+    {
+      "ruleId": "TS-001",
+      "pack": "typescript",
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer and required by Canary promotion contracts."
+    },
+    {
+      "ruleId": "TS-002",
+      "pack": "typescript",
+      "status": "contextual-candidate",
+      "priorityScore": 68,
+      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
+      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+    },
+    {
+      "ruleId": "TS-003",
+      "pack": "typescript",
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer and required by Canary promotion contracts."
+    },
+    {
+      "ruleId": "TS-004",
+      "pack": "typescript",
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer and required by Canary promotion contracts."
+    },
+    {
+      "ruleId": "TS-005",
+      "pack": "typescript",
+      "status": "contextual-candidate",
+      "priorityScore": 68,
+      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
+      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+    },
+    {
+      "ruleId": "TS-006",
+      "pack": "typescript",
+      "status": "contextual-candidate",
+      "priorityScore": 44,
+      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
+      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+    },
+    {
+      "ruleId": "TS-007",
+      "pack": "typescript",
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer and required by Canary promotion contracts."
+    },
+    {
+      "ruleId": "WORK-001",
+      "pack": "workflow",
+      "status": "external-tool",
+      "priorityScore": 0,
+      "reason": "An established tool owns the primary diagnostic more directly.",
+      "blocker": "Whether checks ran is a CI/workflow fact, not a source-code detector responsibility."
+    },
+    {
+      "ruleId": "WORK-002",
+      "pack": "workflow",
+      "status": "human-agent-review",
+      "priorityScore": 20,
+      "reason": "Keep as canonical guidance for humans/agents rather than forcing a heuristic detector.",
+      "blocker": "Requires engineering intent, architecture, product context, or review history that static analysis should not guess."
+    },
+    {
+      "ruleId": "WORK-003",
+      "pack": "workflow",
+      "status": "human-agent-review",
+      "priorityScore": 20,
+      "reason": "Keep as canonical guidance for humans/agents rather than forcing a heuristic detector.",
+      "blocker": "Requires engineering intent, architecture, product context, or review history that static analysis should not guess."
+    },
+    {
+      "ruleId": "WORK-004",
+      "pack": "workflow",
+      "status": "human-agent-review",
+      "priorityScore": 20,
+      "reason": "Keep as canonical guidance for humans/agents rather than forcing a heuristic detector.",
+      "blocker": "Requires engineering intent, architecture, product context, or review history that static analysis should not guess."
+    }
+  ]
+}

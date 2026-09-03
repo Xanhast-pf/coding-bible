@@ -21,7 +21,7 @@ test("local check heals deterministic drift before strict verification", () => {
   );
   assert.equal(
     scripts.generate,
-    "pnpm registries:generate && pnpm rulebook:schema:generate && pnpm agent:generate && pnpm action:build",
+    "pnpm registries:generate && pnpm automation:matrix:generate && pnpm rulebook:schema:generate && pnpm agent:generate && pnpm action:build",
   );
 });
 
@@ -33,7 +33,7 @@ test("strict verification is ordered and does not call mutating generators", () 
   );
   assert.equal(
     scripts["generate:check"],
-    "pnpm registries:check && pnpm rulebook:schema:check && pnpm agent:check && pnpm action:check",
+    "pnpm registries:check && pnpm automation:matrix:check && pnpm rulebook:schema:check && pnpm agent:check && pnpm action:check",
   );
   assert.doesNotMatch(scripts["check:verify"], /:generate\b/u);
   assert.doesNotMatch(scripts["check:verify"], /lint:fix|prettier --write/u);

@@ -10,15 +10,15 @@ const uniqueRuleIds = (source, language = "tsx") =>
   [...new Set(ruleIds(source, language))].sort();
 
 test("analyzer runs only detectors applicable to the selected language", () => {
-  assert.equal(detectors.length, 24);
+  assert.equal(detectors.length, 28);
 
   const tsResult = analyze({ source: "const value = 1;", language: "ts" });
   const tsxResult = analyze({ source: "const value = 1;", language: "tsx" });
 
-  assert.equal(tsResult.checksRun, 14);
-  assert.equal(tsResult.ruleIdsChecked.length, 14);
-  assert.equal(tsxResult.checksRun, 24);
-  assert.equal(tsxResult.ruleIdsChecked.length, 23);
+  assert.equal(tsResult.checksRun, 18);
+  assert.equal(tsResult.ruleIdsChecked.length, 18);
+  assert.equal(tsxResult.checksRun, 28);
+  assert.equal(tsxResult.ruleIdsChecked.length, 27);
 });
 
 test("syntax errors pause rule analysis instead of returning a misleading clean result", () => {
@@ -830,6 +830,146 @@ const View = ({ value }) => {
   useEffect(() => { setCopy(value); }, [value]);
   return <span>{copy}</span>;
 };`),
+    [],
+  );
+});
+
+test("detects manual locale-sensitive date formatting without flagging Intl or machine formats", () => {
+  assert.deepEqual(
+    ruleIds(
+      "const label = `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;",
+      "ts",
+    ),
+    ["I18N-003"],
+  );
+  assert.deepEqual(
+    ruleIds(
+      'const label = "" + (date.getMonth() + 1) + "/" + date.getDate() + "/" + date.getFullYear();',
+      "ts",
+    ),
+    ["I18N-003"],
+  );
+  assert.deepEqual(
+    ruleIds(
+      'const label = new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(date);',
+      "ts",
+    ),
+    [],
+  );
+  assert.deepEqual(
+    ruleIds("const machineDate = date.toISOString().slice(0, 10);", "ts"),
+    [],
+  );
+});
+
+test("detects adjacent Legend-State sibling set calls while preserving independent updates", () => {
+  assert.deepEqual(
+    ruleIds(
+      `store$.data.set(response.data);
+store$.isLoading.set(false);`,
+      "ts",
+    ),
+    ["LEGEND-004"],
+  );
+  assert.deepEqual(
+    ruleIds(`store$.assign({ data: response.data, isLoading: false });`, "ts"),
+    [],
+  );
+  assert.deepEqual(
+    ruleIds(
+      `user$.name.set("Ada");
+settings$.ready.set(true);`,
+      "ts",
+    ),
+    [],
+  );
+  assert.deepEqual(
+    ruleIds(
+      `store.data.set(response.data);
+store.isLoading.set(false);`,
+      "ts",
+    ),
+    [],
+  );
+});
+
+test("detects multiple exported Redux Toolkit stores without flagging store factories", () => {
+  assert.deepEqual(
+    ruleIds(
+      `export const userStore = configureStore({ reducer: userReducer });
+export const settingsStore = configureStore({ reducer: settingsReducer });`,
+      "ts",
+    ),
+    ["REDUX-009"],
+  );
+  assert.deepEqual(
+    ruleIds(
+      `import { configureStore as makeStore } from "@reduxjs/toolkit";
+export const store = makeStore({ reducer });
+export const createTestStore = () => makeStore({ reducer });`,
+      "ts",
+    ),
+    [],
+  );
+  assert.deepEqual(
+    ruleIds(
+      `const configureStore = (options) => options;
+export const first = configureStore({ reducer: one });
+export const second = configureStore({ reducer: two });`,
+      "ts",
+    ),
+    [],
+  );
+});
+
+test("detects direct TanStack Query queryFn dependencies missing from queryKey", () => {
+  assert.deepEqual(
+    ruleIds(
+      `const useTodo = (todoId) => useQuery({
+  queryKey: ["todo"],
+  queryFn: () => fetchTodo(todoId),
+});`,
+      "ts",
+    ),
+    ["TQ-001"],
+  );
+  assert.deepEqual(
+    ruleIds(
+      `const useTodo = (todoId) => useQuery({
+  queryKey: ["todo", todoId],
+  queryFn: () => fetchTodo(todoId),
+});`,
+      "ts",
+    ),
+    [],
+  );
+  assert.deepEqual(
+    ruleIds(
+      `import { useQuery as query } from "@tanstack/react-query";
+const result = query({
+  queryKey: ["todo", todoId],
+  queryFn: () => fetchTodo(todoId),
+});`,
+      "ts",
+    ),
+    [],
+  );
+  assert.deepEqual(
+    ruleIds(
+      `const useExample = () => {
+  const useQuery = (options) => options;
+  return useQuery({ queryKey: ["todo"], queryFn: () => fetchTodo(todoId) });
+};`,
+      "ts",
+    ),
+    [],
+  );
+  assert.deepEqual(
+    ruleIds(
+      `const useTodos = () =>
+  useQuery({ queryKey: ["todos"], queryFn: fetchTodos });`,
+      "ts",
+    ),
     [],
   );
 });

@@ -3397,19 +3397,21 @@ const fetchTodos = createAsyncThunk("todos/fetch", fetchTodosApi);
 **DO**
 
 ```tsx
-useQuery({
-  queryKey: ["todo", todoId],
-  queryFn: () => fetchTodo(todoId),
-});
+const useTodo = (todoId: string) =>
+  useQuery({
+    queryKey: ["todo", todoId],
+    queryFn: () => fetchTodo(todoId),
+  });
 ```
 
 **DON'T**
 
 ```tsx
-useQuery({
-  queryKey: ["todo"],
-  queryFn: () => fetchTodo(todoId),
-});
+const useTodo = (todoId: string) =>
+  useQuery({
+    queryKey: ["todo"],
+    queryFn: () => fetchTodo(todoId),
+  });
 ```
 
 **References:**
