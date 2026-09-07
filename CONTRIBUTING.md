@@ -140,10 +140,13 @@ When changing the Action:
    self-contained and generated with `pnpm action:build`.
 5. Run `pnpm action:check` after analyzer or rule-interface changes. Drift in
    `packages/action/dist` is a release-blocking failure.
-6. Keep the released-Action dogfood job pinned to the immutable release matching
-   `packages/action/package.json`. `scripts/test/action-release-contract.test.mjs`
-   guards the package version, runtime version, SARIF expectation, workflow label,
-   and published `uses:` reference as one release contract.
+6. Keep source/runtime versioning separate from published dogfood. During a
+   release PR, bump `packages/action/package.json`, the Action runtime version,
+   and the MCP runtime version together while leaving
+   `packages/action/release-state.json` pinned to the latest immutable tag that
+   already exists. After the new tag is published, advance `publishedActionVersion`
+   and the workflow pin in a follow-up change. `scripts/test/action-release-contract.test.mjs`
+   guards both sides without creating a tag-before-CI chicken-and-egg.
 7. Keep failure semantics explicit through `fail-on`; syntax diagnostics remain
    failures unless the consumer chooses `none`.
 8. Do not imply semantic-rule coverage. Report the deterministic rule count

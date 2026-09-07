@@ -1,4 +1,4 @@
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, realpath, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 import { checkPaths } from "./analyzerBridge.mjs";
@@ -11,7 +11,7 @@ import { filterChangedLocations, parseGitDiff } from "./diff.mjs";
 import { getChangedDiff, resolveBaseRef } from "./git.mjs";
 import { writeCommand, writeOutput, writeSummary } from "./github.mjs";
 import { readActionInputs } from "./inputs.mjs";
-import { createRuleMap } from "./ruleCatalog.mjs";
+import { createRuleMap, resolveFindingRule } from "./ruleCatalog.mjs";
 import { createSarif } from "./sarif.mjs";
 
 const isInside = (parent, candidate) => {
@@ -96,11 +96,13 @@ const createSummary = ({
       "| --- | --- | --- | --- | --- | --- |",
     );
     for (const finding of findings.slice(0, 25)) {
-      const rule = rulesById.get(finding.ruleId);
-      const url = `${canonicalBaseUrl}#${finding.ruleId}`;
+      const rule = resolveFindingRule(finding, rulesById, canonicalBaseUrl);
+      const ruleLabel = rule.url
+        ? `[${markdownEscape(finding.ruleId)}](${rule.url})`
+        : `\`${markdownEscape(finding.ruleId)}\``;
       lines.push(
         `| ${finding.severity} | ${finding.impact} | ${finding.confidence} | ` +
-          `[${markdownEscape(finding.ruleId)}](${url})${rule?.title ? ` · ${markdownEscape(rule.title)}` : ""} | ` +
+          `${ruleLabel}${rule.title !== finding.ruleId ? ` · ${markdownEscape(rule.title)}` : ""} | ` +
           `\`${markdownEscape(finding.filePath)}:${finding.location.line}\` | ` +
           `${markdownEscape(finding.message)}` +
           `${
@@ -144,7 +146,7 @@ const emitAnnotations = ({ diagnostics, findings, rulesById, stream }) => {
     if (emitted >= maximumAnnotations) {
       break;
     }
-    const rule = rulesById.get(finding.ruleId);
+    const rule = resolveFindingRule(finding, rulesById, canonicalBaseUrl);
     writeCommand(
       stream,
       finding.severity === "error" ? "error" : "warning",
@@ -154,12 +156,12 @@ const emitAnnotations = ({ diagnostics, findings, rulesById, stream }) => {
         col: finding.location.column,
         endLine: finding.location.endLine,
         endColumn: finding.location.endColumn,
-        title: `${finding.ruleId}${rule?.title ? ` · ${rule.title}` : ""}`,
+        title: `${finding.ruleId}${rule.title !== finding.ruleId ? ` · ${rule.title}` : ""}`,
       },
       `${finding.message} ${finding.suggestion} ` +
         `[${finding.impact} impact · ${finding.confidence} confidence] ` +
         `${finding.contextNote ? `${finding.confidence === "contextual" ? "Context required" : "Analyzer note"}: ${finding.contextNote} ` : ""}` +
-        `${canonicalBaseUrl}#${finding.ruleId}`,
+        `${rule.url ?? "No rule URL supplied."}`,
     );
     emitted += 1;
   }
@@ -199,6 +201,7 @@ export const runAction = async ({
   environment = process.env,
   stream = process.stdout,
 } = {}) => {
+  cwd = await realpath(cwd);
   const inputs = readActionInputs(environment);
   const targetPath = resolveTarget(cwd, inputs.path);
   const configPath = inputs.configPath
@@ -218,6 +221,7 @@ export const runAction = async ({
     analysis = changedFiles.length
       ? await checkPaths(changedFiles, {
           cwd,
+          boundaryRoot: cwd,
           baseline: inputs.baseline,
           cache: false,
           ruleSelection: inputs.ruleSelection,
@@ -227,6 +231,7 @@ export const runAction = async ({
   } else {
     analysis = await checkPaths([targetPath], {
       cwd,
+      boundaryRoot: cwd,
       baseline: inputs.baseline,
       cache: false,
       ruleSelection: inputs.ruleSelection,

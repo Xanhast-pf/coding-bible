@@ -4,5 +4,6 @@ export { analyzerDetectorCount, analyzerDetectorSignature, detectors, } from "./
 export { analyzerCustomRuleBookFormatVersion, createAnalyzerCustomRuleDetectors, defineCustomRule, defineCustomRuleBook, defineDetector, validateAnalyzerCustomRuleBook, validateAnalyzerCustomRules, } from "./customRules.mjs";
 export { applyAnalyzerTextEdits, createAnalyzerFilePatch, normalizeAnalyzerPatchPath, prepareAnalyzerTextEdits, } from "./fixes.mjs";
 export { compileGlobs, matchesAnyGlob, normalizeGlobPath } from "./glob.mjs";
-export { analyzerLanguages, analyzerPacks } from "./types.mjs";
+export { createAnalyzerFindingFingerprintPayload } from "./fingerprint.mjs";
+export { analyzerFindingConfidences, analyzerFindingImpacts, analyzerLanguages, analyzerPacks, } from "./types.mjs";
 export { analyzerFindingProfileSignature, analyzerFindingProfiles, getAnalyzerFindingProfile, } from "./findingProfiles.mjs";

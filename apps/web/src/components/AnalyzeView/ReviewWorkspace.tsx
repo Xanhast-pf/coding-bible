@@ -194,9 +194,19 @@ export const ReviewWorkspace = ({
           <header className={styles.reviewFindingHeader}>
             <div>
               <div className={styles.reviewFindingMeta}>
-                <a href={`./#${activeFinding.ruleId}`}>
-                  {activeFinding.ruleId}
-                </a>
+                {rule || activeFinding.ruleUrl ? (
+                  <a
+                    href={
+                      rule
+                        ? `./#${activeFinding.ruleId}`
+                        : activeFinding.ruleUrl
+                    }
+                  >
+                    {activeFinding.ruleId}
+                  </a>
+                ) : (
+                  <span>{activeFinding.ruleId}</span>
+                )}
                 <span data-severity={activeFinding.severity}>
                   {activeFinding.severity}
                 </span>
@@ -215,7 +225,9 @@ export const ReviewWorkspace = ({
                   <span>review only</span>
                 )}
               </div>
-              <h4>{rule?.title ?? activeFinding.ruleId}</h4>
+              <h4>
+                {rule?.title ?? activeFinding.ruleTitle ?? activeFinding.ruleId}
+              </h4>
             </div>
             <div className={styles.reviewFindingActions}>
               <span>

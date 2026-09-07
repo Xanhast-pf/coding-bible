@@ -462,3 +462,7 @@ wrong or the rule needs better scope, severity, or exceptions.
 ## Status
 
 Pre-alpha. The rule library and Learn experience are established; the analyzer now supports project-aware browser analysis, configurable CLI scans, MCP tooling, and a versioned GitHub Action.
+
+## License
+
+MIT. See `LICENSE`.

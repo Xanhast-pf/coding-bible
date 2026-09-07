@@ -4,20 +4,21 @@ import {
   analyzerDetectorCount,
   analyzerDetectorSignature,
   analyzerFindingProfileSignature,
+  analyzerRuleIds,
+  createAnalyzerFindingFingerprintPayload,
 } from "../src/index.mjs";
 
 const ruleBaseUrl = "https://xanhast-pf.github.io/coding-bible/#";
-
-const normalizeFingerprintText = (value) => value.replace(/\s+/g, " ").trim();
+const builtInRuleIds = new Set(analyzerRuleIds);
 
 export const createFindingFingerprint = (finding) => {
-  const payload = [
-    finding.ruleId,
-    finding.detectorId,
-    finding.filePath.replaceAll("\\", "/"),
-    normalizeFingerprintText(finding.excerpt),
-    normalizeFingerprintText(finding.message),
-  ].join("\0");
+  const payload = createAnalyzerFindingFingerprintPayload({
+    detectorId: finding.detectorId,
+    excerpt: finding.excerpt,
+    file: finding.filePath,
+    message: finding.message,
+    ruleId: finding.ruleId,
+  });
 
   return createHash("sha256").update(payload).digest("hex").slice(0, 24);
 };
@@ -114,7 +115,11 @@ export const createAnalyzerReport = (result, { patchFiles = null } = {}) => ({
     ruleId: finding.ruleId,
     ruleRationale: finding.ruleRationale ?? null,
     ruleTitle: finding.ruleTitle ?? null,
-    ruleUrl: finding.ruleUrl ?? `${ruleBaseUrl}${finding.ruleId}`,
+    ruleUrl:
+      finding.ruleUrl ??
+      (builtInRuleIds.has(finding.ruleId)
+        ? `${ruleBaseUrl}${finding.ruleId}`
+        : null),
     severity: finding.severity,
     suggestion: finding.suggestion,
   })),

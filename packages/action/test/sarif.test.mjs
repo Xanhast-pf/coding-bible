@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
+import { actionVersion } from "../src/constants.mjs";
 import { createSarif } from "../src/sarif.mjs";
 
 test("SARIF output uses GitHub-supported 2.1.0 shape and stable rule metadata", () => {
@@ -37,7 +38,7 @@ test("SARIF output uses GitHub-supported 2.1.0 shape and stable rule metadata", 
   });
 
   assert.equal(sarif.version, "2.1.0");
-  assert.equal(sarif.runs[0].tool.driver.semanticVersion, "0.27.0");
+  assert.equal(sarif.runs[0].tool.driver.semanticVersion, actionVersion);
   assert.equal(sarif.runs[0].tool.driver.rules[0].id, "TS-001");
   assert.equal(sarif.runs[0].results[0].ruleId, "TS-001");
   assert.equal(sarif.runs[0].results[0].level, "error");
@@ -53,4 +54,35 @@ test("SARIF output uses GitHub-supported 2.1.0 shape and stable rule metadata", 
     sarif.runs[0].results[0].partialFingerprints.codingBibleFinding,
     /^[a-f0-9]{24}$/u,
   );
+});
+
+test("SARIF registers self-describing custom rules", () => {
+  const sarif = createSarif({
+    rulesById: new Map(),
+    diagnostics: [],
+    findings: [
+      {
+        confidence: "strong",
+        impact: "high",
+        ruleId: "ACME-001",
+        ruleTitle: "Avoid dangerous",
+        ruleRationale: "Custom project policy.",
+        ruleUrl: "https://example.com/rules/ACME-001",
+        severity: "warning",
+        filePath: "src/a.ts",
+        excerpt: "dangerous();",
+        message: "Do not call dangerous().",
+        suggestion: "Use safeAlternative().",
+        location: { line: 1, column: 1, endLine: 1, endColumn: 10 },
+      },
+    ],
+  });
+
+  assert.deepEqual(sarif.runs[0].tool.driver.rules[0], {
+    id: "ACME-001",
+    name: "Avoid dangerous",
+    shortDescription: { text: "Custom project policy." },
+    helpUri: "https://example.com/rules/ACME-001",
+    properties: { source: "finding" },
+  });
 });

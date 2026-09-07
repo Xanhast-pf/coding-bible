@@ -1,8 +1,23 @@
 import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
+import {
+  analyzerFindingConfidences,
+  analyzerFindingImpacts,
+  type AnalyzerReportDiagnosticV1,
+  type AnalyzerReportFindingV1,
+  type AnalyzerReportFixV1,
+  type AnalyzerReportLocation as AnalyzerReportLocationV1,
+  type AnalyzerReportSummaryV1,
+  type AnalyzerReportV1,
+} from "@coding-bible/analyzer";
+
 import { codingBibleCanonicalUrl } from "./constants.ts";
-import { resolveInsideRoot, toRootRelativePath } from "./pathSafety.ts";
+import {
+  resolveExistingInsideRoot,
+  resolveRootDirectory,
+  toRootRelativePath,
+} from "./pathSafety.ts";
 import {
   createRuleReferences,
   type McpRuleReference,
@@ -14,56 +29,11 @@ export interface CheckFilesInput {
   ignoreBaseline?: boolean;
 }
 
-export interface AnalyzerReportLocation {
-  line: number;
-  column: number;
-  endLine: number;
-  endColumn: number;
-}
-
-export interface AnalyzerReportDiagnostic {
-  excerpt: string;
-  file: string;
-  location: AnalyzerReportLocation;
-  message: string;
-}
-
-export interface AnalyzerReportFinding {
-  detectorId: string;
-  excerpt: string;
-  file: string;
-  fingerprint: string;
-  fix: unknown;
-  location: AnalyzerReportLocation;
-  message: string;
-  ruleId: string;
-  ruleUrl: string;
-  severity: "error" | "warning";
-  suggestion: string;
-}
-
-export interface AnalyzerReportSummary {
-  baselineSuppressed: number;
-  cacheHits: number;
-  cacheMisses: number;
-  diagnostics: number;
-  errors: number;
-  filesDiscovered: number;
-  filesAnalyzed: number;
-  findings: number;
-  reviewFixes: number;
-  rulesChecked: number;
-  safeFixes: number;
-  warnings: number;
-}
-
-export interface AnalyzerReport {
-  schemaVersion: 1;
-  summary: AnalyzerReportSummary;
-  diagnostics: readonly AnalyzerReportDiagnostic[];
-  findings: readonly AnalyzerReportFinding[];
-  [key: string]: unknown;
-}
+export type AnalyzerReportDiagnostic = AnalyzerReportDiagnosticV1;
+export type AnalyzerReportFinding = AnalyzerReportFindingV1;
+export type AnalyzerReportSummary = AnalyzerReportSummaryV1;
+export type AnalyzerReport = AnalyzerReportV1;
+export type AnalyzerReportLocation = AnalyzerReportLocationV1;
 
 export interface CheckFilesResult {
   schemaVersion: 1;
@@ -79,6 +49,8 @@ const analyzerCliPath = fileURLToPath(
   import.meta.resolve("@coding-bible/analyzer/bin"),
 );
 const maximumOutputBytes = 32 * 1024 * 1024;
+const findingConfidences = new Set<string>(analyzerFindingConfidences);
+const findingImpacts = new Set<string>(analyzerFindingImpacts);
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
@@ -97,6 +69,17 @@ const readString = (value: unknown, key: string) => {
   }
 
   return value[key];
+};
+
+const readNullableString = (value: unknown, key: string) => {
+  if (!isRecord(value)) {
+    throw new Error(`Analyzer JSON report is missing ${key}.`);
+  }
+  const candidate = value[key];
+  if (candidate !== null && typeof candidate !== "string") {
+    throw new Error(`Analyzer JSON report contains invalid ${key}.`);
+  }
+  return candidate;
 };
 
 const readLocation = (value: unknown): AnalyzerReportLocation => ({
@@ -119,6 +102,37 @@ const readDiagnostic = (value: unknown): AnalyzerReportDiagnostic => {
   };
 };
 
+const readFix = (value: unknown): AnalyzerReportFixV1 => {
+  if (!isRecord(value) || typeof value.available !== "boolean") {
+    throw new Error("Analyzer JSON report contains an invalid finding fix.");
+  }
+  const safety = readString(value, "safety");
+  if (safety !== "none" && safety !== "safe" && safety !== "review") {
+    throw new Error("Analyzer JSON report contains an invalid fix safety.");
+  }
+  const description = value.description;
+  const patch = value.patch;
+  const title = value.title;
+  if (description !== undefined && typeof description !== "string") {
+    throw new Error(
+      "Analyzer JSON report contains an invalid fix description.",
+    );
+  }
+  if (patch !== undefined && patch !== null && typeof patch !== "string") {
+    throw new Error("Analyzer JSON report contains an invalid fix patch.");
+  }
+  if (title !== undefined && typeof title !== "string") {
+    throw new Error("Analyzer JSON report contains an invalid fix title.");
+  }
+  return {
+    available: value.available,
+    ...(description === undefined ? {} : { description }),
+    ...(patch === undefined ? {} : { patch }),
+    safety,
+    ...(title === undefined ? {} : { title }),
+  };
+};
+
 const readFinding = (value: unknown): AnalyzerReportFinding => {
   if (!isRecord(value)) {
     throw new Error("Analyzer JSON report contains an invalid finding.");
@@ -130,21 +144,44 @@ const readFinding = (value: unknown): AnalyzerReportFinding => {
       "Analyzer JSON report contains an invalid finding severity.",
     );
   }
+  const confidence = readString(value, "confidence");
+  if (!findingConfidences.has(confidence)) {
+    throw new Error(
+      "Analyzer JSON report contains invalid finding confidence.",
+    );
+  }
+  const impact = readString(value, "impact");
+  if (!findingImpacts.has(impact)) {
+    throw new Error("Analyzer JSON report contains invalid finding impact.");
+  }
 
   return {
+    confidence: confidence as AnalyzerReportFinding["confidence"],
+    contextNote: readNullableString(value, "contextNote"),
     detectorId: readString(value, "detectorId"),
     excerpt: readString(value, "excerpt"),
     file: readString(value, "file"),
     fingerprint: readString(value, "fingerprint"),
-    fix: value.fix,
+    fix: readFix(value.fix),
+    impact: impact as AnalyzerReportFinding["impact"],
     location: readLocation(value.location),
     message: readString(value, "message"),
     ruleId: readString(value, "ruleId"),
-    ruleUrl: readString(value, "ruleUrl"),
+    ruleRationale: readNullableString(value, "ruleRationale"),
+    ruleTitle: readNullableString(value, "ruleTitle"),
+    ruleUrl: readNullableString(value, "ruleUrl"),
     severity,
     suggestion: readString(value, "suggestion"),
   };
 };
+
+const readCountBreakdown = <TKey extends string>(
+  value: unknown,
+  keys: readonly TKey[],
+): Readonly<Record<TKey, number>> =>
+  Object.fromEntries(
+    keys.map((key) => [key, readNumber(value, key)]),
+  ) as Record<TKey, number>;
 
 export const parseAnalyzerReport = (value: string): AnalyzerReport => {
   const parsed = JSON.parse(value) as unknown;
@@ -170,6 +207,14 @@ export const parseAnalyzerReport = (value: string): AnalyzerReport => {
     rulesChecked: readNumber(summary, "rulesChecked"),
     safeFixes: readNumber(summary, "safeFixes"),
     warnings: readNumber(summary, "warnings"),
+    confidence: readCountBreakdown(
+      summary && isRecord(summary) ? summary.confidence : null,
+      analyzerFindingConfidences,
+    ),
+    impact: readCountBreakdown(
+      summary && isRecord(summary) ? summary.impact : null,
+      analyzerFindingImpacts,
+    ),
   };
 
   return {
@@ -181,15 +226,22 @@ export const parseAnalyzerReport = (value: string): AnalyzerReport => {
   };
 };
 
-export const buildAnalyzerArguments = (
+export const buildAnalyzerArguments = async (
   input: CheckFilesInput,
   rootDirectory: string,
 ) => {
+  const canonicalRoot = await resolveRootDirectory(rootDirectory);
   const requestedPaths = input.paths?.length ? input.paths : ["."];
-  const targets = requestedPaths.map((requestedPath) =>
-    toRootRelativePath(
-      rootDirectory,
-      resolveInsideRoot(rootDirectory, requestedPath, "Check path"),
+  const targets = await Promise.all(
+    requestedPaths.map(async (requestedPath) =>
+      toRootRelativePath(
+        canonicalRoot,
+        await resolveExistingInsideRoot(
+          canonicalRoot,
+          requestedPath,
+          "Check path",
+        ),
+      ),
     ),
   );
   const argumentsList = [
@@ -198,6 +250,8 @@ export const buildAnalyzerArguments = (
     ...targets,
     "--json",
     "--no-cache",
+    "--boundary-root",
+    ".",
   ];
 
   if (input.ignoreBaseline) {
@@ -208,13 +262,17 @@ export const buildAnalyzerArguments = (
     argumentsList.push(
       "--config",
       toRootRelativePath(
-        rootDirectory,
-        resolveInsideRoot(rootDirectory, input.configPath, "Config path"),
+        canonicalRoot,
+        await resolveExistingInsideRoot(
+          canonicalRoot,
+          input.configPath,
+          "Config path",
+        ),
       ),
     );
   }
 
-  return { argumentsList, targets };
+  return { argumentsList, canonicalRoot, targets };
 };
 
 const runAnalyzer = async (
@@ -296,11 +354,9 @@ export const checkFiles = async (
     signal?: AbortSignal;
   } = {},
 ): Promise<CheckFilesResult> => {
-  const { argumentsList, targets } = buildAnalyzerArguments(
-    input,
-    rootDirectory,
-  );
-  const result = await runAnalyzer(argumentsList, rootDirectory, signal);
+  const { argumentsList, canonicalRoot, targets } =
+    await buildAnalyzerArguments(input, rootDirectory);
+  const result = await runAnalyzer(argumentsList, canonicalRoot, signal);
   if (result.exitCode !== 0 && result.exitCode !== 1) {
     throw new Error(
       result.stderr.trim() ||
@@ -316,10 +372,7 @@ export const checkFiles = async (
     root: ".",
     targets,
     analyzer,
-    ruleReferences: createRuleReferences(
-      analyzer.findings.map(({ ruleId }) => ruleId),
-      canonicalBaseUrl,
-    ),
+    ruleReferences: createRuleReferences(analyzer.findings, canonicalBaseUrl),
     coverageNote:
       "A clean result covers only implemented deterministic analyzer rules; semantic Coding Bible rules still require review.",
   };

@@ -21,6 +21,7 @@ export const resolveRootDirectory = async (value: string) => {
   return resolved;
 };
 
+/** Lexical containment check. Use resolveExistingInsideRoot before reading files. */
 export const resolveInsideRoot = (
   rootDirectory: string,
   value: string,
@@ -33,6 +34,36 @@ export const resolveInsideRoot = (
   }
 
   return resolved;
+};
+
+/**
+ * Resolves the actual filesystem target and rejects symlink escapes. The MCP
+ * root is expected to be canonical (resolveRootDirectory does this), but this
+ * function also canonicalizes it so direct library callers get the same guard.
+ */
+export const resolveExistingInsideRoot = async (
+  rootDirectory: string,
+  value: string,
+  label: string,
+) => {
+  const canonicalRoot = await realpath(path.resolve(rootDirectory));
+  const lexicalTarget = resolveInsideRoot(canonicalRoot, value, label);
+  let resolvedTarget: string;
+
+  try {
+    resolvedTarget = await realpath(lexicalTarget);
+  } catch (error) {
+    const detail = error instanceof Error ? ` ${error.message}` : "";
+    throw new Error(
+      `${label} could not be resolved inside the MCP root.${detail}`,
+    );
+  }
+
+  if (!isInside(canonicalRoot, resolvedTarget)) {
+    throw new Error(`${label} must stay inside the configured MCP root.`);
+  }
+
+  return resolvedTarget;
 };
 
 export const toRootRelativePath = (rootDirectory: string, value: string) => {

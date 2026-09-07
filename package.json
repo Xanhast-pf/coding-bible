@@ -1,6 +1,7 @@
 {
   "name": "coding-bible",
   "private": true,
+  "license": "MIT",
   "packageManager": "pnpm@10.15.0",
   "engines": {
     "node": ">=24"

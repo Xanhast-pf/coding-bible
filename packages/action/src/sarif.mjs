@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 
 import { actionVersion, canonicalBaseUrl } from "./constants.mjs";
+import { resolveFindingRule } from "./ruleCatalog.mjs";
 
 const syntaxRuleId = "CODING-BIBLE-SYNTAX";
 
@@ -18,19 +19,27 @@ const toRuleDescriptor = (rule) => ({
   id: rule.id,
   name: rule.title,
   shortDescription: { text: rule.summary },
-  helpUri: `${canonicalBaseUrl}#${rule.id}`,
+  ...(rule.url ? { helpUri: rule.url } : {}),
   properties: {
-    level: rule.level,
-    pack: rule.pack,
-    status: rule.status,
+    source: rule.source,
+    ...(rule.level ? { level: rule.level } : {}),
+    ...(rule.pack ? { pack: rule.pack } : {}),
+    ...(rule.status ? { status: rule.status } : {}),
   },
 });
 
 export const createSarif = ({ diagnostics, findings, rulesById }) => {
-  const ruleIds = [...new Set(findings.map(({ ruleId }) => ruleId))].sort();
-  const rules = ruleIds
-    .map((ruleId) => rulesById.get(ruleId))
-    .filter(Boolean)
+  const findingRules = new Map();
+  for (const finding of findings) {
+    if (!findingRules.has(finding.ruleId)) {
+      findingRules.set(
+        finding.ruleId,
+        resolveFindingRule(finding, rulesById, canonicalBaseUrl),
+      );
+    }
+  }
+  const rules = [...findingRules.values()]
+    .sort((left, right) => left.id.localeCompare(right.id))
     .map(toRuleDescriptor);
 
   if (diagnostics.length) {

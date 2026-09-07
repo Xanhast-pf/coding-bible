@@ -74,8 +74,9 @@ Claude Code can also register the same stdio command permanently with
 - `get_project_guidance` — stable foundation/quality guidance plus ecosystem
   packs detected from local `package.json` files.
 
-`check_files` and `review_diff` include canonical rule references in structured
-output. `review_diff` intentionally ignores findings that exist only on unchanged
+`check_files` and `review_diff` include rule references in structured
+output; built-in findings use canonical rule metadata while custom findings preserve their own title, rationale, and URL.
+`review_diff` intentionally ignores findings that exist only on unchanged
 context lines, so historical project debt does not drown out the change being
 reviewed.
 

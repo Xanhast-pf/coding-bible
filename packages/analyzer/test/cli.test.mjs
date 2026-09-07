@@ -1,5 +1,12 @@
 import assert from "node:assert/strict";
-import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import {
+  mkdtemp,
+  mkdir,
+  readFile,
+  rm,
+  symlink,
+  writeFile,
+} from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -1257,5 +1264,178 @@ test("config validates custom cache and baseline settings", async () => {
     assert.equal(exitCode, 0);
     assert.equal(config.cache, ".cache/coding-bible");
     assert.equal(config.baseline, "config/bible-baseline.json");
+  });
+});
+
+test("analysis boundary stops config discovery above an embedding root", async () => {
+  await withFixture(async (directory) => {
+    const root = path.join(directory, "project");
+    await mkdir(path.join(root, "src"), { recursive: true });
+    await writeFile(
+      path.join(directory, "coding-bible.config.json"),
+      JSON.stringify({
+        customRules: [
+          {
+            id: "ACME-001",
+            title: "Ancestor rule",
+            rationale: "Must not cross an embedding boundary.",
+            message: "Ancestor config fired.",
+            suggestion: "Do not load the ancestor config.",
+            confidence: "certain",
+            impact: "high",
+            match: { kind: "call", callee: "dangerous" },
+          },
+        ],
+      }),
+    );
+    await writeFile(path.join(root, "src", "example.ts"), "dangerous();\n");
+
+    const result = await checkPaths(["."], {
+      baseline: false,
+      boundaryRoot: root,
+      cache: false,
+      cwd: root,
+    });
+
+    assert.equal(result.configPath, null);
+    assert.equal(
+      result.findings.some(({ ruleId }) => ruleId === "ACME-001"),
+      false,
+    );
+  });
+});
+
+test("analysis boundary rejects config and source symlink escapes", async () => {
+  await withFixture(async (directory) => {
+    const root = path.join(directory, "project");
+    const outside = path.join(directory, "outside");
+    await mkdir(root);
+    await mkdir(outside);
+    await writeFile(path.join(outside, "outside.ts"), "dangerous();\n");
+    await writeFile(path.join(outside, "coding-bible.config.json"), "{}\n");
+    await symlink(
+      path.join(outside, "outside.ts"),
+      path.join(root, "outside-link.ts"),
+    );
+    await symlink(
+      path.join(outside, "coding-bible.config.json"),
+      path.join(root, "coding-bible.config.json"),
+    );
+
+    await assert.rejects(
+      () =>
+        checkPaths(["outside-link.ts"], {
+          baseline: false,
+          boundaryRoot: root,
+          cache: false,
+          cwd: root,
+          configPath: "coding-bible.config.json",
+        }),
+      /analysis boundary/u,
+    );
+  });
+});
+
+test("analysis boundary independently rejects a source symlink escape", async () => {
+  await withFixture(async (directory) => {
+    const root = path.join(directory, "project");
+    const outside = path.join(directory, "outside");
+    await mkdir(root);
+    await mkdir(outside);
+    await writeFile(
+      path.join(outside, "outside.ts"),
+      "export const value = 1;\n",
+    );
+    await symlink(
+      path.join(outside, "outside.ts"),
+      path.join(root, "outside-link.ts"),
+    );
+
+    await assert.rejects(
+      () =>
+        checkPaths(["outside-link.ts"], {
+          baseline: false,
+          boundaryRoot: root,
+          cache: false,
+          cwd: root,
+        }),
+      /Requested path escapes the configured analysis boundary/u,
+    );
+  });
+});
+
+test("analysis boundary rejects custom rulebook symlink escapes", async () => {
+  await withFixture(async (directory) => {
+    const root = path.join(directory, "project");
+    const outside = path.join(directory, "outside");
+    await mkdir(path.join(root, "config"), { recursive: true });
+    await mkdir(outside);
+    await writeFile(
+      path.join(outside, "rules.json"),
+      JSON.stringify({
+        formatVersion: 1,
+        name: "outside-rules",
+        rules: [],
+      }),
+    );
+    await symlink(
+      path.join(outside, "rules.json"),
+      path.join(root, "config", "rules.json"),
+    );
+    await writeFile(
+      path.join(root, "coding-bible.config.json"),
+      JSON.stringify({ customRuleFiles: ["config/rules.json"] }),
+    );
+    await writeFile(path.join(root, "example.ts"), "export const value = 1;\n");
+
+    await assert.rejects(
+      () =>
+        checkPaths(["."], {
+          baseline: false,
+          boundaryRoot: root,
+          cache: false,
+          cwd: root,
+        }),
+      /Custom rule file .* analysis boundary/u,
+    );
+  });
+});
+
+test("analysis boundary rejects baseline paths and symlinks outside the root", async () => {
+  await withFixture(async (directory) => {
+    const root = path.join(directory, "project");
+    const outside = path.join(directory, "outside");
+    await mkdir(root);
+    await mkdir(outside);
+    await writeFile(path.join(root, "example.ts"), "export const value = 1;\n");
+    await writeFile(
+      path.join(outside, "baseline.json"),
+      JSON.stringify({ schemaVersion: 1, findings: [] }),
+    );
+
+    await assert.rejects(
+      () =>
+        checkPaths(["."], {
+          baselinePath: "../outside/baseline.json",
+          boundaryRoot: root,
+          cache: false,
+          cwd: root,
+        }),
+      /Baseline path must stay inside the configured analysis boundary/u,
+    );
+
+    await symlink(
+      path.join(outside, "baseline.json"),
+      path.join(root, ".coding-bible-baseline.json"),
+    );
+    await assert.rejects(
+      () =>
+        checkPaths(["."], {
+          boundaryRoot: root,
+          cache: false,
+          cwd: root,
+        }),
+      /Baseline path must stay inside the configured analysis boundary/u,
+    );
   });
 });

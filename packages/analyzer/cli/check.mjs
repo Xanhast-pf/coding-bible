@@ -1,3 +1,4 @@
+import { realpath } from "node:fs/promises";
 import path from "node:path";
 
 import {
@@ -43,6 +44,42 @@ const toRelativePath = (cwd, filePath) => {
 
 const toCacheKey = (cwd, filePath) =>
   toRelativePath(cwd, filePath).replaceAll("\\", "/");
+
+const isInsideBoundary = (parent, candidate) => {
+  const relative = path.relative(parent, candidate);
+  return (
+    relative === "" ||
+    (!relative.startsWith("..") && !path.isAbsolute(relative))
+  );
+};
+
+const assertBaselineInsideBoundary = async (filePath, boundaryRoot) => {
+  if (!filePath || !boundaryRoot) {
+    return filePath;
+  }
+
+  const absolutePath = path.resolve(filePath);
+  if (!isInsideBoundary(boundaryRoot, absolutePath)) {
+    throw new Error(
+      "Baseline path must stay inside the configured analysis boundary.",
+    );
+  }
+
+  try {
+    const resolvedPath = await realpath(absolutePath);
+    if (!isInsideBoundary(boundaryRoot, resolvedPath)) {
+      throw new Error(
+        "Baseline path must stay inside the configured analysis boundary.",
+      );
+    }
+    return resolvedPath;
+  } catch (error) {
+    if (error && typeof error === "object" && error.code === "ENOENT") {
+      return absolutePath;
+    }
+    throw error;
+  }
+};
 
 export const collectSourceFiles = async (
   targets,
@@ -155,6 +192,7 @@ export const checkPaths = async (
   {
     baseline = true,
     baselinePath,
+    boundaryRoot,
     cache = true,
     clearCache = false,
     configPath,
@@ -167,7 +205,11 @@ export const checkPaths = async (
 ) => {
   const totalStartedAt = performance.now();
   signal?.throwIfAborted();
-  const loadedConfig = await loadAnalyzerConfig({ cwd, configPath });
+  const loadedConfig = await loadAnalyzerConfig({
+    cwd,
+    configPath,
+    boundaryRoot,
+  });
   const rootDir = loadedConfig.rootDir;
   const configuredRuleIds = getConfiguredAnalyzerRuleIds(loadedConfig.config);
   const normalizedRuleSelection = normalizeAnalyzerRuleSelection(
@@ -179,7 +221,7 @@ export const checkPaths = async (
     configuredRuleIds,
   );
   const resolvedTargets = targets.length
-    ? targets.map((target) => path.resolve(cwd, target))
+    ? targets.map((target) => path.resolve(loadedConfig.cwd, target))
     : [rootDir];
   signal?.throwIfAborted();
   const resolver = createConfigResolver(loadedConfig.config, rootDir);
@@ -195,6 +237,7 @@ export const checkPaths = async (
   });
   signal?.throwIfAborted();
   const discovery = await discoverSourceFiles(resolvedTargets, {
+    boundaryRoot: loadedConfig.boundaryRoot,
     config: loadedConfig.config,
     cwd: rootDir,
     scopedFiles,
@@ -473,10 +516,14 @@ export const checkPaths = async (
   );
   diagnostics.sort(byLocation);
 
-  const resolvedBaselinePath = resolveBaselinePath(
+  const requestedBaselinePath = resolveBaselinePath(
     rootDir,
     loadedConfig.config,
     { enabled: baseline, overridePath: baselinePath },
+  );
+  const resolvedBaselinePath = await assertBaselineInsideBoundary(
+    requestedBaselinePath,
+    loadedConfig.boundaryRoot,
   );
   const loadedBaseline = await loadBaseline(resolvedBaselinePath);
   const baselineResult = applyBaseline(findings, loadedBaseline);

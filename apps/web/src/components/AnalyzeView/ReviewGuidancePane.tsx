@@ -142,6 +142,30 @@ export const ReviewGuidancePane = ({
               </div>
             ) : null}
           </section>
+        ) : finding.ruleTitle || finding.ruleRationale || finding.ruleUrl ? (
+          <section className={styles.reviewGuidanceSection}>
+            <div className={styles.reviewGuidanceTitleRow}>
+              <span className={styles.reviewGuidanceLabel}>Custom rule</span>
+              {finding.ruleUrl ? (
+                <a
+                  className={styles.reviewGuidanceRuleLink}
+                  href={finding.ruleUrl}
+                  rel="noreferrer"
+                  target="_blank"
+                >
+                  {finding.ruleId} ↗
+                </a>
+              ) : (
+                <span>{finding.ruleId}</span>
+              )}
+            </div>
+            <h5>{finding.ruleTitle ?? finding.ruleId}</h5>
+            {finding.ruleRationale ? (
+              <p className={styles.reviewGuidanceRationale}>
+                {finding.ruleRationale}
+              </p>
+            ) : null}
+          </section>
         ) : null}
       </div>
     </aside>
