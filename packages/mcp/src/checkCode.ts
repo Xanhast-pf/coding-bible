@@ -65,7 +65,7 @@ export const checkCode = (
     diagnostics: result.diagnostics,
     findings: result.findings.map((finding) => ({
       ...finding,
-      rule: createRuleReference(finding.ruleId, canonicalBaseUrl),
+      rule: createRuleReference(finding, canonicalBaseUrl),
     })),
     ruleIdsChecked: result.ruleIdsChecked,
     coverageNote:

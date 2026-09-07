@@ -18,6 +18,8 @@ Scan options:
   --staged              Check only staged files.
   --since <git-ref>     Check branch changes since a Git ref plus local changes.
   --config <path>       Use an explicit Coding Bible config file.
+  --boundary-root <path>
+                        Restrict config/source discovery to this filesystem root.
   --rules <id,...>      Run only the listed automated rule IDs.
   --exclude-rules <id,...>
                         Skip the listed automated rule IDs.
@@ -52,6 +54,7 @@ const createDefaultOptions = (command) => ({
   action: null,
   baseline: true,
   baselinePath: undefined,
+  boundaryRoot: undefined,
   cache: true,
   clearCache: false,
   command,
@@ -158,6 +161,15 @@ const parseArguments = (args) => {
         throw new Error("--config requires a file path.");
       }
       options.configPath = value;
+      index += 1;
+      continue;
+    }
+    if (argument === "--boundary-root") {
+      const value = rest[index + 1];
+      if (!value || value.startsWith("--")) {
+        throw new Error("--boundary-root requires a directory path.");
+      }
+      options.boundaryRoot = value;
       index += 1;
       continue;
     }
@@ -362,6 +374,7 @@ const printConfig = async (options, { cwd, stdout }) => {
   const loaded = await loadAnalyzerConfig({
     cwd,
     configPath: options.configPath,
+    boundaryRoot: options.boundaryRoot,
   });
   const displayPath = loaded.configPath
     ? path.relative(loaded.rootDir, loaded.configPath) ||
@@ -415,6 +428,7 @@ const printConfig = async (options, { cwd, stdout }) => {
 const createBaseline = async (options, { cwd, stdout }) => {
   const result = await checkPaths(options.targets, {
     baseline: false,
+    boundaryRoot: options.boundaryRoot,
     cache: options.cache,
     clearCache: options.clearCache,
     configPath: options.configPath,
@@ -432,6 +446,7 @@ const createBaseline = async (options, { cwd, stdout }) => {
   const loaded = await loadAnalyzerConfig({
     cwd,
     configPath: options.configPath,
+    boundaryRoot: options.boundaryRoot,
   });
   const filePath = resolveBaselinePath(loaded.rootDir, loaded.config, {
     enabled: true,
@@ -495,6 +510,7 @@ export const runCli = async (
     const result = await checkPaths(options.targets, {
       baseline: options.baseline,
       baselinePath: options.baselinePath,
+      boundaryRoot: options.boundaryRoot,
       cache: options.cache,
       clearCache: options.clearCache,
       configPath: options.configPath,

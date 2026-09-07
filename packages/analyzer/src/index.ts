@@ -35,7 +35,13 @@ export {
   prepareAnalyzerTextEdits,
 } from "./fixes.ts";
 export { compileGlobs, matchesAnyGlob, normalizeGlobPath } from "./glob.ts";
-export { analyzerLanguages, analyzerPacks } from "./types.ts";
+export { createAnalyzerFindingFingerprintPayload } from "./fingerprint.ts";
+export {
+  analyzerFindingConfidences,
+  analyzerFindingImpacts,
+  analyzerLanguages,
+  analyzerPacks,
+} from "./types.ts";
 export {
   analyzerFindingProfileSignature,
   analyzerFindingProfiles,
@@ -69,3 +75,11 @@ export type {
   ResolvedAnalyzerFinding,
   SourceLocation,
 } from "./types.ts";
+export type {
+  AnalyzerReportDiagnosticV1,
+  AnalyzerReportFindingV1,
+  AnalyzerReportFixV1,
+  AnalyzerReportLocation,
+  AnalyzerReportSummaryV1,
+  AnalyzerReportV1,
+} from "./reportTypes.ts";

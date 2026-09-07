@@ -63,6 +63,7 @@ const FindingCard = ({
   source?: string;
 }) => {
   const rule = rulesById.get(finding.ruleId);
+  const ruleHref = rule ? `./#${finding.ruleId}` : finding.ruleUrl;
   const fix = finding.fix;
   const [fixError, setFixError] = useState<string | null>(null);
   const [fixPatch, setFixPatch] = useState<string | null>(null);
@@ -110,9 +111,13 @@ const FindingCard = ({
   return (
     <article className={styles.finding} data-level={rule?.level ?? "should"}>
       <div className={styles.findingMeta}>
-        <a className={styles.ruleId} href={`./#${finding.ruleId}`}>
-          {finding.ruleId}
-        </a>
+        {ruleHref ? (
+          <a className={styles.ruleId} href={ruleHref}>
+            {finding.ruleId}
+          </a>
+        ) : (
+          <span className={styles.ruleId}>{finding.ruleId}</span>
+        )}
         <span className={styles.severity} data-severity={finding.severity}>
           {finding.severity}
         </span>
@@ -136,7 +141,9 @@ const FindingCard = ({
         </span>
       </div>
 
-      <h3 className={styles.findingTitle}>{rule?.title ?? finding.ruleId}</h3>
+      <h3 className={styles.findingTitle}>
+        {rule?.title ?? finding.ruleTitle ?? finding.ruleId}
+      </h3>
       <p className={styles.message}>{finding.message}</p>
 
       {finding.contextNote ? (
@@ -205,9 +212,11 @@ const FindingCard = ({
         </div>
       ) : null}
 
-      <a className={styles.viewRule} href={`./#${finding.ruleId}`}>
-        View rule →
-      </a>
+      {ruleHref ? (
+        <a className={styles.viewRule} href={ruleHref}>
+          View rule →
+        </a>
+      ) : null}
     </article>
   );
 };
@@ -300,11 +309,11 @@ export const AnalysisResults = ({
       ? `${Math.round(result.durationMs)} ms`
       : `${(result.durationMs / 1_000).toFixed(1)} s`;
 
-  const downloadReport = () => {
+  const downloadReport = async () => {
     setArtifactError(null);
 
     try {
-      const report = createBrowserAnalyzerReport(
+      const report = await createBrowserAnalyzerReport(
         result,
         projectName ? { projectName } : {},
       );

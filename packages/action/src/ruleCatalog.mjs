@@ -23,3 +23,23 @@ export const loadRuleCatalog = async () => {
 
 export const createRuleMap = async () =>
   new Map((await loadRuleCatalog()).map((rule) => [rule.id, rule]));
+
+export const resolveFindingRule = (finding, rulesById, canonicalBaseUrl) => {
+  const canonical = rulesById.get(finding.ruleId) ?? null;
+  return {
+    id: finding.ruleId,
+    level: canonical?.level ?? null,
+    pack: canonical?.pack ?? null,
+    source: canonical ? "canonical" : "finding",
+    status: canonical?.status ?? null,
+    summary:
+      finding.ruleRationale ??
+      canonical?.summary ??
+      finding.message ??
+      "Analyzer rule finding.",
+    title: finding.ruleTitle ?? canonical?.title ?? finding.ruleId,
+    url:
+      finding.ruleUrl ??
+      (canonical ? `${canonicalBaseUrl}#${finding.ruleId}` : null),
+  };
+};

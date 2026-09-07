@@ -49,7 +49,10 @@ const result = {
             impact: "low",
             location: { column: 10, endColumn: 14, endLine: 1, line: 1 },
             message: "User is used only as a type.",
-            ruleId: "TS-003",
+            ruleId: "ACME-001",
+            ruleRationale: "Project-specific import policy.",
+            ruleTitle: "Prefer explicit type imports",
+            ruleUrl: "https://example.com/rules/ACME-001",
             severity: "error",
             suggestion: "Use a type-only import.",
           },
@@ -78,7 +81,7 @@ const result = {
             suggestion: "Pass the intended radix explicitly.",
           },
         ],
-        ruleIdsChecked: ["JS-002", "TS-003"],
+        ruleIdsChecked: ["ACME-001", "JS-002"],
       },
     },
   ],
@@ -137,8 +140,8 @@ test("browser finding fixes preview and apply only that finding's edits", () => 
   assert.match(reviewFix.source, /import \{ User \}/u);
 });
 
-test("browser report exposes severity and fix safety without source contents", () => {
-  const report = createBrowserAnalyzerReport(result, {
+test("browser report exposes the shared self-describing finding contract", async () => {
+  const report = await createBrowserAnalyzerReport(result, {
     projectName: "example-project",
   });
 
@@ -147,6 +150,9 @@ test("browser report exposes severity and fix safety without source contents", (
   assert.deepEqual(report.analyzer, result.analyzer);
   assert.equal(report.summary.errors, 1);
   assert.equal(report.summary.warnings, 1);
+  assert.equal(report.summary.baselineSuppressed, 0);
+  assert.equal(report.summary.cacheHits, 0);
+  assert.equal(report.summary.filesDiscovered, 1);
   assert.equal(report.summary.safeFixes, 1);
   assert.equal(report.summary.reviewFixes, 1);
   assert.deepEqual(report.summary.confidence, {
@@ -158,6 +164,16 @@ test("browser report exposes severity and fix safety without source contents", (
   assert.equal(report.project.name, "example-project");
   assert.equal(report.findings[0].fix.patch, "safe-fixes.patch");
   assert.equal(report.findings[1].fix.patch, "review-fixes.patch");
+  assert.match(report.findings[0].fingerprint, /^[a-f0-9]{24}$/u);
+  assert.equal(report.findings[0].ruleTitle, "Prefer explicit type imports");
+  assert.equal(
+    report.findings[0].ruleRationale,
+    "Project-specific import policy.",
+  );
+  assert.equal(
+    report.findings[0].ruleUrl,
+    "https://example.com/rules/ACME-001",
+  );
   assert.equal(report.findings[1].severity, "warning");
   assert.equal(report.findings[0].confidence, "certain");
   assert.equal(report.findings[1].confidence, "contextual");

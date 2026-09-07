@@ -67,7 +67,7 @@ const summarizeCodeCheck = (result: ReturnType<typeof checkCode>) => {
 
 const summarizeFileCheck = (result: Awaited<ReturnType<typeof checkFiles>>) => {
   const { summary } = result.analyzer;
-  return `Coding Bible checked ${summary.filesAnalyzed} file(s): ${summary.errors} error(s), ${summary.warnings} warning(s), ${summary.diagnostics} syntax diagnostic(s). The structured result includes canonical references for every rule that fired.`;
+  return `Coding Bible checked ${summary.filesAnalyzed} file(s): ${summary.errors} error(s), ${summary.warnings} warning(s), ${summary.diagnostics} syntax diagnostic(s). The structured result includes rule references for every finding, using canonical metadata when available and self-describing metadata for custom rules.`;
 };
 
 const summarizeDiffReview = (

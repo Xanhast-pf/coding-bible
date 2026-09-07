@@ -13,35 +13,59 @@ const read = (relativePath) =>
   fs.readFileSync(path.join(root, relativePath), "utf8");
 
 const actionPackage = JSON.parse(read("packages/action/package.json"));
-const releaseVersion = actionPackage.version;
-const releaseTag = `v${releaseVersion}`;
+const mcpPackage = JSON.parse(read("packages/mcp/package.json"));
+const releaseState = JSON.parse(read("packages/action/release-state.json"));
+const sourceVersion = actionPackage.version;
+const publishedVersion = releaseState.publishedActionVersion;
+const publishedTag = `v${publishedVersion}`;
 
 const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
 
-test("Action runtime version matches the package release version", () => {
-  assert.match(releaseVersion, /^\d+\.\d+\.\d+$/u);
+const parseSemver = (value) => {
+  assert.match(value, /^\d+\.\d+\.\d+$/u);
+  return value.split(".").map(Number);
+};
+
+const compareSemver = (left, right) => {
+  const a = parseSemver(left);
+  const b = parseSemver(right);
+  for (let index = 0; index < 3; index += 1) {
+    const difference = (a[index] ?? 0) - (b[index] ?? 0);
+    if (difference) return difference;
+  }
+  return 0;
+};
+
+test("Action and MCP versions match the source package version", () => {
+  assert.equal(mcpPackage.version, sourceVersion);
 
   const constants = read("packages/action/src/constants.mjs");
   assert.match(
     constants,
     new RegExp(
-      `export const actionVersion = "${escapeRegExp(releaseVersion)}";`,
+      `export const actionVersion = "${escapeRegExp(sourceVersion)}";`,
+      "u",
+    ),
+  );
+
+  const mcpConstants = read("packages/mcp/src/constants.ts");
+  assert.match(
+    mcpConstants,
+    new RegExp(
+      `export const codingBibleMcpVersion = "${escapeRegExp(sourceVersion)}";`,
       "u",
     ),
   );
 });
 
-test("SARIF contract expects the same Action release version", () => {
-  const sarifTest = read("packages/action/test/sarif.test.mjs");
-  assert.match(
-    sarifTest,
-    new RegExp(`semanticVersion, "${escapeRegExp(releaseVersion)}"\\);`, "u"),
+test("published Action dogfood is independently pinned to an immutable released version", () => {
+  assert.ok(
+    compareSemver(publishedVersion, sourceVersion) <= 0,
+    `Published Action ${publishedVersion} cannot be newer than source ${sourceVersion}.`,
   );
-});
 
-test("released Action dogfood is pinned to the immutable package release", () => {
   const workflow = read(".github/workflows/deploy-pages.yml");
-  const escapedTag = escapeRegExp(releaseTag);
+  const escapedTag = escapeRegExp(publishedTag);
 
   assert.match(
     workflow,
@@ -59,5 +83,5 @@ test("released Action dogfood is pinned to the immutable package release", () =>
   const publishedPins = [
     ...workflow.matchAll(/uses: Xanhast-pf\/coding-bible@(v\d+\.\d+\.\d+)/gu),
   ].map((match) => match[1]);
-  assert.deepEqual(publishedPins, [releaseTag]);
+  assert.deepEqual(publishedPins, [publishedTag]);
 });

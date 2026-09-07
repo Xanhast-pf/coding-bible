@@ -1,9 +1,12 @@
 import {
+  analyzerRuleIds,
   applyAnalyzerTextEdits,
   createAnalyzerFilePatch,
+  createAnalyzerFindingFingerprintPayload,
   normalizeAnalyzerPatchPath,
   prepareAnalyzerTextEdits,
   type AnalyzerFixSafety,
+  type AnalyzerReportV1,
   type AnalyzerTextEdit,
 } from "@coding-bible/analyzer";
 
@@ -14,6 +17,7 @@ import type {
 } from "./types";
 
 const ruleBaseUrl = "https://xanhast-pf.github.io/coding-bible/#";
+const builtInRuleIds = new Set(analyzerRuleIds);
 
 interface BrowserArtifactOptions {
   projectName?: string;
@@ -23,6 +27,27 @@ interface FixEntry {
   edits: AnalyzerTextEdit[];
   findingCount: number;
 }
+
+const createBrowserFindingFingerprint = async (
+  file: string,
+  finding: BrowserAnalyzerFinding,
+) => {
+  const payload = createAnalyzerFindingFingerprintPayload({
+    detectorId: finding.detectorId,
+    excerpt: finding.excerpt,
+    file,
+    message: finding.message,
+    ruleId: finding.ruleId,
+  });
+  const digest = await crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(payload),
+  );
+  return [...new Uint8Array(digest)]
+    .map((value) => value.toString(16).padStart(2, "0"))
+    .join("")
+    .slice(0, 24);
+};
 
 const hasEdits = (finding: BrowserAnalyzerFinding) =>
   Boolean(finding.fix?.edits?.length);
@@ -114,7 +139,7 @@ export const createBrowserFixPatch = (
   };
 };
 
-export const createBrowserAnalyzerReport = (
+export const createBrowserAnalyzerReport = async (
   result: BrowserAnalyzeResult,
   options: BrowserArtifactOptions = {},
 ) => {
@@ -137,6 +162,48 @@ export const createBrowserAnalyzerReport = (
   const warnings = findings.length - errors;
   const safeFixes = countBrowserFixes(result, "safe");
   const reviewFixes = countBrowserFixes(result, "review");
+  const serializedFindings = await Promise.all(
+    findings.map(async ({ fileName, finding }) => {
+      const file = normalizeAnalyzerPatchPath(fileName);
+      return {
+        confidence: finding.confidence,
+        contextNote: finding.contextNote ?? null,
+        detectorId: finding.detectorId,
+        excerpt: finding.excerpt,
+        file,
+        fingerprint: await createBrowserFindingFingerprint(file, finding),
+        fix: finding.fix
+          ? {
+              available: Boolean(finding.fix.edits?.length),
+              description: finding.fix.description,
+              patch: finding.fix.edits?.length
+                ? finding.fix.safety === "safe"
+                  ? "safe-fixes.patch"
+                  : "review-fixes.patch"
+                : null,
+              safety: finding.fix.safety,
+              title: finding.fix.title,
+            }
+          : {
+              available: false,
+              safety: "none" as const,
+            },
+        impact: finding.impact,
+        location: finding.location,
+        message: finding.message,
+        ruleId: finding.ruleId,
+        ruleRationale: finding.ruleRationale ?? null,
+        ruleTitle: finding.ruleTitle ?? null,
+        ruleUrl:
+          finding.ruleUrl ??
+          (builtInRuleIds.has(finding.ruleId)
+            ? `${ruleBaseUrl}${finding.ruleId}`
+            : null),
+        severity: finding.severity,
+        suggestion: finding.suggestion,
+      };
+    }),
+  );
 
   return {
     schemaVersion: 1,
@@ -145,8 +212,12 @@ export const createBrowserAnalyzerReport = (
     mode: result.mode,
     ruleSelection: result.ruleSelection,
     summary: {
+      baselineSuppressed: 0,
+      cacheHits: 0,
+      cacheMisses: 0,
       diagnostics: diagnostics.length,
       errors,
+      filesDiscovered: result.sourceFileCount,
       filesAnalyzed: result.sourceFileCount,
       findings: findings.length,
       reviewFixes,
@@ -184,35 +255,6 @@ export const createBrowserAnalyzerReport = (
       location: diagnostic.location,
       message: diagnostic.message,
     })),
-    findings: findings.map(({ fileName, finding }) => ({
-      confidence: finding.confidence,
-      contextNote: finding.contextNote ?? null,
-      detectorId: finding.detectorId,
-      excerpt: finding.excerpt,
-      file: normalizeAnalyzerPatchPath(fileName),
-      fix: finding.fix
-        ? {
-            available: Boolean(finding.fix.edits?.length),
-            description: finding.fix.description,
-            patch: finding.fix.edits?.length
-              ? finding.fix.safety === "safe"
-                ? "safe-fixes.patch"
-                : "review-fixes.patch"
-              : null,
-            safety: finding.fix.safety,
-            title: finding.fix.title,
-          }
-        : {
-            available: false,
-            safety: "none",
-          },
-      impact: finding.impact,
-      location: finding.location,
-      message: finding.message,
-      ruleId: finding.ruleId,
-      ruleUrl: `${ruleBaseUrl}${finding.ruleId}`,
-      severity: finding.severity,
-      suggestion: finding.suggestion,
-    })),
-  };
+    findings: serializedFindings,
+  } satisfies AnalyzerReportV1;
 };

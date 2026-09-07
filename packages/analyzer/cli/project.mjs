@@ -1,4 +1,4 @@
-import { stat } from "node:fs/promises";
+import { realpath, stat } from "node:fs/promises";
 import path from "node:path";
 
 import ts from "typescript";
@@ -20,8 +20,37 @@ const supportedExtensions = [...languageByExtension.keys()];
 
 const normalizeTargets = (targets) => (targets.length ? targets : ["."]);
 
-const getTargetMatchers = async (targets, cwd) => {
+const isInsideBoundary = (parent, candidate) => {
+  const relative = path.relative(parent, candidate);
+  return (
+    relative === "" ||
+    (!relative.startsWith("..") && !path.isAbsolute(relative))
+  );
+};
+
+const enforceFileBoundary = async (files, boundaryRoot) => {
+  if (!boundaryRoot) {
+    return files;
+  }
+
+  const resolvedBoundary = await realpath(path.resolve(boundaryRoot));
+  for (const filePath of files) {
+    const resolvedFile = await realpath(filePath);
+    if (!isInsideBoundary(resolvedBoundary, resolvedFile)) {
+      throw new Error(
+        `Discovered source file escapes the configured analysis boundary: ${filePath}`,
+      );
+    }
+  }
+  return files;
+};
+
+const getTargetMatchers = async (targets, cwd, boundaryRoot) => {
   const matchers = [];
+
+  const resolvedBoundary = boundaryRoot
+    ? await realpath(path.resolve(boundaryRoot))
+    : null;
 
   for (const target of normalizeTargets(targets)) {
     const absolutePath = path.resolve(cwd, target);
@@ -30,6 +59,15 @@ const getTargetMatchers = async (targets, cwd) => {
       targetStat = await stat(absolutePath);
     } catch {
       throw new Error(`Requested path does not exist: ${target}`);
+    }
+
+    if (resolvedBoundary) {
+      const resolvedTarget = await realpath(absolutePath);
+      if (!isInsideBoundary(resolvedBoundary, resolvedTarget)) {
+        throw new Error(
+          `Requested path escapes the configured analysis boundary: ${target}`,
+        );
+      }
     }
 
     if (targetStat.isDirectory()) {
@@ -53,12 +91,12 @@ const getTargetMatchers = async (targets, cwd) => {
 
 export const discoverSourceFiles = async (
   targets,
-  { cwd = process.cwd(), config, scopedFiles = null } = {},
+  { boundaryRoot, cwd = process.cwd(), config, scopedFiles = null } = {},
 ) => {
   const startedAt = performance.now();
   const include = (config.include ?? ["**/*"]).flatMap(expandBraces);
   const exclude = (config.ignore ?? []).flatMap(expandBraces);
-  const targetMatchers = await getTargetMatchers(targets, cwd);
+  const targetMatchers = await getTargetMatchers(targets, cwd, boundaryRoot);
 
   const allDiscovered = ts.sys
     .readDirectory(cwd, supportedExtensions, exclude, include)
@@ -70,10 +108,11 @@ export const discoverSourceFiles = async (
   const selected = scopedFiles
     ? discovered.filter((filePath) => scopedFiles.has(filePath))
     : discovered;
+  const boundaryChecked = await enforceFileBoundary(selected, boundaryRoot);
 
   return {
     discovered,
-    files: selected,
+    files: boundaryChecked,
     discoveryMs: performance.now() - startedAt,
   };
 };

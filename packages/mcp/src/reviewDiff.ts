@@ -234,7 +234,7 @@ export const reviewDiff = async (
     rangesByFile,
   ).map((finding) => ({
     ...finding,
-    rule: createRuleReference(finding.ruleId, canonicalBaseUrl),
+    rule: createRuleReference(finding, canonicalBaseUrl),
   }));
   const diagnostics = filterChangedLocations(
     checked.analyzer.diagnostics,
@@ -269,10 +269,7 @@ export const reviewDiff = async (
     },
     diagnostics,
     findings,
-    ruleReferences: createRuleReferences(
-      findings.map(({ ruleId }) => ruleId),
-      canonicalBaseUrl,
-    ),
+    ruleReferences: createRuleReferences(findings, canonicalBaseUrl),
     coverageNote:
       "review_diff checks only implemented deterministic analyzer rules on added or modified current-file lines; semantic review and deleted-line reasoning remain separate responsibilities.",
     warnings,

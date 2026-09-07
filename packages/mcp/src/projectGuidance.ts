@@ -10,7 +10,7 @@ import {
 } from "@coding-bible/rules";
 
 import { codingBibleCanonicalUrl } from "./constants.ts";
-import { resolveInsideRoot, toRootRelativePath } from "./pathSafety.ts";
+import { resolveExistingInsideRoot, toRootRelativePath } from "./pathSafety.ts";
 
 const ignoredDirectories = new Set([
   ".cache",
@@ -236,7 +236,7 @@ const resolveProjectDirectory = async (
   serverRoot: string,
   requestedPath: string,
 ) => {
-  const requested = resolveInsideRoot(
+  const requested = await resolveExistingInsideRoot(
     serverRoot,
     requestedPath,
     "Project path",

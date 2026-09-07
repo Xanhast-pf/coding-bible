@@ -94,3 +94,43 @@ test("reviewDiff handles deleted-only changes without scanning unrelated files",
   assert.equal(result.summary.findings, 0);
   assert.ok(result.warnings.length > 0);
 });
+
+test("reviewDiff preserves custom-rule metadata instead of requiring a canonical rule", async () => {
+  const root = await mkdtemp(
+    path.join(os.tmpdir(), "coding-bible-mcp-diff-custom-"),
+  );
+  await mkdir(path.join(root, "src"));
+  await writeFile(
+    path.join(root, "coding-bible.config.json"),
+    JSON.stringify({
+      customRules: [
+        {
+          id: "ACME-001",
+          title: "Avoid dangerous",
+          rationale: "Custom project policy.",
+          message: "Do not call dangerous().",
+          suggestion: "Use safeAlternative().",
+          confidence: "strong",
+          impact: "high",
+          url: "https://example.com/rules/ACME-001",
+          match: { kind: "call", callee: "dangerous" },
+        },
+      ],
+    }),
+  );
+  await writeFile(
+    path.join(root, "src", "example.ts"),
+    "export const safe = 1;\ndangerous();\n",
+  );
+
+  const result = await reviewDiff(
+    { diff: createDiff("dangerous();") },
+    { rootDirectory: root },
+  );
+
+  const finding = result.findings.find(({ ruleId }) => ruleId === "ACME-001");
+  assert.ok(finding);
+  assert.equal(finding.rule.title, "Avoid dangerous");
+  assert.equal(finding.rule.source, "finding");
+  assert.equal(finding.rule.url, "https://example.com/rules/ACME-001");
+});

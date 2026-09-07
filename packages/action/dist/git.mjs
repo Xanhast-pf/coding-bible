@@ -48,7 +48,7 @@ export const getChangedDiff = async ({ cwd, baseRef, targetPath }) => {
         "diff",
         "--unified=0",
         "--no-ext-diff",
-        "--no-renames",
+        "--find-renames",
         `${baseSha}...HEAD`,
         "--",
         targetPath,
