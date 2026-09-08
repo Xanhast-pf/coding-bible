@@ -122,9 +122,9 @@ const createBuild = async (outputDirectory) => {
   const bridgePath = path.join(outputDirectory, "analyzerBridge.mjs");
   await writeFile(
     bridgePath,
-    (await readFile(bridgePath, "utf8")).replace(
-      '"../../analyzer/cli/check.mjs"',
-      '"./vendor/analyzer/cli/check.mjs"',
+    (await readFile(bridgePath, "utf8")).replaceAll(
+      '"../../analyzer/cli/',
+      '"./vendor/analyzer/cli/',
     ),
     "utf8",
   );
