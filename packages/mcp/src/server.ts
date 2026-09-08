@@ -4,6 +4,7 @@ import { checkCode, type CheckCodeInput } from "./checkCode.ts";
 import { checkFiles, type CheckFilesInput } from "./checkFiles.ts";
 import { codingBibleCanonicalUrl, codingBibleMcpVersion } from "./constants.ts";
 import { getProjectGuidance } from "./projectGuidance.ts";
+import { planFixes, type PlanFixesInput } from "./planFixes.ts";
 import { getRule } from "./getRule.ts";
 import { reviewDiff, type ReviewDiffInput } from "./reviewDiff.ts";
 import {
@@ -11,6 +12,7 @@ import {
   checkFilesInputSchema,
   getProjectGuidanceInputSchema,
   getRuleInputSchema,
+  planFixesInputSchema,
   reviewDiffInputSchema,
   searchRulesInputSchema,
 } from "./schemas.ts";
@@ -143,6 +145,32 @@ export const createCodingBibleMcpServer = (
           signal: context.mcpReq.signal,
         });
         return asToolResult(result, summarizeFileCheck(result));
+      } catch (error) {
+        return asToolError(error);
+      }
+    },
+  );
+
+  server.registerTool(
+    "plan_fixes",
+    {
+      title: "Plan fixes",
+      description:
+        "Create a deterministic P0-P3 Fix Pack and Review Brief for existing project files. This tool is read-only: it analyzes with cache writes disabled and does not write patches, reports, baselines, or source changes.",
+      inputSchema: fromJsonSchema<PlanFixesInput>(planFixesInputSchema),
+      annotations: toolAnnotations,
+    },
+    async (input, context) => {
+      try {
+        const result = await planFixes(input, {
+          canonicalBaseUrl,
+          rootDirectory,
+          signal: context.mcpReq.signal,
+        });
+        return asToolResult(
+          result,
+          `Coding Bible prepared a read-only fix plan for ${result.fixPack.summary.findings} finding(s).`,
+        );
       } catch (error) {
         return asToolError(error);
       }

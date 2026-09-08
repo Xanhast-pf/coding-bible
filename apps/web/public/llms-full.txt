@@ -2388,8 +2388,11 @@ export const getUsers = () => db.user.findMany();
 **DON'T**
 
 ```ts
-export const getUsers = () => db.user.findMany();
-export const apiSecret = process.env.API_SECRET;
+"use client";
+
+import "server-only";
+
+export const ClientWidget = () => null;
 ```
 
 **References:**
@@ -3065,19 +3068,31 @@ const reducer = (state = initialState, action) => {
 **DO**
 
 ```ts
-markUpdated(state, action: PayloadAction<number>) {
-  state.lastUpdated = action.payload;
-}
+const metaSlice = createSlice({
+  name: "meta",
+  initialState,
+  reducers: {
+    markUpdated(state, action: PayloadAction<number>) {
+      state.lastUpdated = action.payload;
+    },
+  },
+});
 
-dispatch(markUpdated(Date.now()));
+dispatch(metaSlice.actions.markUpdated(Date.now()));
 ```
 
 **DON'T**
 
 ```ts
-markUpdated(state) {
-  state.lastUpdated = Date.now();
-}
+createSlice({
+  name: "meta",
+  initialState,
+  reducers: {
+    markUpdated(state) {
+      state.lastUpdated = Date.now();
+    },
+  },
+});
 ```
 
 **References:**

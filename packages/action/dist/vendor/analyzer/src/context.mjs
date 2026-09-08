@@ -1,5 +1,7 @@
 import ts from "../../typescript/typescript.cjs";
 const scriptKindByLanguage = {
+    css: ts.ScriptKind.Unknown,
+    graphql: ts.ScriptKind.Unknown,
     js: ts.ScriptKind.JS,
     jsx: ts.ScriptKind.JSX,
     ts: ts.ScriptKind.TS,
@@ -7,6 +9,7 @@ const scriptKindByLanguage = {
 };
 const compilerOptions = {
     allowJs: true,
+    allowNonTsExtensions: true,
     checkJs: false,
     jsx: ts.JsxEmit.Preserve,
     noLib: true,

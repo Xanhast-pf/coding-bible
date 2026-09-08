@@ -1,7 +1,8 @@
-import { realpath } from "node:fs/promises";
+import { readFile, realpath } from "node:fs/promises";
 import path from "node:path";
 
 import {
+  analyze,
   analyzeProgram,
   createAnalyzerRuleSelectionPredicate,
   detectors,
@@ -53,7 +54,7 @@ const isInsideBoundary = (parent, candidate) => {
   );
 };
 
-const assertBaselineInsideBoundary = async (filePath, boundaryRoot) => {
+export const assertBaselineInsideBoundary = async (filePath, boundaryRoot) => {
   if (!filePath || !boundaryRoot) {
     return filePath;
   }
@@ -264,7 +265,14 @@ export const checkPaths = async (
     });
   }
 
-  const projectPlans = createProjectPlans(discovery.files, {
+  const textFiles = discovery.files.filter((filePath) => {
+    const language = languageByExtension.get(path.extname(filePath));
+    return language === "css" || language === "graphql";
+  });
+  const codeFiles = discovery.files.filter(
+    (filePath) => !textFiles.includes(filePath),
+  );
+  const projectPlans = createProjectPlans(codeFiles, {
     cwd: rootDir,
     tsconfig: loadedConfig.config.tsconfig,
   });
@@ -285,6 +293,35 @@ export const checkPaths = async (
   let sourceCacheMisses = 0;
   let projectCacheHits = 0;
   let projectCacheMisses = 0;
+
+  for (const filePath of textFiles) {
+    signal?.throwIfAborted();
+    const language = languageByExtension.get(path.extname(filePath));
+    if (language !== "css" && language !== "graphql") continue;
+    const source = await readFile(filePath, "utf8");
+    const analysisStartedAt = performance.now();
+    const result = analyze(
+      { fileName: filePath, language, source },
+      { additionalDetectors, isRuleEnabled, signal },
+    );
+    analysisMs += performance.now() - analysisStartedAt;
+    filesScanned += 1;
+    checksRun += result.checksRun;
+    result.ruleIdsChecked.forEach((ruleId) => ruleIdsChecked.add(ruleId));
+    for (const diagnostic of result.diagnostics) {
+      diagnostics.push({
+        ...diagnostic,
+        filePath: toRelativePath(rootDir, filePath),
+      });
+    }
+    for (const finding of result.findings) {
+      findings.push({
+        ...finding,
+        filePath: toRelativePath(rootDir, filePath),
+        severity: resolver.getRuleSetting(finding.ruleId, filePath),
+      });
+    }
+  }
 
   for (const plan of projectPlans) {
     signal?.throwIfAborted();
@@ -538,6 +575,7 @@ export const checkPaths = async (
     baseline: loadedBaseline
       ? {
           entries: loadedBaseline.findings.length,
+          generatedAt: loadedBaseline.generatedAt ?? null,
           path: toRelativePath(rootDir, resolvedBaselinePath),
           suppressed: baselineResult.suppressedFindings.length,
         }

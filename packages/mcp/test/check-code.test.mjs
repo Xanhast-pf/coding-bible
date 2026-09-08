@@ -41,3 +41,17 @@ test("checkCode does not overstate a clean deterministic result", () => {
     /semantic Coding Bible rules still require review/,
   );
 });
+
+test("checkCode assigns default file names for CSS and GraphQL snippets", () => {
+  const cssResult = checkCode({
+    code: ".button { color: red; }",
+    language: "css",
+  });
+  const graphqlResult = checkCode({
+    code: "query User { user { id } }",
+    language: "graphql",
+  });
+
+  assert.equal(cssResult.fileName, "snippet.css");
+  assert.equal(graphqlResult.fileName, "snippet.graphql");
+});

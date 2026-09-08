@@ -39,6 +39,8 @@ const defaultFileNameByLanguage = {
   jsx: "snippet.jsx",
   ts: "snippet.ts",
   tsx: "snippet.tsx",
+  css: "snippet.css",
+  graphql: "snippet.graphql",
 } satisfies Record<AnalyzerLanguage, string>;
 
 export const checkCode = (

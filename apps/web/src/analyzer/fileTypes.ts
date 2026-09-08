@@ -3,6 +3,9 @@ import type { AnalyzerLanguage } from "@coding-bible/analyzer";
 import type { BrowserProjectFile } from "./types";
 
 const sourceExtensionLanguages = [
+  [".graphql", "graphql"],
+  [".gql", "graphql"],
+  [".css", "css"],
   [".d.mts", "ts"],
   [".d.cts", "ts"],
   [".d.ts", "ts"],
@@ -53,7 +56,7 @@ export const getAnalyzerLanguage = (
   return match?.[1] ?? null;
 };
 
-export const isDeclarationFile = (fileName: string) =>
+const isDeclarationFile = (fileName: string) =>
   /\.d\.(?:c|m)?ts$/i.test(fileName);
 
 export const isAnalyzableSourceFile = (fileName: string) =>

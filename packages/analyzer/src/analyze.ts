@@ -21,6 +21,8 @@ import type {
 } from "./types.ts";
 
 const defaultFileNameByLanguage = {
+  css: "snippet.css",
+  graphql: "snippet.graphql",
   js: "snippet.js",
   jsx: "snippet.jsx",
   ts: "snippet.ts",
@@ -55,7 +57,8 @@ const getApplicableDetectors = (
 ): readonly Detector[] =>
   resolveAnalyzerDetectors(options).filter(
     (detector) =>
-      (!detector.languages || detector.languages.includes(language)) &&
+      (detector.languages?.includes(language) ??
+        (language !== "css" && language !== "graphql")) &&
       (!options.dependencyScope ||
         detector.dependencyScope === options.dependencyScope) &&
       (options.isRuleEnabled?.(detector.ruleId, fileName) ?? true),
@@ -123,9 +126,12 @@ const analyzeContext = (
   const applicableRuleIds = [
     ...new Set(applicableDetectors.map((detector) => detector.ruleId)),
   ].sort();
-  const diagnostics = context.program
-    .getSyntacticDiagnostics(context.sourceFile)
-    .map((diagnostic) => createDiagnostic(context, diagnostic));
+  const diagnostics =
+    context.language === "css" || context.language === "graphql"
+      ? []
+      : context.program
+          .getSyntacticDiagnostics(context.sourceFile)
+          .map((diagnostic) => createDiagnostic(context, diagnostic));
 
   if (diagnostics.length) {
     return {

@@ -38,6 +38,8 @@ export type {
   ReviewDiffInput,
   ReviewDiffResult,
 } from "./reviewDiff.ts";
+export { planFixes } from "./planFixes.ts";
+export type { FixPriority, PlanFixesInput } from "./planFixes.ts";
 export { createRuleReference, createRuleReferences } from "./ruleReference.ts";
 export type { McpRuleReference } from "./ruleReference.ts";
 export { searchRules } from "./searchRules.ts";

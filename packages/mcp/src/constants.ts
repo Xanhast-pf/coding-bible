@@ -1,4 +1,4 @@
 export const codingBibleCanonicalUrl =
   "https://xanhast-pf.github.io/coding-bible/";
 
-export const codingBibleMcpVersion = "0.27.0";
+export const codingBibleMcpVersion = "0.28.0";

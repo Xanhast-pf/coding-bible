@@ -311,3 +311,77 @@ test("cache schema can represent source-local and project-sensitive entries inde
     assert.equal(cached.projectResults["src/a.ts"].signature, "project-a");
   });
 });
+
+test("NEXT-004 follows project runtime edges without treating type-only edges as client leakage", async () => {
+  await withFixture(async (directory) => {
+    await writeBasicProject(directory, {
+      "client.ts": [
+        '"use client";',
+        'import { getUsers } from "./bridge";',
+        "export const load = () => getUsers();",
+        "",
+      ].join("\n"),
+      "bridge.ts": 'export { getUsers } from "./server-data";\n',
+      "server-data.ts": [
+        'import "server-only";',
+        "export const getUsers = () => [];",
+        "",
+      ].join("\n"),
+      "dynamic-client.ts": [
+        '"use client";',
+        'export const load = () => import("./server-data");',
+        "",
+      ].join("\n"),
+      "types.ts": [
+        'import "server-only";',
+        "export type Secret = string;",
+        "",
+      ].join("\n"),
+      "type-client.ts": [
+        '"use client";',
+        'import type { Secret } from "./types";',
+        "export type PublicSecret = Secret;",
+        "",
+      ].join("\n"),
+      "server.ts": [
+        'import { getUsers } from "./server-data";',
+        "export const load = () => getUsers();",
+        "",
+      ].join("\n"),
+    });
+
+    const all = await checkPaths(["src"], { cwd: directory, cache: false });
+    assert.deepEqual(
+      all.findings
+        .filter(({ ruleId }) => ruleId === "NEXT-004")
+        .map(({ filePath }) => filePath),
+      [
+        path.join("src", "bridge.ts"),
+        path.join("src", "client.ts"),
+        path.join("src", "dynamic-client.ts"),
+      ],
+    );
+
+    const bridgeOnly = await checkPaths(["src/bridge.ts"], {
+      cwd: directory,
+      cache: false,
+    });
+    assert.deepEqual(
+      bridgeOnly.findings
+        .filter(({ ruleId }) => ruleId === "NEXT-004")
+        .map(({ filePath }) => filePath),
+      [path.join("src", "bridge.ts")],
+    );
+
+    const clientOnly = await checkPaths(["src/client.ts"], {
+      cwd: directory,
+      cache: false,
+    });
+    assert.deepEqual(
+      clientOnly.findings
+        .filter(({ ruleId }) => ruleId === "NEXT-004")
+        .map(({ filePath }) => filePath),
+      [path.join("src", "client.ts")],
+    );
+  });
+});

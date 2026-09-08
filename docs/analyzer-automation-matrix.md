@@ -10,9 +10,9 @@ the analyzer can responsibly claim today. It is generated from
 
 | Classification | Rules |
 | --- | ---: |
-| Automated | 27 |
-| High-confidence candidate | 12 |
-| Contextual candidate | 42 |
+| Automated | 77 |
+| High-confidence candidate | 0 |
+| Contextual candidate | 4 |
 | Human / agent review | 43 |
 | External tool | 4 |
 | **Total** | **128** |
@@ -29,18 +29,7 @@ GraphQL validators, or CI.
 
 | Priority | Rule | Pack | Blocker / required evidence |
 | ---: | --- | --- | --- |
-| 1 | `NEXT-004` — Protect server-only code from client imports | `nextjs` | Needs project import-graph analysis for client-to-server-only leakage. |
-| 2 | `GQL-001` — Name production operations | `graphql` | Needs standalone GraphQL source support or a clearly documented embedded-document-only contract. |
-| 3 | `NEXT-003` — Pass serializable props across the server-client boundary | `nextjs` | Needs project-aware Server/Client Component boundary resolution and prop-value serializability. |
-| 4 | `TQ-005` — Make query functions reject failed requests | `tanstack-query` | Needs query-function identity tracing so fetch response checks are enforced only for actual query functions. |
-| 5 | `TQ-002` — Keep query keys serializable and deterministic | `tanstack-query` | Needs query-key AST/value analysis for unstable or non-serializable identity. |
-| 6 | `LEGEND-003` — Update observable state through observable APIs | `legend-state` | Needs Legend observable symbol identity and mutation-flow checks around peek()/set(). |
-| 7 | `REDUX-001` — Use Redux Toolkit for modern Redux | `redux` | Needs precise Redux identity/legacy-pattern detection without treating every reducer switch as Redux. |
-| 8 | `A11Y-003` — Keep focus visible | `accessibility` | Needs style/CSS evidence that focus indicators are not removed without an equivalent visible replacement. |
-| 9 | `REDUX-003` — Keep Redux state and normal actions serializable | `redux` | Needs Redux state/action boundary identification plus conservative serializability checks. |
-| 10 | `NEXT-005` — Fetch server data directly from Server Components | `nextjs` | Needs Server Component identification plus conservative same-app HTTP indirection detection. |
-| 11 | `A11Y-006` — Respect reduced motion preferences | `accessibility` | Needs style/CSS animation evidence plus reduced-motion handling. |
-| 12 | `LEGEND-006` — Keep persisted or synchronized state serializable | `legend-state` | Needs persistence/sync API identity plus conservative serializability analysis. |
+
 
 ## Full matrix
 
@@ -48,85 +37,85 @@ GraphQL validators, or CI.
 | --- | --- | --- | --- | ---: | --- |
 | `A11Y-001` | Prefer semantic HTML | `accessibility` | Automated | 100 | — |
 | `A11Y-002` | Keyboard access is mandatory | `accessibility` | Automated | 100 | — |
+| `A11Y-003` | Keep focus visible | `accessibility` | Automated | 100 | — |
 | `A11Y-004` | Controls need accessible names | `accessibility` | Automated | 100 | — |
+| `A11Y-005` | Do not communicate with color alone | `accessibility` | Automated | 100 | — |
+| `A11Y-006` | Respect reduced motion preferences | `accessibility` | Automated | 100 | — |
+| `APOLLO-002` | Choose fetch policies deliberately | `apollo` | Automated | 100 | — |
+| `APOLLO-003` | Return modified entities from mutations | `apollo` | Automated | 100 | — |
+| `APOLLO-005` | Encode pagination and merge semantics in field policies | `apollo` | Automated | 100 | — |
+| `APOLLO-006` | Handle GraphQL errors and partial data intentionally | `apollo` | Automated | 100 | — |
 | `CORE-003` | Prefer const | `core` | Automated | 100 | — |
+| `CORE-006` | Name meaningful constants | `core` | Automated | 100 | — |
+| `CORE-008` | Reduce nesting when it improves clarity | `core` | Automated | 100 | — |
+| `CORE-010` | Keep the public surface minimal | `core` | Automated | 100 | — |
+| `CORE-011` | Hoist context-free helpers | `core` | Automated | 100 | — |
+| `FLAG-002` | Delete flags after rollout | `feature-flags` | Automated | 100 | — |
+| `FLAG-003` | Keep flag decisions at clear boundaries | `feature-flags` | Automated | 100 | — |
+| `FLAG-004` | Test both reachable flag states | `feature-flags` | Automated | 100 | — |
+| `GQL-001` | Name production operations | `graphql` | Automated | 100 | — |
 | `GQL-002` | Pass dynamic values as variables | `graphql` | Automated | 100 | — |
+| `GQL-003` | Use fragments for genuinely shared selection sets | `graphql` | Automated | 100 | — |
+| `GQL-005` | Treat nullability as part of the contract | `graphql` | Automated | 100 | — |
 | `I18N-001` | Localize user-visible text | `internationalization` | Automated | 100 | — |
+| `I18N-002` | Parameterize messages instead of concatenating sentences | `internationalization` | Automated | 100 | — |
 | `I18N-003` | Use Intl for locale-sensitive formatting | `internationalization` | Automated | 100 | — |
+| `I18N-004` | Design layouts for text expansion and direction | `internationalization` | Automated | 100 | — |
 | `JS-001` | Use async only for Promise semantics | `javascript` | Automated | 100 | — |
 | `JS-002` | Use optional chaining for genuine nullish access | `javascript` | Automated | 100 | — |
 | `JS-003` | Prefer default parameters for default inputs | `javascript` | Automated | 100 | — |
 | `JS-004` | Prefer namespace-safe built-ins | `javascript` | Automated | 100 | — |
+| `JS-005` | Scope try/catch to the operation that can fail | `javascript` | Automated | 100 | — |
 | `JS-006` | Prefer non-mutating collection APIs when mutation is not intended | `javascript` | Automated | 100 | — |
+| `JS-007` | Use an options object when positional parameters stop being obvious | `javascript` | Automated | 100 | — |
 | `LEGEND-001` | Use useValue for React subscriptions | `legend-state` | Automated | 100 | — |
+| `LEGEND-002` | Use peek only when non-reactive access is intentional | `legend-state` | Automated | 100 | — |
+| `LEGEND-003` | Update observable state through observable APIs | `legend-state` | Automated | 100 | — |
 | `LEGEND-004` | Batch sibling updates with assign | `legend-state` | Automated | 100 | — |
+| `LEGEND-005` | Subscribe at the narrowest useful observable | `legend-state` | Automated | 100 | — |
+| `LEGEND-006` | Keep persisted or synchronized state serializable | `legend-state` | Automated | 100 | — |
+| `NEXT-001` | Default to Server Components | `nextjs` | Automated | 100 | — |
+| `NEXT-002` | Keep use client boundaries as small as practical | `nextjs` | Automated | 100 | — |
+| `NEXT-003` | Pass serializable props across the server-client boundary | `nextjs` | Automated | 100 | — |
+| `NEXT-004` | Protect server-only code from client imports | `nextjs` | Automated | 100 | — |
+| `NEXT-005` | Fetch server data directly from Server Components | `nextjs` | Automated | 100 | — |
+| `NEXT-006` | Avoid avoidable data-fetching waterfalls | `nextjs` | Automated | 100 | — |
+| `REACT-002` | Do not memoize by reflex | `react` | Automated | 100 | — |
 | `REACT-004` | Do not store derived state | `react` | Automated | 100 | — |
+| `REACT-005` | Use effects to synchronize external systems | `react` | Automated | 100 | — |
 | `REACT-006` | Use stable list keys | `react` | Automated | 100 | — |
+| `REACT-007` | Keep render pure | `react` | Automated | 100 | — |
 | `REACT-008` | Move static values out of components | `react` | Automated | 100 | — |
 | `REACT-009` | Follow the Rules of Hooks | `react` | Automated | 100 | — |
 | `REACT-010` | Let React call components | `react` | Automated | 100 | — |
 | `REACT-011` | Treat props, state, and Hook inputs as immutable snapshots | `react` | Automated | 100 | — |
 | `REACT-012` | Do not suppress Hook dependency correctness | `react` | Automated | 100 | — |
+| `REDUX-001` | Use Redux Toolkit for modern Redux | `redux` | Automated | 100 | — |
+| `REDUX-002` | Keep reducers pure | `redux` | Automated | 100 | — |
+| `REDUX-003` | Keep Redux state and normal actions serializable | `redux` | Automated | 100 | — |
+| `REDUX-004` | Keep Redux state minimal and derive the rest | `redux` | Automated | 100 | — |
+| `REDUX-005` | Normalize complex relational collections | `redux` | Automated | 100 | — |
+| `REDUX-006` | Use selectors to encapsulate state shape | `redux` | Automated | 100 | — |
+| `REDUX-007` | Memoize selectors only when they derive expensive or referentially new values | `redux` | Automated | 100 | — |
 | `REDUX-009` | Use one Redux store per application | `redux` | Automated | 100 | — |
+| `REDUX-011` | Prefer RTK Query for server data in Redux applications | `redux` | Automated | 100 | — |
+| `TEST-005` | Use snapshots selectively | `testing` | Automated | 100 | — |
 | `TQ-001` | Put every query dependency in the query key | `tanstack-query` | Automated | 100 | — |
+| `TQ-002` | Keep query keys serializable and deterministic | `tanstack-query` | Automated | 100 | — |
+| `TQ-003` | Configure freshness instead of fighting refetch behavior | `tanstack-query` | Automated | 100 | — |
+| `TQ-004` | Invalidate related queries after successful mutations | `tanstack-query` | Automated | 100 | — |
+| `TQ-005` | Make query functions reject failed requests | `tanstack-query` | Automated | 100 | — |
 | `TS-001` | Avoid any | `typescript` | Automated | 100 | — |
+| `TS-002` | Keep types narrow | `typescript` | Automated | 100 | — |
 | `TS-003` | Use type-only imports | `typescript` | Automated | 100 | — |
 | `TS-004` | Treat untrusted input as unknown | `typescript` | Automated | 100 | — |
+| `TS-005` | Optional means genuinely optional | `typescript` | Automated | 100 | — |
+| `TS-006` | Model variants as discriminated unions | `typescript` | Automated | 100 | — |
 | `TS-007` | Do not cast to silence the compiler | `typescript` | Automated | 100 | — |
-| `NEXT-004` | Protect server-only code from client imports | `nextjs` | High-confidence candidate | 93 | Needs project import-graph analysis for client-to-server-only leakage. |
-| `GQL-001` | Name production operations | `graphql` | High-confidence candidate | 92 | Needs standalone GraphQL source support or a clearly documented embedded-document-only contract. |
-| `NEXT-003` | Pass serializable props across the server-client boundary | `nextjs` | High-confidence candidate | 91 | Needs project-aware Server/Client Component boundary resolution and prop-value serializability. |
-| `TQ-005` | Make query functions reject failed requests | `tanstack-query` | High-confidence candidate | 90 | Needs query-function identity tracing so fetch response checks are enforced only for actual query functions. |
-| `TQ-002` | Keep query keys serializable and deterministic | `tanstack-query` | High-confidence candidate | 89 | Needs query-key AST/value analysis for unstable or non-serializable identity. |
-| `LEGEND-003` | Update observable state through observable APIs | `legend-state` | High-confidence candidate | 88 | Needs Legend observable symbol identity and mutation-flow checks around peek()/set(). |
-| `REDUX-001` | Use Redux Toolkit for modern Redux | `redux` | High-confidence candidate | 86 | Needs precise Redux identity/legacy-pattern detection without treating every reducer switch as Redux. |
-| `A11Y-003` | Keep focus visible | `accessibility` | High-confidence candidate | 84 | Needs style/CSS evidence that focus indicators are not removed without an equivalent visible replacement. |
-| `REDUX-003` | Keep Redux state and normal actions serializable | `redux` | High-confidence candidate | 84 | Needs Redux state/action boundary identification plus conservative serializability checks. |
-| `NEXT-005` | Fetch server data directly from Server Components | `nextjs` | High-confidence candidate | 83 | Needs Server Component identification plus conservative same-app HTTP indirection detection. |
-| `A11Y-006` | Respect reduced motion preferences | `accessibility` | High-confidence candidate | 82 | Needs style/CSS animation evidence plus reduced-motion handling. |
-| `LEGEND-006` | Keep persisted or synchronized state serializable | `legend-state` | High-confidence candidate | 80 | Needs persistence/sync API identity plus conservative serializability analysis. |
-| `A11Y-005` | Do not communicate with color alone | `accessibility` | Contextual candidate | 68 | Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion. |
 | `APOLLO-001` | Define stable cache identity | `apollo` | Contextual candidate | 68 | Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion. |
 | `APOLLO-004` | Reconcile mutation results explicitly | `apollo` | Contextual candidate | 68 | Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion. |
-| `APOLLO-006` | Handle GraphQL errors and partial data intentionally | `apollo` | Contextual candidate | 68 | Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion. |
-| `FLAG-002` | Delete flags after rollout | `feature-flags` | Contextual candidate | 68 | Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion. |
-| `FLAG-004` | Test both reachable flag states | `feature-flags` | Contextual candidate | 68 | Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion. |
-| `GQL-005` | Treat nullability as part of the contract | `graphql` | Contextual candidate | 68 | Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion. |
 | `GQL-006` | Paginate collections that can grow without bound | `graphql` | Contextual candidate | 68 | Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion. |
-| `I18N-002` | Parameterize messages instead of concatenating sentences | `internationalization` | Contextual candidate | 68 | Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion. |
-| `LEGEND-002` | Use peek only when non-reactive access is intentional | `legend-state` | Contextual candidate | 68 | Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion. |
-| `REACT-007` | Keep render pure | `react` | Contextual candidate | 68 | Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion. |
-| `REDUX-002` | Keep reducers pure | `redux` | Contextual candidate | 68 | Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion. |
-| `REDUX-004` | Keep Redux state minimal and derive the rest | `redux` | Contextual candidate | 68 | Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion. |
-| `TQ-004` | Invalidate related queries after successful mutations | `tanstack-query` | Contextual candidate | 68 | Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion. |
-| `TS-002` | Keep types narrow | `typescript` | Contextual candidate | 68 | Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion. |
-| `TS-005` | Optional means genuinely optional | `typescript` | Contextual candidate | 68 | Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion. |
-| `CORE-010` | Keep the public surface minimal | `core` | Contextual candidate | 63 | Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion. |
-| `APOLLO-002` | Choose fetch policies deliberately | `apollo` | Contextual candidate | 56 | Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion. |
-| `APOLLO-003` | Return modified entities from mutations | `apollo` | Contextual candidate | 56 | Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion. |
-| `APOLLO-005` | Encode pagination and merge semantics in field policies | `apollo` | Contextual candidate | 56 | Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion. |
-| `CORE-006` | Name meaningful constants | `core` | Contextual candidate | 56 | Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion. |
-| `FLAG-003` | Keep flag decisions at clear boundaries | `feature-flags` | Contextual candidate | 56 | Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion. |
-| `GQL-003` | Use fragments for genuinely shared selection sets | `graphql` | Contextual candidate | 56 | Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion. |
-| `I18N-004` | Design layouts for text expansion and direction | `internationalization` | Contextual candidate | 56 | Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion. |
-| `JS-005` | Scope try/catch to the operation that can fail | `javascript` | Contextual candidate | 56 | Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion. |
-| `LEGEND-005` | Subscribe at the narrowest useful observable | `legend-state` | Contextual candidate | 56 | Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion. |
-| `NEXT-001` | Default to Server Components | `nextjs` | Contextual candidate | 56 | Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion. |
-| `NEXT-002` | Keep use client boundaries as small as practical | `nextjs` | Contextual candidate | 56 | Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion. |
-| `NEXT-006` | Avoid avoidable data-fetching waterfalls | `nextjs` | Contextual candidate | 56 | Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion. |
-| `REACT-005` | Use effects to synchronize external systems | `react` | Contextual candidate | 56 | Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion. |
-| `REDUX-005` | Normalize complex relational collections | `redux` | Contextual candidate | 56 | Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion. |
-| `REDUX-006` | Use selectors to encapsulate state shape | `redux` | Contextual candidate | 56 | Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion. |
-| `REDUX-011` | Prefer RTK Query for server data in Redux applications | `redux` | Contextual candidate | 56 | Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion. |
-| `TQ-003` | Configure freshness instead of fighting refetch behavior | `tanstack-query` | Contextual candidate | 56 | Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion. |
-| `CORE-011` | Hoist context-free helpers | `core` | Contextual candidate | 51 | Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion. |
-| `CORE-008` | Reduce nesting when it improves clarity | `core` | Contextual candidate | 44 | Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion. |
-| `JS-007` | Use an options object when positional parameters stop being obvious | `javascript` | Contextual candidate | 44 | Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion. |
 | `PERF-003` | Prefer one pass on hot large-data paths | `performance` | Contextual candidate | 44 | Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion. |
-| `REACT-002` | Do not memoize by reflex | `react` | Contextual candidate | 44 | Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion. |
-| `REDUX-007` | Memoize selectors only when they derive expensive or referentially new values | `redux` | Contextual candidate | 44 | Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion. |
-| `TEST-005` | Use snapshots selectively | `testing` | Contextual candidate | 44 | Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion. |
-| `TS-006` | Model variants as discriminated unions | `typescript` | Contextual candidate | 44 | Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion. |
 | `AI-001` | Generated code follows existing architecture | `ai` | Human / agent review | 20 | Requires engineering intent, architecture, product context, or review history that static analysis should not guess. |
 | `AI-002` | Generated comments must add context | `ai` | Human / agent review | 20 | Requires engineering intent, architecture, product context, or review history that static analysis should not guess. |
 | `AI-003` | Change the smallest coherent surface | `ai` | Human / agent review | 20 | Requires engineering intent, architecture, product context, or review history that static analysis should not guess. |

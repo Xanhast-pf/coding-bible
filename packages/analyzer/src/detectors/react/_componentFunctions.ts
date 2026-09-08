@@ -6,7 +6,7 @@ import {
   isPascalCaseName,
 } from "../../utils.ts";
 
-export const containsJsx = (root: ts.Node) => {
+const containsJsx = (root: ts.Node) => {
   let found = false;
 
   const walk = (node: ts.Node) => {

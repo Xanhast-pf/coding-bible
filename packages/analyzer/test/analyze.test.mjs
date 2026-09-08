@@ -10,15 +10,15 @@ const uniqueRuleIds = (source, language = "tsx") =>
   [...new Set(ruleIds(source, language))].sort();
 
 test("analyzer runs only detectors applicable to the selected language", () => {
-  assert.equal(detectors.length, 28);
+  assert.equal(detectors.length, 78);
 
   const tsResult = analyze({ source: "const value = 1;", language: "ts" });
   const tsxResult = analyze({ source: "const value = 1;", language: "tsx" });
 
-  assert.equal(tsResult.checksRun, 18);
-  assert.equal(tsResult.ruleIdsChecked.length, 18);
-  assert.equal(tsxResult.checksRun, 28);
-  assert.equal(tsxResult.ruleIdsChecked.length, 27);
+  assert.equal(tsResult.checksRun, 55);
+  assert.equal(tsResult.ruleIdsChecked.length, 55);
+  assert.equal(tsxResult.checksRun, 72);
+  assert.equal(tsxResult.ruleIdsChecked.length, 71);
 });
 
 test("syntax errors pause rule analysis instead of returning a misleading clean result", () => {

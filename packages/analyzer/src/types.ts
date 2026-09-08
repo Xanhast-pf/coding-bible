@@ -1,6 +1,13 @@
 import type ts from "typescript";
 
-export const analyzerLanguages = ["tsx", "ts", "jsx", "js"] as const;
+export const analyzerLanguages = [
+  "tsx",
+  "ts",
+  "jsx",
+  "js",
+  "css",
+  "graphql",
+] as const;
 export type AnalyzerLanguage = (typeof analyzerLanguages)[number];
 
 export const analyzerPacks = [

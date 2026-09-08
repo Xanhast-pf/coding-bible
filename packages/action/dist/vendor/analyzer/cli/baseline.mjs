@@ -78,21 +78,40 @@ export const applyBaseline = (findings, baseline) => {
   return { findings: active, suppressedFindings: suppressed };
 };
 
-export const writeBaseline = async (result, filePath) => {
-  const entries = result.findings
-    .map((finding) => ({
-      file: normalizePath(finding.filePath),
-      fingerprint: createFindingFingerprint(finding),
-      ruleId: finding.ruleId,
-    }))
-    .sort(
-      (left, right) =>
-        left.file.localeCompare(right.file) ||
-        left.ruleId.localeCompare(right.ruleId) ||
-        left.fingerprint.localeCompare(right.fingerprint),
-    );
+export const classifyBaseline = (findings, baseline) => {
+  const currentByFingerprint = new Map(
+    findings.map((finding) => [createFindingFingerprint(finding), finding]),
+  );
+  const baselineEntries = baseline?.findings ?? [];
+  const baselineFingerprints = new Set(
+    baselineEntries.map(({ fingerprint }) => fingerprint),
+  );
+  return {
+    active: baselineEntries.filter(({ fingerprint }) =>
+      currentByFingerprint.has(fingerprint),
+    ),
+    newFindings: findings.filter(
+      (finding) => !baselineFingerprints.has(createFindingFingerprint(finding)),
+    ),
+    stale: baselineEntries.filter(
+      ({ fingerprint }) => !currentByFingerprint.has(fingerprint),
+    ),
+  };
+};
+
+const sortEntries = (entries) =>
+  [...entries].sort(
+    (left, right) =>
+      left.file.localeCompare(right.file) ||
+      left.ruleId.localeCompare(right.ruleId) ||
+      left.fingerprint.localeCompare(right.fingerprint),
+  );
+
+export const writeBaselineEntries = async (entries, filePath) => {
   const uniqueEntries = [
-    ...new Map(entries.map((entry) => [entry.fingerprint, entry])).values(),
+    ...new Map(
+      sortEntries(entries).map((entry) => [entry.fingerprint, entry]),
+    ).values(),
   ];
   await mkdir(path.dirname(filePath), { recursive: true });
   await writeFile(
@@ -110,3 +129,13 @@ export const writeBaseline = async (result, filePath) => {
   );
   return uniqueEntries.length;
 };
+
+export const writeBaseline = async (result, filePath) =>
+  writeBaselineEntries(
+    result.findings.map((finding) => ({
+      file: normalizePath(finding.filePath),
+      fingerprint: createFindingFingerprint(finding),
+      ruleId: finding.ruleId,
+    })),
+    filePath,
+  );

@@ -6,6 +6,9 @@ import ts from "typescript";
 import { expandBraces } from "./glob.mjs";
 
 export const languageByExtension = new Map([
+  [".css", "css"],
+  [".gql", "graphql"],
+  [".graphql", "graphql"],
   [".cjs", "js"],
   [".cts", "ts"],
   [".js", "js"],
