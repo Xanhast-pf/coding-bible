@@ -62,9 +62,12 @@ Some rules require TypeScript symbols, project context, control relationships, o
 specialized AST reasoning. Those should use the normal detector API rather than
 stretching the declarative DSL into a programming language.
 
-`pnpm rule:new -- --id ... --title ... --detector` scaffolds the canonical rule
-and an analyzer module together. The detector owns an inline finding profile and
-the generated registry discovers detector modules across every rule pack.
+`pnpm rule:new -- --id ... --title ... --detector` scaffolds a new canonical
+rule and analyzer module together. When the canonical rule already exists and is
+approved for automation, `pnpm rule:new -- --id "$RULE_ID" --detector` adds only
+the matching detector module without rewriting the rule. The detector owns an
+inline finding profile and the generated registry discovers detector modules
+across every rule pack.
 
 The goal is simple:
 

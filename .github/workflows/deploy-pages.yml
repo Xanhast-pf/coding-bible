@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - "**"
+    tags:
+      - "v*.*.*"
   pull_request:
     branches:
       - main
@@ -42,6 +44,10 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Verify release tag version
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: pnpm release:tag:check -- "$GITHUB_REF_NAME"
 
       - name: Verify repository
         run: pnpm check:ci

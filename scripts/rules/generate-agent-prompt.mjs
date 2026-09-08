@@ -215,9 +215,34 @@ const modeGuidance = (mode) => {
   ].join(" ");
 };
 
-const scopeGuidance = (id) => {
+const inspectPublicRuleState = (id) => {
   const layout = getRuleLayoutById(id);
-  if (!layout) {
+  if (!layout) return { layout: null, ruleFile: null, detectorFile: null };
+
+  const ruleDirectory = path.join(
+    root,
+    "packages/rules/src/rules",
+    layout.directory,
+  );
+  const detectorDirectory = path.join(
+    root,
+    "packages/analyzer/src/detectors",
+    layout.directory,
+  );
+  const findRuleFile = (directory) =>
+    fs.existsSync(directory)
+      ? (fs.readdirSync(directory).find((name) => name.startsWith(`${id}-`)) ??
+        null)
+      : null;
+  const ruleFile = findRuleFile(ruleDirectory);
+  const detectorFile = findRuleFile(detectorDirectory);
+
+  return { detectorFile, layout, ruleFile };
+};
+
+const scopeGuidance = (id, title) => {
+  const state = inspectPublicRuleState(id);
+  if (!state.layout) {
     return [
       "## Rule scope",
       "",
@@ -227,23 +252,42 @@ const scopeGuidance = (id) => {
     ].join("\n");
   }
 
-  return [
+  const lines = [
     "## Rule scope",
     "",
-    `\`${id}\` maps to the public \`${layout.pack}\` pack in this checkout.`,
-    "If this is a new canonical rule that needs a detector, the supported scaffold is:",
-    "",
-    "```bash",
-    `pnpm rule:new -- --id ${id} --title ${JSON.stringify("RULE_TITLE_PLACEHOLDER")} --detector`,
-    "```",
-    "",
-    "Replace the placeholder title with the requested title. If the canonical rule already exists, refine the existing rule/detector instead of creating a duplicate ID.",
-  ].join("\n");
+    `\`${id}\` maps to the public \`${state.layout.pack}\` pack in this checkout.`,
+  ];
+
+  if (!state.ruleFile) {
+    lines.push(
+      "The canonical rule does not exist yet. Scaffold the rule and detector together:",
+      "",
+      "```bash",
+      `pnpm rule:new -- --id ${id} --title ${JSON.stringify(title)} --detector`,
+      "```",
+    );
+  } else if (!state.detectorFile) {
+    lines.push(
+      `The canonical rule already exists at \`packages/rules/src/rules/${state.layout.directory}/${state.ruleFile}\`.`,
+      "Add only its detector scaffold with:",
+      "",
+      "```bash",
+      `pnpm rule:new -- --id ${id} --detector`,
+      "```",
+    );
+  } else {
+    lines.push(
+      `The canonical rule already exists at \`packages/rules/src/rules/${state.layout.directory}/${state.ruleFile}\`.`,
+      `Its detector already exists at \`packages/analyzer/src/detectors/${state.layout.directory}/${state.detectorFile}\`; refine that detector and its regressions instead of scaffolding another module.`,
+    );
+  }
+
+  return lines.join("\n");
 };
 
 const detectorGuidance = (id, title) => {
-  const layout = getRuleLayoutById(id);
-  if (!layout) {
+  const state = inspectPublicRuleState(id);
+  if (!state.layout) {
     return [
       `The core \`rule:new --detector\` scaffolder does not recognize the \`${id.split("-")[0]}\` prefix.`,
       "For organization-specific executable analysis, use a controlled fork or analyzer wrapper and the additive detector API.",
@@ -251,15 +295,21 @@ const detectorGuidance = (id, title) => {
     ].join("\n");
   }
 
-  return [
-    "For a new canonical rule, scaffold the rule and detector together:",
-    "",
-    "```bash",
-    `pnpm rule:new -- --id ${id} --title ${JSON.stringify(title)} --detector`,
-    "```",
-    "",
-    "If that command reports the rule already exists, locate the existing canonical rule and add/refine only the detector and regressions needed for this task.",
-  ].join("\n");
+  if (state.detectorFile) {
+    return [
+      "The canonical rule and detector already exist in this checkout.",
+      `Refine \`packages/analyzer/src/detectors/${state.layout.directory}/${state.detectorFile}\` and add focused regressions; do not create a duplicate detector.`,
+    ].join("\n");
+  }
+
+  const command = state.ruleFile
+    ? `pnpm rule:new -- --id ${id} --detector`
+    : `pnpm rule:new -- --id ${id} --title ${JSON.stringify(title)} --detector`;
+  const description = state.ruleFile
+    ? "The canonical rule already exists. Scaffold only its detector:"
+    : "Scaffold the new canonical rule and detector together:";
+
+  return [description, "", "```bash", command, "```"].join("\n");
 };
 
 const formatExtraContext = (context) =>
@@ -286,10 +336,7 @@ const renderTemplate = (template, values) => {
 
 const buildRuleAgentPrompt = (input) => {
   const template = fs.readFileSync(templatePath, "utf8");
-  const scope = scopeGuidance(input.id).replace(
-    '"RULE_TITLE_PLACEHOLDER"',
-    JSON.stringify(input.title),
-  );
+  const scope = scopeGuidance(input.id, input.title);
 
   return renderTemplate(template, {
     CAPABILITIES: describeCapabilities(),

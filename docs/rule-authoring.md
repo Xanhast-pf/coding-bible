@@ -117,9 +117,10 @@ Then:
 
 1. Fill in the summary, rationale, level, tags, and exceptions where needed.
 2. Add paired DON'T / DO examples before moving the rule to `stable`.
-3. If the rule becomes automated, add one matching detector file under the
-   analyzer pack directory and export `<ruleIdWithoutDash>Detectors` (for example
-   `react014Detectors`).
+3. If an existing canonical rule is approved for automation, scaffold only its
+   detector with `pnpm rule:new -- --id "$RULE_ID" --detector`. For a new rule,
+   use `--detector` on the initial `rule:new` command so both files are created
+   together.
 4. Add focused regression coverage for the detector plus any project/browser
    behavior it relies on.
 5. Run `pnpm registries:generate`, then `pnpm check`.

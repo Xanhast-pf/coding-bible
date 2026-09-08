@@ -320,7 +320,11 @@ Official contributors and forks should not edit generated registries manually.
 Scaffold the canonical rule and detector together:
 
 ```bash
+# New canonical rule + detector
 pnpm rule:new -- --id REACT-014 --title "Prefer explicit event ownership" --detector
+
+# Existing canonical rule approved for automation
+pnpm rule:new -- --id "$RULE_ID" --detector
 ```
 
 The detector stub owns an inline `profile` with impact/confidence/context
@@ -334,44 +338,19 @@ Additional detectors must use unique detector IDs and declare an inline profile.
 
 ## Automated coverage
 
-The current pass runs 28 detector functions covering 27 Bible rules:
+The current automation policy covers **77 of the 128 Bible rules**. The generated
+[`docs/analyzer-automation-matrix.md`](../../docs/analyzer-automation-matrix.md) is
+the source of truth for the exact automated set, contextual candidates, human /
+agent review rules, and rules intentionally delegated to external tooling.
 
-JSX-aware React, accessibility, and Legend-State detectors also run on legacy `.js` sources because many established React codebases use JSX without the `.jsx` extension.
-
-- `CORE-003` bindings that can be `const`
-- `JS-001` clearly redundant `async` functions without asynchronous or Promise-returning semantics
-- `JS-002` repeated nullish guard chains suited to optional chaining
-- `JS-003` body-level undefined defaults suited to default parameters
-- `JS-004` legacy global/prototype built-ins
-- `JS-006` mutating sort/reverse results stored as separate values
-- `TS-001` explicit `any`
-- `TS-003` value imports used only in type positions
-- `TS-004` unsafe assertions over external runtime data, including local aliases
-- `TS-007` direct assertions from `unknown`, including double-assertion escape hatches
-- `A11Y-001` clickable generic elements without native semantics
-- `A11Y-002` custom buttons without equivalent keyboard handling
-- `A11Y-004` buttons without a detectable accessible name
-- `GQL-002` runtime interpolation inside `gql`/`graphql` templates
-- `I18N-001` hardcoded user-visible JSX text in files that already import a supported localization API
-- `I18N-003` manually assembled locale-sensitive date/time display strings
-- `LEGEND-001` Legend-State `get()` subscriptions inside `observer` renders
-- `LEGEND-004` adjacent sibling observable `set()` calls that should usually be batched
-- `REACT-004` state that is only synchronized from Effect dependencies
-- `REACT-006` missing list keys
-- `REACT-006` unstable index/generated list keys
-- `REACT-008` context-free array/object allocations inside components
-- `REACT-009` invalid Hook placement
-- `REACT-010` direct invocation of local React components
-- `REACT-011` mutation of values received through component inputs
-- `REACT-012` exhaustive-deps suppressions
-- `REDUX-009` multiple exported Redux Toolkit stores in one application module
-- `TQ-001` direct `queryFn` dependencies missing from TanStack Query keys
+JSX-aware React, accessibility, and Legend-State detectors also run on legacy
+`.js` sources because many established React codebases use JSX without the
+`.jsx` extension. CSS and GraphQL are analyzed as first-class languages without
+being routed through TypeScript Programs.
 
 `AnalyzeResult.ruleIdsChecked` reports the exact automated rule set applicable to
 the language and active configuration. A clean result means "clean for the
 applicable automated subset," never "all Coding Bible rules were reviewed."
-The full 128-rule automation classification and prioritized detector backlog live in
-`docs/analyzer-automation-matrix.md` and are generated from the reviewed automation policy.
 Malformed source is reported through diagnostics and rule checks pause for that
 file.
 
