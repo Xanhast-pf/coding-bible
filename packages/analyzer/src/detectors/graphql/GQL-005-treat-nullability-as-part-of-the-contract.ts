@@ -19,7 +19,9 @@ const detector = createSourceEvidenceDetector({
   find: (context) =>
     conjunctiveEvidence(
       context.source,
-      [/\/\/\s*Schema:\s*(\w+)\s*:\s*String\b[\s\S]*\b\1\s*:\s*string\b/m],
+      [
+        /\/\/\s*Schema:\s*(\w+)\s*:\s*String(?!\s*!)[ \t]*(?:\r?\n|$)[\s\S]*\b\1\s*:\s*string\b/m,
+      ],
       [/\bstring\s*\|\s*null\b/m],
     ),
 });

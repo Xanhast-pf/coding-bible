@@ -1,23 +1,35 @@
 import ts from "../../../../typescript/typescript.cjs";
 const suppressionPattern = /eslint-disable(?:-next-line|-line)?[^\n]*react-hooks\/exhaustive-deps/;
+const getCommentRanges = (sourceFile, source) => {
+    const ranges = new Map();
+    const add = (items) => {
+        for (const item of items ?? []) {
+            ranges.set(`${item.pos}:${item.end}`, item);
+        }
+    };
+    const visit = (node) => {
+        add(ts.getLeadingCommentRanges(source, node.getFullStart()));
+        add(ts.getTrailingCommentRanges(source, node.end));
+        for (const child of node.getChildren(sourceFile)) {
+            visit(child);
+        }
+    };
+    visit(sourceFile);
+    return [...ranges.values()].sort((left, right) => left.pos - right.pos);
+};
 export const react012HookDependencySuppressionsDetector = {
     dependencyScope: "source-file",
     id: "react-hook-dependency-suppression",
     ruleId: "REACT-012",
     analyze: (context) => {
         const findings = [];
-        const scanner = ts.createScanner(ts.ScriptTarget.Latest, false, context.sourceFile.languageVariant, context.source);
-        for (let token = scanner.scan(); token !== ts.SyntaxKind.EndOfFileToken; token = scanner.scan()) {
-            if (token !== ts.SyntaxKind.SingleLineCommentTrivia &&
-                token !== ts.SyntaxKind.MultiLineCommentTrivia) {
-                continue;
-            }
-            const comment = scanner.getTokenText();
+        for (const range of getCommentRanges(context.sourceFile, context.source)) {
+            const comment = context.source.slice(range.pos, range.end);
             const match = suppressionPattern.exec(comment);
             if (!match) {
                 continue;
             }
-            const start = scanner.getTokenPos() + match.index;
+            const start = range.pos + match.index;
             const end = start + match[0].length;
             const startPosition = context.sourceFile.getLineAndCharacterOfPosition(start);
             const endPosition = context.sourceFile.getLineAndCharacterOfPosition(end);

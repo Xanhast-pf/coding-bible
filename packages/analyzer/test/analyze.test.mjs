@@ -21,6 +21,39 @@ test("analyzer runs only detectors applicable to the selected language", () => {
   assert.equal(tsxResult.ruleIdsChecked.length, 71);
 });
 
+test("GraphQL nullability evidence distinguishes nullable String from String!", () => {
+  assert.ok(
+    ruleIds(
+      `// Schema: nickname: String\ntype User = { nickname: string };`,
+      "ts",
+    ).includes("GQL-005"),
+  );
+  assert.equal(
+    ruleIds(
+      `// Schema: nickname: String!\ntype User = { nickname: string };`,
+      "ts",
+    ).includes("GQL-005"),
+    false,
+  );
+});
+
+test("Redux selector memoization flags identity selectors but not derived arrays", () => {
+  const createSelector = "create" + "Selector";
+  assert.ok(
+    ruleIds(
+      `const selectName = ${createSelector}([(state) => state.user.name], (name) => name);`,
+      "ts",
+    ).includes("REDUX-007"),
+  );
+  assert.equal(
+    ruleIds(
+      `const selectVisible = ${createSelector}([(state) => state.todos], (todos) => todos.filter((todo) => !todo.completed));`,
+      "ts",
+    ).includes("REDUX-007"),
+    false,
+  );
+});
+
 test("syntax errors pause rule analysis instead of returning a misleading clean result", () => {
   const result = analyze({
     language: "tsx",
@@ -530,16 +563,23 @@ test("detects direct invocation by component symbol without shadowing false posi
 });
 
 test("detects exhaustive-deps suppressions only in comments", () => {
+  const suppression = [
+    "eslint-disable-line",
+    "react-hooks/exhaustive-deps",
+  ].join(" ");
+
   assert.deepEqual(
     ruleIds(
-      `function UserPanel() {\n  useEffect(() => load(userId), []); // eslint-disable-line react-hooks/exhaustive-deps\n  return <div />;\n}`,
+      `function UserPanel() {\n  useEffect(() => load(userId), []); // ${suppression}\n  return <div />;\n}`,
     ),
     ["REACT-012"],
   );
   assert.deepEqual(
-    ruleIds(
-      `const example = "eslint-disable-line react-hooks/exhaustive-deps";`,
-    ),
+    ruleIds(`const example = ${JSON.stringify(suppression)};`),
+    [],
+  );
+  assert.deepEqual(
+    ruleIds(String.raw`const example = \`// ${suppression}\`;`),
     [],
   );
 });

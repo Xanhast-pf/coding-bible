@@ -21,7 +21,7 @@ const detector = createSourceEvidenceDetector({
     conjunctiveEvidence(
       context.source,
       [
-        /\bcreateSelector\s*\(\s*\[\s*\(?\s*state\s*\)?\s*=>\s*state\.([\w.]+)\s*\]\s*,\s*\(?\s*(\w+)\s*\)?\s*=>\s*\2/m,
+        /\bcreateSelector\s*\(\s*\[\s*\(?\s*state\s*\)?\s*=>\s*state\.([\w.]+)\s*\]\s*,\s*\(?\s*(\w+)\s*\)?\s*=>\s*\2\s*(?=[,)])/m,
       ],
       [],
     ),
