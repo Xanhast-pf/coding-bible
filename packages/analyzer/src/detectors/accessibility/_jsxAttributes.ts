@@ -7,7 +7,7 @@ export const getTagName = (node: JsxWithAttributes) =>
 
 const getAttributes = (node: JsxWithAttributes) => node.attributes.properties;
 
-export const getAttribute = (node: JsxWithAttributes, name: string) =>
+const getAttribute = (node: JsxWithAttributes, name: string) =>
   getAttributes(node).find(
     (attribute): attribute is ts.JsxAttribute =>
       ts.isJsxAttribute(attribute) && attribute.name.getText() === name,

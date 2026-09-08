@@ -1795,3 +1795,9 @@
   color: var(--muted);
   margin: 0.375rem 0 0;
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .progressPulse {
+    animation: none;
+  }
+}

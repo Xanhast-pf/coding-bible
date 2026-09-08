@@ -13,7 +13,7 @@ export const next004Rule = {
   tags: ["nextjs", "security", "server-only"],
   bad: {
     language: "ts",
-    code: "export const getUsers = () => db.user.findMany();\nexport const apiSecret = process.env.API_SECRET;",
+    code: '"use client";\n\nimport "server-only";\n\nexport const ClientWidget = () => null;',
   },
   good: {
     language: "ts",

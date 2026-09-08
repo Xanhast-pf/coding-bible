@@ -2,58 +2,158 @@
 import type { Detector } from "../types.ts";
 import { a11y001Detectors } from "./accessibility/A11Y-001-semantic-interactive-element.ts";
 import { a11y002Detectors } from "./accessibility/A11Y-002-keyboard-interaction.ts";
+import { a11y003Detectors } from "./accessibility/A11Y-003-keep-focus-visible.ts";
 import { a11y004Detectors } from "./accessibility/A11Y-004-accessible-control-name.ts";
+import { a11y005Detectors } from "./accessibility/A11Y-005-do-not-communicate-with-color-alone.ts";
+import { a11y006Detectors } from "./accessibility/A11Y-006-respect-reduced-motion-preferences.ts";
+import { apollo002Detectors } from "./apollo/APOLLO-002-choose-fetch-policies-deliberately.ts";
+import { apollo003Detectors } from "./apollo/APOLLO-003-return-modified-entities-from-mutations.ts";
+import { apollo005Detectors } from "./apollo/APOLLO-005-encode-pagination-and-merge-semantics-in-field-policies.ts";
+import { apollo006Detectors } from "./apollo/APOLLO-006-handle-graphql-errors-and-partial-data-intentionally.ts";
 import { core003Detectors } from "./core/CORE-003-prefer-const.ts";
+import { core006Detectors } from "./core/CORE-006-name-meaningful-constants.ts";
+import { core008Detectors } from "./core/CORE-008-reduce-nesting-when-it-improves-clarity.ts";
+import { core010Detectors } from "./core/CORE-010-keep-the-public-surface-minimal.ts";
+import { core011Detectors } from "./core/CORE-011-hoist-context-free-helpers.ts";
+import { flag002Detectors } from "./feature-flags/FLAG-002-delete-flags-after-rollout.ts";
+import { flag003Detectors } from "./feature-flags/FLAG-003-keep-flag-decisions-at-clear-boundaries.ts";
+import { flag004Detectors } from "./feature-flags/FLAG-004-test-both-reachable-flag-states.ts";
+import { gql001Detectors } from "./graphql/GQL-001-name-production-operations.ts";
 import { gql002Detectors } from "./graphql/GQL-002-runtime-template-interpolation.ts";
+import { gql003Detectors } from "./graphql/GQL-003-use-fragments-for-genuinely-shared-selection-sets.ts";
+import { gql005Detectors } from "./graphql/GQL-005-treat-nullability-as-part-of-the-contract.ts";
 import { i18n001Detectors } from "./internationalization/I18N-001-hardcoded-jsx-text.ts";
+import { i18n002Detectors } from "./internationalization/I18N-002-parameterize-messages-instead-of-concatenating-sentences.ts";
 import { i18n003Detectors } from "./internationalization/I18N-003-intl-date-formatting.ts";
+import { i18n004Detectors } from "./internationalization/I18N-004-design-layouts-for-text-expansion-and-direction.ts";
 import { js001Detectors } from "./javascript/JS-001-redundant-async.ts";
 import { js002Detectors } from "./javascript/JS-002-optional-chaining.ts";
 import { js003Detectors } from "./javascript/JS-003-default-parameters.ts";
 import { js004Detectors } from "./javascript/JS-004-namespace-safe-builtins.ts";
+import { js005Detectors } from "./javascript/JS-005-scope-try-catch-to-the-operation-that-can-fail.ts";
 import { js006Detectors } from "./javascript/JS-006-non-mutating-collections.ts";
+import { js007Detectors } from "./javascript/JS-007-use-an-options-object-when-positional-parameters-stop-being-obvious.ts";
 import { legend001Detectors } from "./legend-state/LEGEND-001-react-subscriptions.ts";
+import { legend002Detectors } from "./legend-state/LEGEND-002-use-peek-only-when-non-reactive-access-is-intentional.ts";
+import { legend003Detectors } from "./legend-state/LEGEND-003-update-observable-state-through-observable-apis.ts";
 import { legend004Detectors } from "./legend-state/LEGEND-004-batch-sibling-updates.ts";
+import { legend005Detectors } from "./legend-state/LEGEND-005-subscribe-at-the-narrowest-useful-observable.ts";
+import { legend006Detectors } from "./legend-state/LEGEND-006-keep-persisted-or-synchronized-state-serializable.ts";
+import { next001Detectors } from "./nextjs/NEXT-001-default-to-server-components.ts";
+import { next002Detectors } from "./nextjs/NEXT-002-keep-use-client-boundaries-as-small-as-practical.ts";
+import { next003Detectors } from "./nextjs/NEXT-003-pass-serializable-props-across-the-server-client-boundary.ts";
+import { next004Detectors } from "./nextjs/NEXT-004-protect-server-only-code-from-client-imports.ts";
+import { next005Detectors } from "./nextjs/NEXT-005-fetch-server-data-directly-from-server-components.ts";
+import { next006Detectors } from "./nextjs/NEXT-006-avoid-avoidable-data-fetching-waterfalls.ts";
+import { react002Detectors } from "./react/REACT-002-do-not-memoize-by-reflex.ts";
 import { react004Detectors } from "./react/REACT-004-derived-state-effect.ts";
+import { react005Detectors } from "./react/REACT-005-use-effects-to-synchronize-external-systems.ts";
 import { react006Detectors } from "./react/REACT-006-stable-list-keys.ts";
+import { react007Detectors } from "./react/REACT-007-keep-render-pure.ts";
 import { react008Detectors } from "./react/REACT-008-static-render-values.ts";
 import { react009Detectors } from "./react/REACT-009-hook-placement.ts";
 import { react010Detectors } from "./react/REACT-010-direct-component-calls.ts";
 import { react011Detectors } from "./react/REACT-011-input-mutation.ts";
 import { react012Detectors } from "./react/REACT-012-hook-dependency-suppressions.ts";
+import { redux001Detectors } from "./redux/REDUX-001-use-redux-toolkit-for-modern-redux.ts";
+import { redux002Detectors } from "./redux/REDUX-002-keep-reducers-pure.ts";
+import { redux003Detectors } from "./redux/REDUX-003-keep-redux-state-and-normal-actions-serializable.ts";
+import { redux004Detectors } from "./redux/REDUX-004-keep-redux-state-minimal-and-derive-the-rest.ts";
+import { redux005Detectors } from "./redux/REDUX-005-normalize-complex-relational-collections.ts";
+import { redux006Detectors } from "./redux/REDUX-006-use-selectors-to-encapsulate-state-shape.ts";
+import { redux007Detectors } from "./redux/REDUX-007-memoize-selectors-only-when-they-derive-expensive-or-referentially-new-values.ts";
 import { redux009Detectors } from "./redux/REDUX-009-single-store.ts";
+import { redux011Detectors } from "./redux/REDUX-011-prefer-rtk-query-for-server-data-in-redux-applications.ts";
 import { tq001Detectors } from "./tanstack-query/TQ-001-query-key-dependencies.ts";
+import { tq002Detectors } from "./tanstack-query/TQ-002-keep-query-keys-serializable-and-deterministic.ts";
+import { tq003Detectors } from "./tanstack-query/TQ-003-configure-freshness-instead-of-fighting-refetch-behavior.ts";
+import { tq004Detectors } from "./tanstack-query/TQ-004-invalidate-related-queries-after-successful-mutations.ts";
+import { tq005Detectors } from "./tanstack-query/TQ-005-make-query-functions-reject-failed-requests.ts";
+import { test005Detectors } from "./testing/TEST-005-use-snapshots-selectively.ts";
 import { ts001Detectors } from "./typescript/TS-001-no-explicit-any.ts";
+import { ts002Detectors } from "./typescript/TS-002-keep-types-narrow.ts";
 import { ts003Detectors } from "./typescript/TS-003-type-only-imports.ts";
 import { ts004Detectors } from "./typescript/TS-004-untrusted-data-assertions.ts";
+import { ts005Detectors } from "./typescript/TS-005-optional-means-genuinely-optional.ts";
+import { ts006Detectors } from "./typescript/TS-006-model-variants-as-discriminated-unions.ts";
 import { ts007Detectors } from "./typescript/TS-007-unsafe-unknown-assertions.ts";
 
 export const detectors = [
   ...a11y001Detectors,
   ...a11y002Detectors,
+  ...a11y003Detectors,
   ...a11y004Detectors,
+  ...a11y005Detectors,
+  ...a11y006Detectors,
+  ...apollo002Detectors,
+  ...apollo003Detectors,
+  ...apollo005Detectors,
+  ...apollo006Detectors,
   ...core003Detectors,
+  ...core006Detectors,
+  ...core008Detectors,
+  ...core010Detectors,
+  ...core011Detectors,
+  ...flag002Detectors,
+  ...flag003Detectors,
+  ...flag004Detectors,
+  ...gql001Detectors,
   ...gql002Detectors,
+  ...gql003Detectors,
+  ...gql005Detectors,
   ...i18n001Detectors,
+  ...i18n002Detectors,
   ...i18n003Detectors,
+  ...i18n004Detectors,
   ...js001Detectors,
   ...js002Detectors,
   ...js003Detectors,
   ...js004Detectors,
+  ...js005Detectors,
   ...js006Detectors,
+  ...js007Detectors,
   ...legend001Detectors,
+  ...legend002Detectors,
+  ...legend003Detectors,
   ...legend004Detectors,
+  ...legend005Detectors,
+  ...legend006Detectors,
+  ...next001Detectors,
+  ...next002Detectors,
+  ...next003Detectors,
+  ...next004Detectors,
+  ...next005Detectors,
+  ...next006Detectors,
+  ...react002Detectors,
   ...react004Detectors,
+  ...react005Detectors,
   ...react006Detectors,
+  ...react007Detectors,
   ...react008Detectors,
   ...react009Detectors,
   ...react010Detectors,
   ...react011Detectors,
   ...react012Detectors,
+  ...redux001Detectors,
+  ...redux002Detectors,
+  ...redux003Detectors,
+  ...redux004Detectors,
+  ...redux005Detectors,
+  ...redux006Detectors,
+  ...redux007Detectors,
   ...redux009Detectors,
+  ...redux011Detectors,
   ...tq001Detectors,
+  ...tq002Detectors,
+  ...tq003Detectors,
+  ...tq004Detectors,
+  ...tq005Detectors,
+  ...test005Detectors,
   ...ts001Detectors,
+  ...ts002Detectors,
   ...ts003Detectors,
   ...ts004Detectors,
+  ...ts005Detectors,
+  ...ts006Detectors,
   ...ts007Detectors,
 ] satisfies readonly Detector[];

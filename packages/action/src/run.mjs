@@ -1,7 +1,7 @@
 import { mkdir, realpath, writeFile } from "node:fs/promises";
 import path from "node:path";
 
-import { checkPaths } from "./analyzerBridge.mjs";
+import { checkPaths, writeAnalysisArtifacts } from "./analyzerBridge.mjs";
 import {
   canonicalBaseUrl,
   defaultSarifPath,
@@ -36,14 +36,16 @@ const resolveTarget = (cwd, requestedPath) => {
 const markdownEscape = (value) =>
   String(value).replaceAll("|", "\\|").replaceAll("\n", " ");
 
-const createEmptyAnalysis = () => ({
+const createEmptyAnalysis = ({ cwd, scope }) => ({
   baseline: null,
   diagnostics: [],
   errors: 0,
   filesDiscovered: 0,
   filesScanned: 0,
   findings: [],
+  rootDir: cwd,
   ruleIdsChecked: [],
+  scope: { mode: scope },
   warnings: 0,
 });
 
@@ -227,7 +229,7 @@ export const runAction = async ({
           ruleSelection: inputs.ruleSelection,
           ...(configPath ? { configPath } : {}),
         })
-      : createEmptyAnalysis();
+      : createEmptyAnalysis({ cwd, scope: inputs.scope });
   } else {
     analysis = await checkPaths([targetPath], {
       cwd,
@@ -271,13 +273,43 @@ export const runAction = async ({
     );
   }
 
+  let remediationFiles = [];
+  if (inputs.remediation) {
+    const artifactAnalysis = {
+      ...analysis,
+      diagnostics,
+      errors,
+      findings,
+      warnings,
+    };
+    const artifacts = await writeAnalysisArtifacts(artifactAnalysis, {
+      fixPack: true,
+      includeReviewFixes: true,
+      patch: true,
+      report: true,
+      reviewBrief: true,
+    });
+    remediationFiles = artifacts.files.map((filePath) =>
+      filePath.replaceAll("\\", "/"),
+    );
+  }
+  const hasArtifact = (name) =>
+    remediationFiles.includes(`.coding-bible/${name}`)
+      ? `.coding-bible/${name}`
+      : "";
+
   const outputs = {
     conclusion: failed ? "failed" : "passed",
     diagnostics: diagnostics.length,
     errors,
     findings: findings.length,
     "files-analyzed": analysis.filesScanned ?? 0,
+    "fix-pack-path": hasArtifact("fix-pack.json"),
+    "report-path": hasArtifact("report.json"),
+    "review-brief-path": hasArtifact("review-brief.md"),
+    "review-patch-path": hasArtifact("review-fixes.patch"),
     "rules-checked": analysis.ruleIdsChecked?.length ?? 0,
+    "safe-patch-path": hasArtifact("safe-fixes.patch"),
     "sarif-path": sarifPath ?? "",
     warnings,
   };

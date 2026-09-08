@@ -10,6 +10,7 @@ import {
 } from "../src/index.mjs";
 import { languageByExtension } from "./project.mjs";
 import { createAnalyzerReport } from "./report.mjs";
+import { createFixPack, createReviewBrief } from "./remediation.mjs";
 
 const defaultOutputDirectory = ".coding-bible";
 
@@ -97,7 +98,7 @@ const verifySafePlans = (plans) => {
   }
 };
 
-export const createFixPatch = async (result, safety) => {
+const createFixPatch = async (result, safety) => {
   const plans = await collectFileFixes(result, safety);
   if (safety === "safe") {
     verifySafePlans(plans);
@@ -117,13 +118,15 @@ export const createFixPatch = async (result, safety) => {
 export const writeAnalysisArtifacts = async (
   result,
   {
+    fixPack = false,
     includeReviewFixes = false,
     outputDirectory = defaultOutputDirectory,
     patch = false,
     report = false,
+    reviewBrief = false,
   } = {},
 ) => {
-  if (!report && !patch) {
+  if (!report && !patch && !fixPack && !reviewBrief) {
     return { files: [], report: createAnalyzerReport(result) };
   }
 
@@ -165,6 +168,31 @@ export const writeAnalysisArtifacts = async (
       safe: safePatchPath,
     },
   });
+  const remediationPlan = createFixPack(result, {
+    reviewPatchPath,
+    safePatchPath,
+  });
+
+  if (fixPack) {
+    const filePath = path.join(absoluteDirectory, "fix-pack.json");
+    await writeFile(
+      filePath,
+      `${JSON.stringify(remediationPlan, null, 2)}\n`,
+      "utf8",
+    );
+    written.push(path.relative(result.rootDir, filePath));
+  }
+
+  if (reviewBrief) {
+    const filePath = path.join(absoluteDirectory, "review-brief.md");
+    await writeFile(
+      filePath,
+      createReviewBrief(result, remediationPlan),
+      "utf8",
+    );
+    written.push(path.relative(result.rootDir, filePath));
+  }
+
   if (report) {
     const filePath = path.join(absoluteDirectory, "report.json");
     await writeFile(
@@ -177,6 +205,7 @@ export const writeAnalysisArtifacts = async (
 
   return {
     files: written,
+    fixPack: remediationPlan,
     report: analyzerReport,
     reviewPatch,
     safePatch,

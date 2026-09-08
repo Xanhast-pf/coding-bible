@@ -2080,7 +2080,7 @@
     {
       "bad": {
         "language": "ts",
-        "code": "export const getUsers = () => db.user.findMany();\nexport const apiSecret = process.env.API_SECRET;"
+        "code": "\"use client\";\n\nimport \"server-only\";\n\nexport const ClientWidget = () => null;"
       },
       "canonicalUrl": "https://xanhast-pf.github.io/coding-bible/#NEXT-004",
       "detection": {
@@ -2653,7 +2653,7 @@
     {
       "bad": {
         "language": "ts",
-        "code": "markUpdated(state) {\n  state.lastUpdated = Date.now();\n}"
+        "code": "createSlice({\n  name: \"meta\",\n  initialState,\n  reducers: {\n    markUpdated(state) {\n      state.lastUpdated = Date.now();\n    },\n  },\n});"
       },
       "canonicalUrl": "https://xanhast-pf.github.io/coding-bible/#REDUX-002",
       "detection": {
@@ -2663,7 +2663,7 @@
       },
       "good": {
         "language": "ts",
-        "code": "markUpdated(state, action: PayloadAction<number>) {\n  state.lastUpdated = action.payload;\n}\n\ndispatch(markUpdated(Date.now()));"
+        "code": "const metaSlice = createSlice({\n  name: \"meta\",\n  initialState,\n  reducers: {\n    markUpdated(state, action: PayloadAction<number>) {\n      state.lastUpdated = action.payload;\n    },\n  },\n});\n\ndispatch(metaSlice.actions.markUpdated(Date.now()));"
       },
       "id": "REDUX-002",
       "level": "must",

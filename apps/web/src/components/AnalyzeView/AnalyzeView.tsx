@@ -48,12 +48,16 @@ const languageOptions = [
   ["ts", "TypeScript"],
   ["jsx", "JavaScript + JSX"],
   ["js", "JavaScript"],
+  ["css", "CSS"],
+  ["graphql", "GraphQL"],
 ] as const satisfies readonly (readonly [AnalyzerLanguage, string])[];
 
 const isAnalyzerLanguage = (value: string): value is AnalyzerLanguage =>
   languageOptions.some(([language]) => language === value);
 
 const snippetFileNameByLanguage = {
+  css: "snippet.css",
+  graphql: "snippet.graphql",
   js: "snippet.js",
   jsx: "snippet.jsx",
   ts: "snippet.ts",

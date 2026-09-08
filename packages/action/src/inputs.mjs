@@ -70,6 +70,7 @@ export const readActionInputs = (environment = process.env) => {
       "error",
     ),
     path: readInput(environment, "path") || ".",
+    remediation: readBooleanInput(environment, "remediation", true),
     ruleSelection: {
       ...(exclude ? { exclude } : {}),
       ...(include ? { include } : {}),

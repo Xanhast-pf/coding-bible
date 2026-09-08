@@ -30,7 +30,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: Xanhast-pf/coding-bible@v0.27.0
+      - uses: Xanhast-pf/coding-bible@v0.28.0
 ```
 
 `changed` is the default scope. The action resolves the pull-request base SHA,
@@ -41,7 +41,7 @@ small PR into a report of unrelated historical debt.
 Use `scope: project` when a full scan is desired:
 
 ```yaml
-- uses: Xanhast-pf/coding-bible@v0.27.0
+- uses: Xanhast-pf/coding-bible@v0.28.0
   with:
     scope: project
     path: src
@@ -62,11 +62,12 @@ Use `scope: project` when a full scan is desired:
 | `baseline` | `true` | Honor an existing Coding Bible baseline |
 | `annotations` | `true` | Emit GitHub error/warning annotations |
 | `sarif` | `true` | Write `.coding-bible/coding-bible.sarif` |
+| `remediation` | `true` | Write report, Fix Pack, Review Brief, and available safe/review patches |
 
 Rule selection is an extra filter on top of the repository config. For example:
 
 ```yaml
-- uses: Xanhast-pf/coding-bible@v0.27.0
+- uses: Xanhast-pf/coding-bible@v0.28.0
   with:
     rules: TS-001, REACT-006, LEGEND-001
     exclude-rules: REACT-006
@@ -79,8 +80,16 @@ dogfood workflow intentionally omits both, and the canary workflow should do the
 same so those repositories always exercise the complete applicable catalog.
 
 The action also writes a GitHub Step Summary and exposes counts through outputs.
-The committed runtime caps log annotations at 50; complete results remain
-available in the summary/SARIF output.
+With `remediation: true` (the default), it writes `.coding-bible/report.json`,
+`fix-pack.json`, `review-brief.md`, and any available safe/review patch files,
+then exposes their repository-relative paths as Action outputs. Set
+`remediation: false` when only annotations/summary/SARIF are desired. The
+committed runtime caps log annotations at 50; complete results remain available
+in the summary/SARIF/remediation artifacts.
+
+Artifact outputs are `report-path`, `fix-pack-path`, `review-brief-path`,
+`safe-patch-path`, and `review-patch-path`; absent or disabled artifacts resolve
+to an empty string.
 
 For install-free consumers, prefer `coding-bible.config.json` or an import-free
 ES module that directly exports the config object. A config that imports
@@ -104,7 +113,7 @@ steps:
       fetch-depth: 0
 
   - id: coding-bible
-    uses: Xanhast-pf/coding-bible@v0.27.0
+    uses: Xanhast-pf/coding-bible@v0.28.0
     with:
       fail-on: none
 
@@ -123,8 +132,8 @@ the only desired reporting surface.
 
 Release tags are the public action contract:
 
-- `@v0.27.0` pins the exact Coding Bible release tag.
-- `@v0.27` is the floating minor branch for compatible patch updates.
+- `@v0.28.0` pins the exact Coding Bible release tag.
+- `@v0.28` is the floating minor branch for compatible patch updates.
 - a full commit SHA gives consumers an immutable supply-chain pin.
 
 The repository commits `packages/action/dist`. `pnpm action:build` regenerates

@@ -1,4 +1,5 @@
 import {
+  analyze,
   analyzeProgram,
   analyzerDetectorCount,
   analyzerDetectorSignature,
@@ -8,7 +9,7 @@ import {
 } from "@coding-bible/analyzer";
 
 import { loadBrowserAnalyzerConfig } from "./browserConfig.ts";
-import { normalizeRelativeFileName } from "./fileTypes.ts";
+import { getAnalyzerLanguage, normalizeRelativeFileName } from "./fileTypes.ts";
 import {
   createVirtualProject,
   createVirtualProjectPlans,
@@ -61,10 +62,16 @@ export const analyzeBrowserInput = (
       ? {}
       : { tsconfig: browserConfig.tsconfig }),
   });
-  const sourceFileCount = plans.reduce(
-    (total, plan) => total + plan.fileNames.length,
-    0,
-  );
+  const textFiles = input.files.filter(({ fileName }) => {
+    const language = getAnalyzerLanguage(fileName);
+    return (
+      (language === "css" || language === "graphql") &&
+      browserConfig.shouldAnalyzeFile(normalizeRelativeFileName(fileName))
+    );
+  });
+  const sourceFileCount =
+    plans.reduce((total, plan) => total + plan.fileNames.length, 0) +
+    textFiles.length;
   const configurationDiagnostics = [...browserConfig.configurationDiagnostics];
   const fileResults: BrowserFileResult[] = [];
   const tsconfigFileNames = plans.flatMap((plan) =>
@@ -137,6 +144,45 @@ export const analyzeBrowserInput = (
       });
       completed += 1;
     }
+  }
+
+  for (const file of textFiles) {
+    const language = getAnalyzerLanguage(file.fileName);
+    if (language !== "css" && language !== "graphql") continue;
+    const fileName = normalizeRelativeFileName(file.fileName);
+    onProgress({
+      completed,
+      message: `Analyzing ${fileName}…`,
+      phase: "analyzing",
+      total: sourceFileCount,
+    });
+    const result = analyze(
+      { fileName, language, source: file.source },
+      {
+        additionalDetectors: browserConfig.additionalDetectors,
+        isRuleEnabled: (ruleId, candidate) =>
+          ruleSelected(ruleId) &&
+          browserConfig.resolver.isRuleEnabled(ruleId, candidate),
+      },
+    );
+    fileResults.push({
+      fileName,
+      language,
+      result: {
+        ...result,
+        findings: result.findings.map((finding) => {
+          const severity = browserConfig.resolver.getRuleSetting(
+            finding.ruleId,
+            fileName,
+          );
+          return {
+            ...finding,
+            severity: severity === "warning" ? "warning" : "error",
+          };
+        }),
+      },
+    });
+    completed += 1;
   }
 
   fileResults.sort((left, right) =>

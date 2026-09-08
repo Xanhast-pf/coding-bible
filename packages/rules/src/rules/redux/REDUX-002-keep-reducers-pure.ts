@@ -13,11 +13,11 @@ export const redux002Rule = {
   tags: ["purity", "reducers", "redux"],
   bad: {
     language: "ts",
-    code: "markUpdated(state) {\n  state.lastUpdated = Date.now();\n}",
+    code: 'createSlice({\n  name: "meta",\n  initialState,\n  reducers: {\n    markUpdated(state) {\n      state.lastUpdated = Date.now();\n    },\n  },\n});',
   },
   good: {
     language: "ts",
-    code: "markUpdated(state, action: PayloadAction<number>) {\n  state.lastUpdated = action.payload;\n}\n\ndispatch(markUpdated(Date.now()));",
+    code: 'const metaSlice = createSlice({\n  name: "meta",\n  initialState,\n  reducers: {\n    markUpdated(state, action: PayloadAction<number>) {\n      state.lastUpdated = action.payload;\n    },\n  },\n});\n\ndispatch(metaSlice.actions.markUpdated(Date.now()));',
   },
   references: [
     {

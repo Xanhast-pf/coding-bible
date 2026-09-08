@@ -1,7 +1,7 @@
 import ts from "../../../../typescript/typescript.cjs";
 export const getTagName = (node) => ts.isIdentifier(node.tagName) ? node.tagName.text : null;
 const getAttributes = (node) => node.attributes.properties;
-export const getAttribute = (node, name) => getAttributes(node).find((attribute) => ts.isJsxAttribute(attribute) && attribute.name.getText() === name);
+const getAttribute = (node, name) => getAttributes(node).find((attribute) => ts.isJsxAttribute(attribute) && attribute.name.getText() === name);
 export const hasAttribute = (node, name) => Boolean(getAttribute(node, name));
 export const hasSpreadAttribute = (node) => getAttributes(node).some(ts.isJsxSpreadAttribute);
 export const getStringAttribute = (node, name) => {

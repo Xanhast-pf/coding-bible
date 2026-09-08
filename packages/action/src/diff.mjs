@@ -80,7 +80,7 @@ export const parseGitDiff = (diff) => {
     .sort((left, right) => left.file.localeCompare(right.file));
 };
 
-export const locationTouchesRanges = (location, ranges) =>
+const locationTouchesRanges = (location, ranges) =>
   ranges.some(
     ({ startLine, endLine }) =>
       location.line <= endLine && location.endLine >= startLine,

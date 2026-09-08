@@ -1,4 +1,11 @@
-export const analyzerLanguages = ["tsx", "ts", "jsx", "js"];
+export const analyzerLanguages = [
+    "tsx",
+    "ts",
+    "jsx",
+    "js",
+    "css",
+    "graphql",
+];
 export const analyzerPacks = [
     "accessibility",
     "ai",

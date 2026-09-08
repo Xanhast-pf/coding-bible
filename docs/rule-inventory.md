@@ -35,9 +35,9 @@ are generated in [`analyzer-automation-matrix.md`](./analyzer-automation-matrix.
 
 The current classification is:
 
-- **27** automated rules;
-- **12** high-confidence automation candidates;
-- **42** contextual candidates;
+- **77** automated rules;
+- **0** high-confidence automation candidates;
+- **4** contextual candidates;
 - **43** human / agent review rules;
 - **4** rules primarily owned by external tooling.
 

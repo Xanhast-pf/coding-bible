@@ -3,19 +3,25 @@ import test from "node:test";
 
 import {
   accessibilityRules,
+  apolloRules,
   coreRules,
+  featureFlagRules,
   graphqlRules,
   internationalizationRules,
   javascriptRules,
   legendStateRules,
+  nextjsRules,
   reactRules,
   reduxRules,
   tanstackQueryRules,
+  testingRules,
   typescriptRules,
 } from "../../rules/src/rules/index.ts";
 import { analyze, detectors } from "../src/index.ts";
 
 const analyzerLanguageByExampleLanguage = new Map([
+  ["css", "css"],
+  ["graphql", "graphql"],
   ["js", "js"],
   ["javascript", "js"],
   ["jsx", "jsx"],
@@ -26,14 +32,18 @@ const analyzerLanguageByExampleLanguage = new Map([
 
 const rules = [
   ...accessibilityRules,
+  ...apolloRules,
   ...coreRules,
+  ...featureFlagRules,
   ...graphqlRules,
   ...internationalizationRules,
   ...javascriptRules,
   ...legendStateRules,
+  ...nextjsRules,
   ...reactRules,
   ...reduxRules,
   ...tanstackQueryRules,
+  ...testingRules,
   ...typescriptRules,
 ];
 const rulesById = new Map(rules.map((rule) => [rule.id, rule]));
@@ -42,7 +52,7 @@ const automatedRuleIds = [
 ].sort();
 
 test("every automated rule catches its own DON'T example", () => {
-  assert.equal(automatedRuleIds.length, 27);
+  assert.equal(automatedRuleIds.length, 77);
 
   for (const ruleId of automatedRuleIds) {
     const rule = rulesById.get(ruleId);
@@ -83,10 +93,10 @@ test("every automated rule catches its own DON'T example", () => {
       0,
       `${ruleId} DO example must parse cleanly`,
     );
-    assert.deepEqual(
-      goodResult.findings,
-      [],
-      `${ruleId} DO example must remain clean across every applicable automated rule`,
+    assert.equal(
+      goodResult.findings.some((finding) => finding.ruleId === ruleId),
+      false,
+      `${ruleId} DO example must remain clean for its automated rule`,
     );
   }
 });

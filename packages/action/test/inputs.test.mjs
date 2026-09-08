@@ -11,6 +11,7 @@ test("action inputs have safe zero-config defaults", () => {
     configPath: null,
     failOn: "error",
     path: ".",
+    remediation: true,
     ruleSelection: {},
     sarif: true,
     scope: "changed",
@@ -26,6 +27,7 @@ test("action inputs parse explicit policy", () => {
       INPUT_CONFIG: "config/coding-bible.mjs",
       "INPUT_FAIL-ON": "warning",
       INPUT_PATH: "src",
+      INPUT_REMEDIATION: "false",
       INPUT_RULES: "TS-001, REACT-006\nJS-004",
       "INPUT_EXCLUDE-RULES": "JS-004",
       INPUT_SARIF: "false",
@@ -38,6 +40,7 @@ test("action inputs parse explicit policy", () => {
       configPath: "config/coding-bible.mjs",
       failOn: "warning",
       path: "src",
+      remediation: false,
       ruleSelection: {
         exclude: ["JS-004"],
         include: ["TS-001", "REACT-006", "JS-004"],
@@ -67,5 +70,9 @@ test("action inputs reject unsupported values", () => {
   assert.throws(
     () => readActionInputs({ INPUT_BASELINE: "sometimes" }),
     /baseline must be true or false/u,
+  );
+  assert.throws(
+    () => readActionInputs({ INPUT_REMEDIATION: "sometimes" }),
+    /remediation must be true or false/u,
   );
 });

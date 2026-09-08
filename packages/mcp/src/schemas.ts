@@ -11,7 +11,7 @@ export const checkCodeInputSchema = {
     },
     language: {
       type: "string",
-      enum: ["tsx", "ts", "jsx", "js"],
+      enum: ["tsx", "ts", "jsx", "js", "css", "graphql"],
       description: "Language/parser mode for the supplied source.",
     },
     fileName: {
@@ -48,6 +48,12 @@ export const checkFilesInputSchema = {
         "When true, report known baseline findings instead of suppressing them.",
     },
   },
+} as const;
+
+export const planFixesInputSchema = {
+  ...checkFilesInputSchema,
+  description:
+    "Plan prioritized remediations for project files without modifying source or analyzer state.",
 } as const;
 
 export const reviewDiffInputSchema = {

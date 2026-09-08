@@ -122,7 +122,7 @@ test("checkPaths returns file-aware analyzer findings", async () => {
     assert.equal(result.findings.length, 1);
     assert.equal(result.findings[0]?.filePath, path.join("src", "bad.ts"));
     assert.equal(result.findings[0]?.ruleId, "TS-001");
-    assert.equal(result.ruleIdsChecked.length, 18);
+    assert.equal(result.ruleIdsChecked.length, 55);
   });
 });
 
@@ -142,7 +142,7 @@ test("runCli exits non-zero for findings and supports JSON output", async () => 
     assert.equal(exitCode, 1);
     assert.equal(stderr.value, "");
     assert.equal(result.findings[0].ruleId, "TS-001");
-    assert.equal(result.summary.rulesChecked, 18);
+    assert.equal(result.summary.rulesChecked, 55);
   });
 });
 
@@ -160,7 +160,7 @@ test("CLI clean summary states automated coverage instead of implying a full rev
 
     assert.equal(exitCode, 0);
     assert.equal(stderr.value, "");
-    assert.match(stdout.value, /18 applicable automated rules/);
+    assert.match(stdout.value, /55 applicable automated rules/);
     assert.doesNotMatch(stdout.value, /found no issues/);
   });
 });
@@ -197,7 +197,7 @@ test("CLI reports the union of rules actually applicable to scanned languages", 
 
     const result = await checkPaths(["."], { cwd: directory });
 
-    assert.equal(result.ruleIdsChecked.length, 27);
+    assert.equal(result.ruleIdsChecked.length, 71);
     assert.equal(result.diagnostics.length, 0);
   });
 });
@@ -676,7 +676,7 @@ test("JSON output uses the versioned report schema with stable finding fingerpri
 
     assert.equal(firstExitCode, 1);
     assert.equal(first.schemaVersion, 1);
-    assert.equal(first.analyzer.detectorCount, 28);
+    assert.equal(first.analyzer.detectorCount, 78);
     assert.match(
       first.analyzer.detectorSignature,
       /^detectors-v1-[a-f0-9]{8}$/u,
@@ -902,9 +902,12 @@ test("source-file cache survives an unrelated sibling edit", async () => {
       profile: true,
     });
 
-    assert.equal(invalidated.cache.hits, 1);
-    assert.equal(invalidated.cache.misses, 0);
-    assert.equal(invalidated.profile.programMs, 0);
+    assert.equal(invalidated.cache.hits, 0);
+    assert.equal(invalidated.cache.misses, 1);
+    assert.equal(invalidated.cache.partialHits, 1);
+    assert.equal(invalidated.profile.sourceCacheHits, 1);
+    assert.equal(invalidated.profile.sourceCacheMisses, 0);
+    assert.ok(invalidated.profile.programMs > 0);
   });
 });
 
@@ -932,8 +935,9 @@ test("one-file edits reuse unaffected source-file cache entries", async () => {
       profile: true,
     });
 
-    assert.equal(incremental.cache.hits, 1);
-    assert.equal(incremental.cache.misses, 1);
+    assert.equal(incremental.cache.hits, 0);
+    assert.equal(incremental.cache.misses, 2);
+    assert.equal(incremental.cache.partialHits, 1);
     assert.equal(incremental.profile.sourceCacheHits, 1);
     assert.equal(incremental.profile.sourceCacheMisses, 1);
     assert.equal(incremental.findings.length, 1);
@@ -971,9 +975,11 @@ test("targeted scans preserve warm cache entries for unselected files", async ()
     assert.equal(targeted.cache.misses, 1);
 
     const full = await checkPaths(["src"], { cwd: directory, profile: true });
-    assert.equal(full.cache.hits, 2);
-    assert.equal(full.cache.misses, 0);
-    assert.equal(full.profile.programMs, 0);
+    assert.equal(full.cache.hits, 1);
+    assert.equal(full.cache.misses, 1);
+    assert.equal(full.cache.partialHits, 1);
+    assert.equal(full.profile.sourceCacheHits, 2);
+    assert.ok(full.profile.programMs > 0);
   });
 });
 

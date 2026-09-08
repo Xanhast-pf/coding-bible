@@ -1,8 +1,14 @@
 import path from "node:path";
 
-import { resolveBaselinePath, writeBaseline } from "./baseline.mjs";
+import {
+  classifyBaseline,
+  loadBaseline,
+  resolveBaselinePath,
+  writeBaseline,
+  writeBaselineEntries,
+} from "./baseline.mjs";
 import { loadAnalyzerConfig } from "./config.mjs";
-import { checkPaths } from "./check.mjs";
+import { assertBaselineInsideBoundary, checkPaths } from "./check.mjs";
 import { writeAnalysisArtifacts } from "./fixes.mjs";
 
 const usage = `Coding Bible CLI
@@ -10,6 +16,8 @@ const usage = `Coding Bible CLI
 Usage:
   coding-bible check [path ...] [options]
   coding-bible baseline create [path ...] [options]
+  coding-bible baseline status [path ...] [options]
+  coding-bible baseline prune [path ...] [options]
   coding-bible config [--json] [--config path]
   coding-bible --help
 
@@ -34,6 +42,8 @@ Scan options:
   --patch               Write .coding-bible/safe-fixes.patch.
   --include-review-fixes
                         Also write .coding-bible/review-fixes.patch.
+  --review-brief        Write .coding-bible/review-brief.md.
+  --fix-pack            Write the full remediation bundle (report, patches, Fix Pack, Review Brief).
   --output-dir <path>   Override the artifact directory (default: .coding-bible).
 
 Examples:
@@ -44,8 +54,11 @@ Examples:
   coding-bible check . --profile
   coding-bible check . --no-cache
   coding-bible baseline create .
+  coding-bible baseline status .
+  coding-bible baseline prune .
   coding-bible check . --no-baseline
   coding-bible check . --report --patch
+  coding-bible check . --fix-pack
   coding-bible check . --json
   coding-bible config --json
 `;
@@ -59,6 +72,7 @@ const createDefaultOptions = (command) => ({
   clearCache: false,
   command,
   configPath: undefined,
+  fixPack: false,
   includeReviewFixes: false,
   json: false,
   outputDirectory: ".coding-bible",
@@ -66,6 +80,7 @@ const createDefaultOptions = (command) => ({
   patch: false,
   profile: false,
   report: false,
+  reviewBrief: false,
   scope: { mode: "project" },
   targets: [],
 });
@@ -95,8 +110,10 @@ const parseArguments = (args) => {
   const rest = [...originalRest];
   if (command === "baseline") {
     options.action = rest.shift() ?? null;
-    if (options.action !== "create") {
-      throw new Error('The baseline command currently supports only "create".');
+    if (!["create", "status", "prune"].includes(options.action)) {
+      throw new Error(
+        'The baseline command supports "create", "status", and "prune".',
+      );
     }
     options.baseline = false;
   }
@@ -115,6 +132,18 @@ const parseArguments = (args) => {
     }
     if (argument === "--report") {
       options.report = true;
+      continue;
+    }
+    if (argument === "--review-brief") {
+      options.reviewBrief = true;
+      continue;
+    }
+    if (argument === "--fix-pack") {
+      options.fixPack = true;
+      options.includeReviewFixes = true;
+      options.patch = true;
+      options.report = true;
+      options.reviewBrief = true;
       continue;
     }
     if (argument === "--patch") {
@@ -228,6 +257,8 @@ const parseArguments = (args) => {
     }
     if (
       options.report ||
+      options.reviewBrief ||
+      options.fixPack ||
       options.patch ||
       options.includeReviewFixes ||
       options.outputDirectory !== ".coding-bible" ||
@@ -250,18 +281,22 @@ const parseArguments = (args) => {
   if (command === "baseline") {
     if (scopeCount) {
       throw new Error(
-        "Baseline creation requires a project/path scan, not a Git diff scope.",
+        "Baseline lifecycle commands require a project/path scan, not a Git diff scope.",
       );
     }
     if (
-      options.json ||
       options.report ||
+      options.reviewBrief ||
+      options.fixPack ||
       options.patch ||
       options.includeReviewFixes
     ) {
       throw new Error(
-        "Report and patch options are not valid while creating a baseline.",
+        "Report, patch, Review Brief, and Fix Pack options are not valid for baseline lifecycle commands.",
       );
+    }
+    if (options.json && options.action !== "status") {
+      throw new Error("--json is supported only by baseline status.");
     }
   }
 
@@ -448,10 +483,14 @@ const createBaseline = async (options, { cwd, stdout }) => {
     configPath: options.configPath,
     boundaryRoot: options.boundaryRoot,
   });
-  const filePath = resolveBaselinePath(loaded.rootDir, loaded.config, {
+  const requestedFilePath = resolveBaselinePath(loaded.rootDir, loaded.config, {
     enabled: true,
     overridePath: options.baselinePath,
   });
+  const filePath = await assertBaselineInsideBoundary(
+    requestedFilePath,
+    loaded.boundaryRoot,
+  );
   if (!filePath) {
     throw new Error(
       "Baseline output is disabled by config. Set baseline to a path or use --baseline-file.",
@@ -470,6 +509,98 @@ const createBaseline = async (options, { cwd, stdout }) => {
     writeLine(stdout);
     writeLine(stdout, formatProfile(result.profile));
   }
+  return 0;
+};
+
+const inspectBaseline = async (options, { cwd }) => {
+  const result = await checkPaths(options.targets, {
+    baseline: false,
+    boundaryRoot: options.boundaryRoot,
+    cache: options.cache,
+    clearCache: options.clearCache,
+    configPath: options.configPath,
+    cwd,
+    profile: options.profile,
+    ruleSelection: options.ruleSelection,
+  });
+  const loaded = await loadAnalyzerConfig({
+    cwd,
+    configPath: options.configPath,
+    boundaryRoot: options.boundaryRoot,
+  });
+  const requestedFilePath = resolveBaselinePath(loaded.rootDir, loaded.config, {
+    enabled: true,
+    overridePath: options.baselinePath,
+  });
+  const filePath = await assertBaselineInsideBoundary(
+    requestedFilePath,
+    loaded.boundaryRoot,
+  );
+  const baseline = await loadBaseline(filePath);
+  return {
+    baseline,
+    classification: classifyBaseline(result.findings, baseline),
+    filePath,
+    loaded,
+    result,
+  };
+};
+
+const baselineStatus = async (options, { cwd, stdout }) => {
+  const inspected = await inspectBaseline(options, { cwd });
+  if (inspected.result.diagnostics.length) {
+    writeLine(stdout, formatSummary(inspected.result));
+    return 1;
+  }
+  const { active, newFindings, stale } = inspected.classification;
+  const displayPath = inspected.filePath
+    ? path.relative(inspected.loaded.rootDir, inspected.filePath) ||
+      path.basename(inspected.filePath)
+    : null;
+  const payload = {
+    schemaVersion: 1,
+    baseline: inspected.baseline
+      ? {
+          generatedAt: inspected.baseline.generatedAt ?? null,
+          path: displayPath,
+          entries: inspected.baseline.findings.length,
+        }
+      : null,
+    active: active.length,
+    stale: stale.length,
+    new: newFindings.length,
+  };
+  if (options.json) {
+    writeLine(stdout, JSON.stringify(payload, null, 2));
+  } else {
+    writeLine(stdout, "Coding Bible baseline status");
+    writeLine(stdout, `  baseline ${displayPath ?? "not configured"}`);
+    writeLine(stdout, `  active   ${payload.active}`);
+    writeLine(stdout, `  stale    ${payload.stale}`);
+    writeLine(stdout, `  new      ${payload.new}`);
+  }
+  return 0;
+};
+
+const pruneBaseline = async (options, { cwd, stdout }) => {
+  const inspected = await inspectBaseline(options, { cwd });
+  if (inspected.result.diagnostics.length) {
+    writeLine(stdout, formatSummary(inspected.result));
+    return 1;
+  }
+  if (!inspected.filePath || !inspected.baseline) {
+    throw new Error("Cannot prune because no Coding Bible baseline exists.");
+  }
+  const { active, newFindings, stale } = inspected.classification;
+  await writeBaselineEntries(active, inspected.filePath);
+  const displayPath =
+    path.relative(inspected.loaded.rootDir, inspected.filePath) ||
+    path.basename(inspected.filePath);
+  writeLine(
+    stdout,
+    `✓ Pruned ${stale.length} stale baseline entr${stale.length === 1 ? "y" : "ies"} from ${displayPath}; ` +
+      `${active.length} active entr${active.length === 1 ? "y" : "ies"} remain and ${newFindings.length} new finding${newFindings.length === 1 ? " was" : "s were"} not baselined.`,
+  );
   return 0;
 };
 
@@ -504,7 +635,11 @@ export const runCli = async (
       return await printConfig(options, { cwd, stdout });
     }
     if (options.command === "baseline") {
-      return await createBaseline(options, { cwd, stdout });
+      if (options.action === "create")
+        return await createBaseline(options, { cwd, stdout });
+      if (options.action === "status")
+        return await baselineStatus(options, { cwd, stdout });
+      return await pruneBaseline(options, { cwd, stdout });
     }
 
     const result = await checkPaths(options.targets, {
@@ -520,12 +655,18 @@ export const runCli = async (
       scope: options.scope,
     });
     const artifacts =
-      options.json || options.report || options.patch
+      options.json ||
+      options.report ||
+      options.patch ||
+      options.reviewBrief ||
+      options.fixPack
         ? await writeAnalysisArtifacts(result, {
+            fixPack: options.fixPack,
             includeReviewFixes: options.includeReviewFixes,
             outputDirectory: options.outputDirectory,
             patch: options.patch,
             report: options.report,
+            reviewBrief: options.reviewBrief,
           })
         : { files: [], report: null };
 

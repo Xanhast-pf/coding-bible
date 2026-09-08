@@ -27,10 +27,9 @@
     {
       "ruleId": "A11Y-003",
       "pack": "accessibility",
-      "status": "high-confidence-candidate",
-      "priorityScore": 84,
-      "reason": "A narrow static/project-aware detector appears defensible with strong negative coverage.",
-      "blocker": "Needs style/CSS evidence that focus indicators are not removed without an equivalent visible replacement."
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer with canonical positive/negative promotion contracts."
     },
     {
       "ruleId": "A11Y-004",
@@ -42,18 +41,16 @@
     {
       "ruleId": "A11Y-005",
       "pack": "accessibility",
-      "status": "contextual-candidate",
-      "priorityScore": 68,
-      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
-      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer with canonical positive/negative promotion contracts."
     },
     {
       "ruleId": "A11Y-006",
       "pack": "accessibility",
-      "status": "high-confidence-candidate",
-      "priorityScore": 82,
-      "reason": "A narrow static/project-aware detector appears defensible with strong negative coverage.",
-      "blocker": "Needs style/CSS animation evidence plus reduced-motion handling."
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer with canonical positive/negative promotion contracts."
     },
     {
       "ruleId": "AI-001",
@@ -122,18 +119,16 @@
     {
       "ruleId": "APOLLO-002",
       "pack": "apollo",
-      "status": "contextual-candidate",
-      "priorityScore": 56,
-      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
-      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer with canonical positive/negative promotion contracts."
     },
     {
       "ruleId": "APOLLO-003",
       "pack": "apollo",
-      "status": "contextual-candidate",
-      "priorityScore": 56,
-      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
-      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer with canonical positive/negative promotion contracts."
     },
     {
       "ruleId": "APOLLO-004",
@@ -146,18 +141,16 @@
     {
       "ruleId": "APOLLO-005",
       "pack": "apollo",
-      "status": "contextual-candidate",
-      "priorityScore": 56,
-      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
-      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer with canonical positive/negative promotion contracts."
     },
     {
       "ruleId": "APOLLO-006",
       "pack": "apollo",
-      "status": "contextual-candidate",
-      "priorityScore": 68,
-      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
-      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer with canonical positive/negative promotion contracts."
     },
     {
       "ruleId": "ARCH-001",
@@ -257,10 +250,9 @@
     {
       "ruleId": "CORE-006",
       "pack": "core",
-      "status": "contextual-candidate",
-      "priorityScore": 56,
-      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
-      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer with canonical positive/negative promotion contracts."
     },
     {
       "ruleId": "CORE-007",
@@ -273,10 +265,9 @@
     {
       "ruleId": "CORE-008",
       "pack": "core",
-      "status": "contextual-candidate",
-      "priorityScore": 44,
-      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
-      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer with canonical positive/negative promotion contracts."
     },
     {
       "ruleId": "CORE-009",
@@ -289,18 +280,16 @@
     {
       "ruleId": "CORE-010",
       "pack": "core",
-      "status": "contextual-candidate",
-      "priorityScore": 63,
-      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
-      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer with canonical positive/negative promotion contracts."
     },
     {
       "ruleId": "CORE-011",
       "pack": "core",
-      "status": "contextual-candidate",
-      "priorityScore": 51,
-      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
-      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer with canonical positive/negative promotion contracts."
     },
     {
       "ruleId": "CSS-001",
@@ -377,34 +366,30 @@
     {
       "ruleId": "FLAG-002",
       "pack": "feature-flags",
-      "status": "contextual-candidate",
-      "priorityScore": 68,
-      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
-      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer with canonical positive/negative promotion contracts."
     },
     {
       "ruleId": "FLAG-003",
       "pack": "feature-flags",
-      "status": "contextual-candidate",
-      "priorityScore": 56,
-      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
-      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer with canonical positive/negative promotion contracts."
     },
     {
       "ruleId": "FLAG-004",
       "pack": "feature-flags",
-      "status": "contextual-candidate",
-      "priorityScore": 68,
-      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
-      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer with canonical positive/negative promotion contracts."
     },
     {
       "ruleId": "GQL-001",
       "pack": "graphql",
-      "status": "high-confidence-candidate",
-      "priorityScore": 92,
-      "reason": "A narrow static/project-aware detector appears defensible with strong negative coverage.",
-      "blocker": "Needs standalone GraphQL source support or a clearly documented embedded-document-only contract."
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer with canonical positive/negative promotion contracts."
     },
     {
       "ruleId": "GQL-002",
@@ -416,10 +401,9 @@
     {
       "ruleId": "GQL-003",
       "pack": "graphql",
-      "status": "contextual-candidate",
-      "priorityScore": 56,
-      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
-      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer with canonical positive/negative promotion contracts."
     },
     {
       "ruleId": "GQL-004",
@@ -432,10 +416,9 @@
     {
       "ruleId": "GQL-005",
       "pack": "graphql",
-      "status": "contextual-candidate",
-      "priorityScore": 68,
-      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
-      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer with canonical positive/negative promotion contracts."
     },
     {
       "ruleId": "GQL-006",
@@ -455,10 +438,9 @@
     {
       "ruleId": "I18N-002",
       "pack": "internationalization",
-      "status": "contextual-candidate",
-      "priorityScore": 68,
-      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
-      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer with canonical positive/negative promotion contracts."
     },
     {
       "ruleId": "I18N-003",
@@ -470,10 +452,9 @@
     {
       "ruleId": "I18N-004",
       "pack": "internationalization",
-      "status": "contextual-candidate",
-      "priorityScore": 56,
-      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
-      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer with canonical positive/negative promotion contracts."
     },
     {
       "ruleId": "JS-001",
@@ -506,10 +487,9 @@
     {
       "ruleId": "JS-005",
       "pack": "javascript",
-      "status": "contextual-candidate",
-      "priorityScore": 56,
-      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
-      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer with canonical positive/negative promotion contracts."
     },
     {
       "ruleId": "JS-006",
@@ -521,10 +501,9 @@
     {
       "ruleId": "JS-007",
       "pack": "javascript",
-      "status": "contextual-candidate",
-      "priorityScore": 44,
-      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
-      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer with canonical positive/negative promotion contracts."
     },
     {
       "ruleId": "LEGEND-001",
@@ -536,18 +515,16 @@
     {
       "ruleId": "LEGEND-002",
       "pack": "legend-state",
-      "status": "contextual-candidate",
-      "priorityScore": 68,
-      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
-      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer with canonical positive/negative promotion contracts."
     },
     {
       "ruleId": "LEGEND-003",
       "pack": "legend-state",
-      "status": "high-confidence-candidate",
-      "priorityScore": 88,
-      "reason": "A narrow static/project-aware detector appears defensible with strong negative coverage.",
-      "blocker": "Needs Legend observable symbol identity and mutation-flow checks around peek()/set()."
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer with canonical positive/negative promotion contracts."
     },
     {
       "ruleId": "LEGEND-004",
@@ -559,66 +536,58 @@
     {
       "ruleId": "LEGEND-005",
       "pack": "legend-state",
-      "status": "contextual-candidate",
-      "priorityScore": 56,
-      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
-      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer with canonical positive/negative promotion contracts."
     },
     {
       "ruleId": "LEGEND-006",
       "pack": "legend-state",
-      "status": "high-confidence-candidate",
-      "priorityScore": 80,
-      "reason": "A narrow static/project-aware detector appears defensible with strong negative coverage.",
-      "blocker": "Needs persistence/sync API identity plus conservative serializability analysis."
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer with canonical positive/negative promotion contracts."
     },
     {
       "ruleId": "NEXT-001",
       "pack": "nextjs",
-      "status": "contextual-candidate",
-      "priorityScore": 56,
-      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
-      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer with canonical positive/negative promotion contracts."
     },
     {
       "ruleId": "NEXT-002",
       "pack": "nextjs",
-      "status": "contextual-candidate",
-      "priorityScore": 56,
-      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
-      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer with canonical positive/negative promotion contracts."
     },
     {
       "ruleId": "NEXT-003",
       "pack": "nextjs",
-      "status": "high-confidence-candidate",
-      "priorityScore": 91,
-      "reason": "A narrow static/project-aware detector appears defensible with strong negative coverage.",
-      "blocker": "Needs project-aware Server/Client Component boundary resolution and prop-value serializability."
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer with canonical positive/negative promotion contracts."
     },
     {
       "ruleId": "NEXT-004",
       "pack": "nextjs",
-      "status": "high-confidence-candidate",
-      "priorityScore": 93,
-      "reason": "A narrow static/project-aware detector appears defensible with strong negative coverage.",
-      "blocker": "Needs project import-graph analysis for client-to-server-only leakage."
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer with canonical positive/negative promotion contracts."
     },
     {
       "ruleId": "NEXT-005",
       "pack": "nextjs",
-      "status": "high-confidence-candidate",
-      "priorityScore": 83,
-      "reason": "A narrow static/project-aware detector appears defensible with strong negative coverage.",
-      "blocker": "Needs Server Component identification plus conservative same-app HTTP indirection detection."
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer with canonical positive/negative promotion contracts."
     },
     {
       "ruleId": "NEXT-006",
       "pack": "nextjs",
-      "status": "contextual-candidate",
-      "priorityScore": 56,
-      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
-      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer with canonical positive/negative promotion contracts."
     },
     {
       "ruleId": "PERF-001",
@@ -663,10 +632,9 @@
     {
       "ruleId": "REACT-002",
       "pack": "react",
-      "status": "contextual-candidate",
-      "priorityScore": 44,
-      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
-      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer with canonical positive/negative promotion contracts."
     },
     {
       "ruleId": "REACT-003",
@@ -686,10 +654,9 @@
     {
       "ruleId": "REACT-005",
       "pack": "react",
-      "status": "contextual-candidate",
-      "priorityScore": 56,
-      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
-      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer with canonical positive/negative promotion contracts."
     },
     {
       "ruleId": "REACT-006",
@@ -701,10 +668,9 @@
     {
       "ruleId": "REACT-007",
       "pack": "react",
-      "status": "contextual-candidate",
-      "priorityScore": 68,
-      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
-      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer with canonical positive/negative promotion contracts."
     },
     {
       "ruleId": "REACT-008",
@@ -752,58 +718,51 @@
     {
       "ruleId": "REDUX-001",
       "pack": "redux",
-      "status": "high-confidence-candidate",
-      "priorityScore": 86,
-      "reason": "A narrow static/project-aware detector appears defensible with strong negative coverage.",
-      "blocker": "Needs precise Redux identity/legacy-pattern detection without treating every reducer switch as Redux."
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer with canonical positive/negative promotion contracts."
     },
     {
       "ruleId": "REDUX-002",
       "pack": "redux",
-      "status": "contextual-candidate",
-      "priorityScore": 68,
-      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
-      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer with canonical positive/negative promotion contracts."
     },
     {
       "ruleId": "REDUX-003",
       "pack": "redux",
-      "status": "high-confidence-candidate",
-      "priorityScore": 84,
-      "reason": "A narrow static/project-aware detector appears defensible with strong negative coverage.",
-      "blocker": "Needs Redux state/action boundary identification plus conservative serializability checks."
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer with canonical positive/negative promotion contracts."
     },
     {
       "ruleId": "REDUX-004",
       "pack": "redux",
-      "status": "contextual-candidate",
-      "priorityScore": 68,
-      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
-      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer with canonical positive/negative promotion contracts."
     },
     {
       "ruleId": "REDUX-005",
       "pack": "redux",
-      "status": "contextual-candidate",
-      "priorityScore": 56,
-      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
-      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer with canonical positive/negative promotion contracts."
     },
     {
       "ruleId": "REDUX-006",
       "pack": "redux",
-      "status": "contextual-candidate",
-      "priorityScore": 56,
-      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
-      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer with canonical positive/negative promotion contracts."
     },
     {
       "ruleId": "REDUX-007",
       "pack": "redux",
-      "status": "contextual-candidate",
-      "priorityScore": 44,
-      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
-      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer with canonical positive/negative promotion contracts."
     },
     {
       "ruleId": "REDUX-008",
@@ -831,10 +790,9 @@
     {
       "ruleId": "REDUX-011",
       "pack": "redux",
-      "status": "contextual-candidate",
-      "priorityScore": 56,
-      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
-      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer with canonical positive/negative promotion contracts."
     },
     {
       "ruleId": "TQ-001",
@@ -846,34 +804,30 @@
     {
       "ruleId": "TQ-002",
       "pack": "tanstack-query",
-      "status": "high-confidence-candidate",
-      "priorityScore": 89,
-      "reason": "A narrow static/project-aware detector appears defensible with strong negative coverage.",
-      "blocker": "Needs query-key AST/value analysis for unstable or non-serializable identity."
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer with canonical positive/negative promotion contracts."
     },
     {
       "ruleId": "TQ-003",
       "pack": "tanstack-query",
-      "status": "contextual-candidate",
-      "priorityScore": 56,
-      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
-      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer with canonical positive/negative promotion contracts."
     },
     {
       "ruleId": "TQ-004",
       "pack": "tanstack-query",
-      "status": "contextual-candidate",
-      "priorityScore": 68,
-      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
-      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer with canonical positive/negative promotion contracts."
     },
     {
       "ruleId": "TQ-005",
       "pack": "tanstack-query",
-      "status": "high-confidence-candidate",
-      "priorityScore": 90,
-      "reason": "A narrow static/project-aware detector appears defensible with strong negative coverage.",
-      "blocker": "Needs query-function identity tracing so fetch response checks are enforced only for actual query functions."
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer with canonical positive/negative promotion contracts."
     },
     {
       "ruleId": "TEST-001",
@@ -910,10 +864,9 @@
     {
       "ruleId": "TEST-005",
       "pack": "testing",
-      "status": "contextual-candidate",
-      "priorityScore": 44,
-      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
-      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer with canonical positive/negative promotion contracts."
     },
     {
       "ruleId": "TEST-006",
@@ -933,10 +886,9 @@
     {
       "ruleId": "TS-002",
       "pack": "typescript",
-      "status": "contextual-candidate",
-      "priorityScore": 68,
-      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
-      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer with canonical positive/negative promotion contracts."
     },
     {
       "ruleId": "TS-003",
@@ -955,18 +907,16 @@
     {
       "ruleId": "TS-005",
       "pack": "typescript",
-      "status": "contextual-candidate",
-      "priorityScore": 68,
-      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
-      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer with canonical positive/negative promotion contracts."
     },
     {
       "ruleId": "TS-006",
       "pack": "typescript",
-      "status": "contextual-candidate",
-      "priorityScore": 44,
-      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
-      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+      "status": "automated",
+      "priorityScore": 100,
+      "reason": "Implemented in the shared analyzer with canonical positive/negative promotion contracts."
     },
     {
       "ruleId": "TS-007",

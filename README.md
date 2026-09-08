@@ -243,15 +243,16 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: Xanhast-pf/coding-bible@v0.27.0
+      - uses: Xanhast-pf/coding-bible@v0.28.0
 ```
 
 The default `changed` scope analyzes current files with project/tsconfig context
 but reports only findings on added or modified lines. GitHub annotations and a
 Step Summary are always available without extra permissions. The action also
-writes `.coding-bible/coding-bible.sarif` for optional Code Scanning upload.
-Baselines and `coding-bible.config.*` remain analyzer contracts rather than
-Action-specific rule definitions.
+writes `.coding-bible/coding-bible.sarif` for optional Code Scanning upload and,
+by default, emits the same report / Fix Pack / Review Brief remediation artifacts
+used by the CLI. Baselines and `coding-bible.config.*` remain analyzer contracts
+rather than Action-specific rule definitions.
 
 The release contains a committed self-contained Node 24 runtime under
 `packages/action/dist`. Keep it synchronized with:
@@ -275,7 +276,7 @@ pnpm mcp --root /absolute/path/to/project --print-config vscode
 pnpm mcp --root /absolute/path/to/project --print-config claude-code
 ```
 
-It provides six read-only tools:
+It provides seven read-only tools:
 
 - `check_code` — deterministic analysis for an in-memory JS/TS snippet.
 - `check_files` — project-aware analysis for files/directories under the
@@ -283,6 +284,8 @@ It provides six read-only tools:
   analyzer cache.
 - `review_diff` — project-aware analysis filtered to added/modified lines in a
   supplied Git diff.
+- `plan_fixes` — read-only prioritized Fix Pack and Review Brief planning for
+  project findings. It does not modify source files, caches, or baseline state.
 - `search_rules` — ranked rule discovery by concept, ID, title, tags, or pack.
 - `get_rule` — canonical rule data and the corresponding agent prompt.
 - `get_project_guidance` — stable foundation/quality rules plus ecosystem packs
@@ -369,28 +372,36 @@ one commit:
 
 ```bash
 coding-bible baseline create .
+coding-bible baseline status .
+coding-bible baseline prune .
 coding-bible check .
 coding-bible check . --no-baseline
 ```
 
 The committable `.coding-bible-baseline.json` stores stable finding fingerprints.
 Known findings are suppressed, while changed/new violations and syntax errors
-still surface normally. Baselines are intentionally separate from the disposable
-cache.
+still surface normally. `baseline status` reports active, stale, and new debt;
+`baseline prune` removes only stale fingerprints and never adds newly discovered
+violations to the baseline. Baselines are intentionally separate from the
+disposable cache.
 
 Analyzer results can also be exported without modifying source files:
 
 ```bash
 coding-bible check . --report
 coding-bible check . --report --patch
+coding-bible check . --report --review-brief
+coding-bible check . --fix-pack
 coding-bible check . --report --patch --include-review-fixes
 ```
 
 The default `.coding-bible/` output contains a versioned `report.json` plus a
-standard Git `safe-fixes.patch` when requested. Behavior-sensitive proposed
-edits are isolated in `review-fixes.patch` behind the explicit
-`--include-review-fixes` flag. Safe fixes are re-analyzed before export and can
-be reviewed with `git apply --check` before anything touches the working tree.
+standard Git `safe-fixes.patch` when requested. `--review-brief` adds a concise
+review-order summary, while `--fix-pack` emits the complete remediation bundle:
+report, available safe/review patches, `fix-pack.json`, and `review-brief.md`.
+Behavior-sensitive proposed edits are isolated in `review-fixes.patch`; safe
+fixes are re-analyzed before export and can be reviewed with `git apply --check`
+before anything touches the working tree.
 
 ## Git quality gates
 

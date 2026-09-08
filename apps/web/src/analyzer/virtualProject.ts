@@ -253,7 +253,10 @@ export const createVirtualProject = (
     : null;
   const selectedProgramRoots = files
     .filter(({ fileName }) => isProjectTextFile(fileName))
-    .filter(({ fileName }) => getAnalyzerLanguage(fileName) !== null)
+    .filter(({ fileName }) => {
+      const language = getAnalyzerLanguage(fileName);
+      return language !== null && language !== "css" && language !== "graphql";
+    })
     .filter(({ fileName }) =>
       selected ? selected.has(normalizeRelativeFileName(fileName)) : true,
     )
@@ -280,6 +283,8 @@ export const createVirtualProject = (
     const normalizedFileName = normalizeRelativeFileName(fileName);
     if (
       !language ||
+      language === "css" ||
+      language === "graphql" ||
       /\.d\.(?:c|m)?ts$/i.test(fileName) ||
       (selected && !selected.has(normalizedFileName))
     ) {
@@ -332,7 +337,12 @@ export const createVirtualProjectPlans = (
 
   for (const { fileName } of files) {
     const language = getAnalyzerLanguage(fileName);
-    if (!language || /\.d\.(?:c|m)?ts$/i.test(fileName)) {
+    if (
+      !language ||
+      language === "css" ||
+      language === "graphql" ||
+      /\.d\.(?:c|m)?ts$/i.test(fileName)
+    ) {
       continue;
     }
 

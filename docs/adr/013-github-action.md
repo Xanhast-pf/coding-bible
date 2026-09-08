@@ -30,8 +30,9 @@ The action:
 4. filters findings and syntax diagnostics to added/modified lines;
 5. emits native GitHub annotations and a Step Summary;
 6. honors analyzer configuration and baselines;
-7. writes SARIF 2.1.0 for optional Code Scanning upload; and
-8. fails according to the explicit `fail-on` policy.
+7. writes SARIF 2.1.0 for optional Code Scanning upload;
+8. emits report / Fix Pack / Review Brief remediation artifacts by default; and
+9. fails according to the explicit `fail-on` policy.
 
 The release tag is the consumer-facing version boundary. The runtime vendors the
 analyzer implementation and exact TypeScript compiler used at build time, so
@@ -43,7 +44,7 @@ want Code Scanning add GitHub's `upload-sarif` action and the required
 
 ## Consequences
 
-- `uses: Xanhast-pf/coding-bible@v0.27.0` is sufficient after checkout.
+- `uses: Xanhast-pf/coding-bible@v0.28.0` is sufficient after checkout.
 - Pull requests receive deterministic feedback only for changed lines while the
   analyzer still has full project/type context.
 - Existing baselines remain a viable gradual-adoption mechanism.

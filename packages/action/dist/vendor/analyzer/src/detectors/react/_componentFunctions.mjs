@@ -1,6 +1,6 @@
 import ts from "../../../../typescript/typescript.cjs";
 import { getFunctionName, isExecutableFunction, isPascalCaseName, } from "../../utils.mjs";
-export const containsJsx = (root) => {
+const containsJsx = (root) => {
     let found = false;
     const walk = (node) => {
         if (found) {

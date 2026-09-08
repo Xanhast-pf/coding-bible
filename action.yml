@@ -43,6 +43,10 @@ inputs:
     description: Write .coding-bible/coding-bible.sarif for optional Code Scanning upload.
     required: false
     default: "true"
+  remediation:
+    description: Write report, Fix Pack, Review Brief, and available safe/review patches under .coding-bible.
+    required: false
+    default: "true"
 
 outputs:
   conclusion:
@@ -61,6 +65,16 @@ outputs:
     description: Number of deterministic rule IDs exercised by the analyzer.
   sarif-path:
     description: Repository-relative SARIF path, or an empty string when SARIF output is disabled.
+  report-path:
+    description: Repository-relative analyzer report path, or an empty string when remediation output is disabled.
+  fix-pack-path:
+    description: Repository-relative Fix Pack JSON path, or an empty string when remediation output is disabled.
+  review-brief-path:
+    description: Repository-relative Review Brief path, or an empty string when remediation output is disabled.
+  safe-patch-path:
+    description: Repository-relative safe-fixes patch path when safe fixes exist.
+  review-patch-path:
+    description: Repository-relative review-fixes patch path when review fixes exist.
 
 runs:
   using: node24

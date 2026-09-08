@@ -3,6 +3,8 @@ import { createDetectorContext, createDetectorContexts, createDetectorContextsFr
 import { detectors } from "./detectors/index.mjs";
 import { getAnalyzerFindingProfile } from "./findingProfiles.mjs";
 const defaultFileNameByLanguage = {
+    css: "snippet.css",
+    graphql: "snippet.graphql",
     js: "snippet.js",
     jsx: "snippet.jsx",
     ts: "snippet.ts",
@@ -24,7 +26,8 @@ const resolveAnalyzerDetectors = (options) => {
     }
     return [...detectors, ...additional];
 };
-const getApplicableDetectors = (language, fileName, options) => resolveAnalyzerDetectors(options).filter((detector) => (!detector.languages || detector.languages.includes(language)) &&
+const getApplicableDetectors = (language, fileName, options) => resolveAnalyzerDetectors(options).filter((detector) => (detector.languages?.includes(language) ??
+    (language !== "css" && language !== "graphql")) &&
     (!options.dependencyScope ||
         detector.dependencyScope === options.dependencyScope) &&
     (options.isRuleEnabled?.(detector.ruleId, fileName) ?? true));
@@ -71,9 +74,11 @@ const analyzeContext = (context, options) => {
     const applicableRuleIds = [
         ...new Set(applicableDetectors.map((detector) => detector.ruleId)),
     ].sort();
-    const diagnostics = context.program
-        .getSyntacticDiagnostics(context.sourceFile)
-        .map((diagnostic) => createDiagnostic(context, diagnostic));
+    const diagnostics = context.language === "css" || context.language === "graphql"
+        ? []
+        : context.program
+            .getSyntacticDiagnostics(context.sourceFile)
+            .map((diagnostic) => createDiagnostic(context, diagnostic));
     if (diagnostics.length) {
         return {
             checksRun: 0,

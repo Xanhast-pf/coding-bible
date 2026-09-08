@@ -140,6 +140,49 @@ export const createFinding = (
   };
 };
 
+export const createRangeFinding = (
+  context: DetectorContext,
+  start: number,
+  end: number,
+  details: Pick<
+    AnalyzerFinding,
+    | "detectorId"
+    | "fix"
+    | "message"
+    | "ruleId"
+    | "ruleRationale"
+    | "ruleTitle"
+    | "ruleUrl"
+    | "suggestion"
+  >,
+): AnalyzerFinding => {
+  const boundedStart = Math.max(0, Math.min(start, context.source.length));
+  const boundedEnd = Math.max(
+    boundedStart,
+    Math.min(end, context.source.length),
+  );
+  const startPosition =
+    context.sourceFile.getLineAndCharacterOfPosition(boundedStart);
+  const endPosition =
+    context.sourceFile.getLineAndCharacterOfPosition(boundedEnd);
+  const lineStart = context.sourceFile.getPositionOfLineAndCharacter(
+    startPosition.line,
+    0,
+  );
+  const lineEnd = context.sourceFile.getLineEndOfPosition(boundedStart);
+
+  return {
+    ...details,
+    excerpt: context.source.slice(lineStart, lineEnd).trimEnd(),
+    location: {
+      column: startPosition.character + 1,
+      endColumn: endPosition.character + 1,
+      endLine: endPosition.line + 1,
+      line: startPosition.line + 1,
+    },
+  };
+};
+
 export const replaceNodeEdit = (
   context: DetectorContext,
   node: ts.Node,

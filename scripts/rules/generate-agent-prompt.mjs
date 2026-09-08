@@ -54,7 +54,7 @@ const nextValue = (args, index, name) => {
   return value;
 };
 
-export const parseRuleAgentPromptArgs = (args) => {
+const parseRuleAgentPromptArgs = (args) => {
   const parsed = {
     context: [],
     goal: null,
@@ -284,7 +284,7 @@ const renderTemplate = (template, values) => {
   return rendered;
 };
 
-export const buildRuleAgentPrompt = (input) => {
+const buildRuleAgentPrompt = (input) => {
   const template = fs.readFileSync(templatePath, "utf8");
   const scope = scopeGuidance(input.id).replace(
     '"RULE_TITLE_PLACEHOLDER"',

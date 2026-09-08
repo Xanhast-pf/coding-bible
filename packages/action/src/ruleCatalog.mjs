@@ -14,7 +14,7 @@ const readRules = (payload) => {
   return payload.rules;
 };
 
-export const loadRuleCatalog = async () => {
+const loadRuleCatalog = async () => {
   catalogPromise ??= readFile(fileURLToPath(sourceUrl), "utf8")
     .then(JSON.parse)
     .then(readRules);
