@@ -2,11 +2,24 @@
   "name": "@coding-bible/analyzer",
   "version": "0.0.0",
   "private": true,
+  "license": "MIT",
   "type": "module",
   "sideEffects": false,
+  "engines": {
+    "node": ">=24"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Xanhast-pf/coding-bible.git",
+    "directory": "packages/analyzer"
+  },
   "exports": {
-    ".": "./src/index.ts",
-    "./bin": "./bin/coding-bible.mjs"
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/src/index.js",
+      "default": "./dist/src/index.js"
+    },
+    "./bin": "./dist/bin/coding-bible.mjs"
   },
   "dependencies": {
     "typescript": "^5.9.2"
@@ -15,9 +28,15 @@
     "test": "node --test test/*.test.mjs",
     "typecheck": "tsc --noEmit",
     "cli": "node bin/coding-bible.mjs",
-    "bench": "node bench/project-benchmark.mjs"
+    "bench": "node bench/project-benchmark.mjs",
+    "build": "node build-package.mjs",
+    "build:check": "node build-package.mjs --check"
   },
   "bin": {
-    "coding-bible": "./bin/coding-bible.mjs"
-  }
+    "coding-bible": "./dist/bin/coding-bible.mjs"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ]
 }

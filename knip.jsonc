@@ -30,12 +30,14 @@
     },
     "packages/analyzer": {
       "entry": [
+        "build-package.mjs",
         "src/index.ts",
         "bin/coding-bible.mjs",
         "bench/*.mjs",
         "test/*.test.mjs",
       ],
       "project": [
+        "build-package.mjs",
         "src/**/*.ts",
         "cli/*.mjs",
         "bin/*.mjs",

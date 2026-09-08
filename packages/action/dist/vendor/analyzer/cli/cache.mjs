@@ -109,7 +109,7 @@ const getImplementationSignature = () => {
   implementationSignaturePromise ??= (async () => {
     const sourceRoot = path.join(analyzerRoot, "src");
     const sourceFiles = (await readdir(sourceRoot, { recursive: true }))
-      .filter((entry) => entry.endsWith(".ts"))
+      .filter((entry) => entry.endsWith(".ts") || entry.endsWith(".js"))
       .map((entry) => path.join(sourceRoot, entry));
     const files = [
       ...sourceFiles,
