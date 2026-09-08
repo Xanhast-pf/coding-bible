@@ -21,6 +21,39 @@ test("analyzer runs only detectors applicable to the selected language", () => {
   assert.equal(tsxResult.ruleIdsChecked.length, 71);
 });
 
+test("GraphQL nullability evidence distinguishes nullable String from String!", () => {
+  assert.ok(
+    ruleIds(
+      `// Schema: nickname: String\ntype User = { nickname: string };`,
+      "ts",
+    ).includes("GQL-005"),
+  );
+  assert.equal(
+    ruleIds(
+      `// Schema: nickname: String!\ntype User = { nickname: string };`,
+      "ts",
+    ).includes("GQL-005"),
+    false,
+  );
+});
+
+test("Redux selector memoization flags identity selectors but not derived arrays", () => {
+  const createSelector = "create" + "Selector";
+  assert.ok(
+    ruleIds(
+      `const selectName = ${createSelector}([(state) => state.user.name], (name) => name);`,
+      "ts",
+    ).includes("REDUX-007"),
+  );
+  assert.equal(
+    ruleIds(
+      `const selectVisible = ${createSelector}([(state) => state.todos], (todos) => todos.filter((todo) => !todo.completed));`,
+      "ts",
+    ).includes("REDUX-007"),
+    false,
+  );
+});
+
 test("syntax errors pause rule analysis instead of returning a misleading clean result", () => {
   const result = analyze({
     language: "tsx",
@@ -539,6 +572,12 @@ test("detects exhaustive-deps suppressions only in comments", () => {
   assert.deepEqual(
     ruleIds(
       `const example = "eslint-disable-line react-hooks/exhaustive-deps";`,
+    ),
+    [],
+  );
+  assert.deepEqual(
+    ruleIds(
+      String.raw`const example = \`// eslint-disable-line react-hooks/exhaustive-deps\`;`,
     ),
     [],
   );

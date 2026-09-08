@@ -4,7 +4,7 @@ import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
 import test from "node:test";
 
-import { detectors } from "@coding-bible/analyzer";
+import { analyze, detectors } from "@coding-bible/analyzer";
 
 import { analyzeBrowserInput } from "../src/analyzer/analyzeBrowserInput.ts";
 import { getBrowserAnalyzerRuntimeIntegrityError } from "../src/analyzer/runtimeIntegrity.ts";
@@ -29,9 +29,15 @@ const readFixture = (name) =>
   );
 
 test("browser analysis preserves the canonical clean/violation detector contract", () => {
+  const cleanSource = readFixture("all-clean");
+  const violationSource = readFixture("all-violations");
+  const canonicalViolations = analyze({
+    language: "tsx",
+    source: violationSource,
+  });
   const clean = analyzeBrowserInput(
     {
-      files: [{ fileName: "all-clean.tsx", source: readFixture("all-clean") }],
+      files: [{ fileName: "all-clean.tsx", source: cleanSource }],
       mode: "snippet",
     },
     libraryFiles,
@@ -41,7 +47,7 @@ test("browser analysis preserves the canonical clean/violation detector contract
       files: [
         {
           fileName: "all-violations.tsx",
-          source: readFixture("all-violations"),
+          source: violationSource,
         },
       ],
       mode: "snippet",
@@ -51,11 +57,19 @@ test("browser analysis preserves the canonical clean/violation detector contract
 
   assert.equal(clean.files[0]?.result.findings.length, 0);
   assert.equal(clean.files[0]?.result.checksRun, 72);
-  assert.equal(violations.files[0]?.result.findings.length, 31);
   assert.equal(
-    new Set(violations.files[0]?.result.findings.map(({ ruleId }) => ruleId))
-      .size,
-    28,
+    violations.files[0]?.result.findings.length,
+    canonicalViolations.findings.length,
+  );
+  assert.deepEqual(
+    [
+      ...new Set(
+        violations.files[0]?.result.findings.map(({ ruleId }) => ruleId),
+      ),
+    ].sort(),
+    [
+      ...new Set(canonicalViolations.findings.map(({ ruleId }) => ruleId)),
+    ].sort(),
   );
 });
 

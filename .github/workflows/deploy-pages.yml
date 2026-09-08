@@ -70,10 +70,19 @@ jobs:
           persist-credentials: false
 
       - name: Dogfood GitHub Action runtime
+        id: smoke
         uses: ./
         with:
-          scope: changed
+          scope: project
           fail-on: error
+
+      - name: Assert Action exercised analyzer
+        env:
+          FILES_ANALYZED: ${{ steps.smoke.outputs.files-analyzed }}
+          RULES_CHECKED: ${{ steps.smoke.outputs.rules-checked }}
+        run: |
+          test "$FILES_ANALYZED" -gt 0
+          test "$RULES_CHECKED" -gt 0
 
   released-action:
     name: Released Action dogfood · v0.27.0

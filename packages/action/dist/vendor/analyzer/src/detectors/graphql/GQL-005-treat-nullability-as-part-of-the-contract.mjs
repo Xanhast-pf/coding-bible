@@ -10,6 +10,8 @@ const detector = createSourceEvidenceDetector({
     },
     message: "Treat nullability as part of the contract evidence was detected in this source.",
     suggestion: "Apply GQL-005: Treat nullability as part of the contract.",
-    find: (context) => conjunctiveEvidence(context.source, [/\/\/\s*Schema:\s*(\w+)\s*:\s*String\b[\s\S]*\b\1\s*:\s*string\b/m], [/\bstring\s*\|\s*null\b/m]),
+    find: (context) => conjunctiveEvidence(context.source, [
+        /\/\/\s*Schema:\s*(\w+)\s*:\s*String(?!\s*!)[ \t]*(?:\r?\n|$)[\s\S]*\b\1\s*:\s*string\b/m,
+    ], [/\bstring\s*\|\s*null\b/m]),
 });
 export const gql005Detectors = [detector];

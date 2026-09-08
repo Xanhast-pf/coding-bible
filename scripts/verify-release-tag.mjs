@@ -35,9 +35,28 @@ if (!tag) {
         `Release tag ${tag} does not match source versions: Action ${actionVersion}, MCP ${mcpVersion}.`,
       );
     } else {
-      process.stdout.write(
-        `Release tag ${tag} matches Action and MCP source versions.\n`,
-      );
+      const releaseNotesPath = path.join(root, "docs/releases", `${tag}.md`);
+      const expectedHeading = `# Coding Bible ${tag}`;
+
+      if (!fs.existsSync(releaseNotesPath)) {
+        fail(
+          `Release notes are required before tagging: docs/releases/${tag}.md.`,
+        );
+      } else {
+        const [heading = ""] = fs
+          .readFileSync(releaseNotesPath, "utf8")
+          .split(/\r?\n/u);
+
+        if (heading !== expectedHeading) {
+          fail(
+            `Release notes must start with "${expectedHeading}": docs/releases/${tag}.md.`,
+          );
+        } else {
+          process.stdout.write(
+            `Release tag ${tag} matches Action/MCP source versions and release notes.\n`,
+          );
+        }
+      }
     }
   }
 }
