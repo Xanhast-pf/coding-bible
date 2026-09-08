@@ -85,7 +85,7 @@ jobs:
           test "$RULES_CHECKED" -gt 0
 
   released-action:
-    name: Released Action dogfood · v0.27.0
+    name: Released Action dogfood · v0.28.0
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -96,8 +96,8 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Review with published Coding Bible v0.27.0
-        uses: Xanhast-pf/coding-bible@v0.27.0
+      - name: Review with published Coding Bible v0.28.0
+        uses: Xanhast-pf/coding-bible@v0.28.0
         with:
           scope: project
           fail-on: error
