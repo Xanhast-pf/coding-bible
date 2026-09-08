@@ -2,6 +2,8 @@ node_modules/
 dist/
 !packages/action/dist/
 !packages/action/dist/**
+!packages/analyzer/dist/
+!packages/analyzer/dist/**
 coverage/
 .vite/
 .cache/

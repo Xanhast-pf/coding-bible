@@ -1,0 +1,87 @@
+import ts from "typescript";
+import { createFinding, hasSourceFileDeclaration, nodesOfKind, replaceNodeEdit, } from "../../utils.js";
+const legacyGlobals = new Map([
+    ["parseInt", "Number.parseInt"],
+    ["parseFloat", "Number.parseFloat"],
+    ["isNaN", "Number.isNaN"],
+    ["isFinite", "Number.isFinite"],
+]);
+const getLegacyGlobalMessage = (method, displayName) => method === "parseInt" || method === "parseFloat"
+    ? `Global \`${displayName}\` has a direct namespaced equivalent with the same parsing semantics.`
+    : `Legacy global \`${displayName}\` coerces values before testing them.`;
+const isUnshadowedGlobalIdentifier = (context, node) => !hasSourceFileDeclaration(context, node);
+const isUnshadowedGlobalOwner = (context, node) => ts.isIdentifier(node) &&
+    (node.text === "globalThis" || node.text === "window") &&
+    isUnshadowedGlobalIdentifier(context, node);
+export const js004NamespaceSafeBuiltinsDetector = {
+    dependencyScope: "source-file",
+    id: "namespace-safe-builtins",
+    ruleId: "JS-004",
+    analyze: (context) => {
+        const findings = [];
+        for (const node of nodesOfKind(context, ts.SyntaxKind.CallExpression)) {
+            if (ts.isIdentifier(node.expression)) {
+                const replacement = legacyGlobals.get(node.expression.text);
+                if (!replacement ||
+                    !isUnshadowedGlobalIdentifier(context, node.expression)) {
+                    continue;
+                }
+                const safety = node.expression.text === "parseInt" ||
+                    node.expression.text === "parseFloat"
+                    ? "safe"
+                    : "review";
+                findings.push(createFinding(context, node.expression, {
+                    detectorId: "namespace-safe-builtins",
+                    fix: {
+                        description: safety === "safe"
+                            ? `Use the namespaced equivalent \`${replacement}\`.`
+                            : `Use \`${replacement}\` only after confirming the code does not rely on the coercion behavior of the legacy global.`,
+                        edits: [replaceNodeEdit(context, node.expression, replacement)],
+                        safety,
+                        title: `Replace with ${replacement}`,
+                    },
+                    message: getLegacyGlobalMessage(node.expression.text, node.expression.text),
+                    ruleId: "JS-004",
+                    suggestion: `Use \`${replacement}\` instead.`,
+                }));
+                continue;
+            }
+            if (!ts.isPropertyAccessExpression(node.expression)) {
+                continue;
+            }
+            const owner = node.expression.expression;
+            const method = node.expression.name.text;
+            const replacement = legacyGlobals.get(method);
+            if (replacement && isUnshadowedGlobalOwner(context, owner)) {
+                const safety = method === "parseInt" || method === "parseFloat" ? "safe" : "review";
+                findings.push(createFinding(context, node.expression, {
+                    detectorId: "namespace-safe-builtins",
+                    fix: {
+                        description: safety === "safe"
+                            ? `Use the namespaced equivalent \`${replacement}\`.`
+                            : `Use \`${replacement}\` only after confirming the code does not rely on the coercion behavior of the legacy global.`,
+                        edits: [replaceNodeEdit(context, node.expression, replacement)],
+                        safety,
+                        title: `Replace with ${replacement}`,
+                    },
+                    message: getLegacyGlobalMessage(method, `${owner.getText(context.sourceFile)}.${method}`),
+                    ruleId: "JS-004",
+                    suggestion: `Use \`${replacement}\` instead.`,
+                }));
+                continue;
+            }
+            if (method === "hasOwnProperty") {
+                findings.push(createFinding(context, node.expression.name, {
+                    detectorId: "namespace-safe-builtins",
+                    message: "Calling `hasOwnProperty` through an object can fail for null-prototype or shadowed objects.",
+                    ruleId: "JS-004",
+                    suggestion: "Use `Object.hasOwn(object, key)` instead.",
+                }));
+            }
+        }
+        return findings;
+    },
+};
+export const js004Detectors = [
+    js004NamespaceSafeBuiltinsDetector,
+];

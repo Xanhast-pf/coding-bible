@@ -12,6 +12,20 @@ A clean result means clean for the applicable automated subset only. Rules that
 require architecture, runtime intent, or broader repository judgment remain
 explicitly human- or agent-reviewed.
 
+## Consumer installation before npm
+
+Until the npm package is published, install the analyzer from an immutable Git
+commit that contains the consumer-ready package runtime:
+
+```bash
+pnpm add -D 'github:Xanhast-pf/coding-bible#<commit-sha>&path:packages/analyzer'
+```
+
+The installed package executes compiled JavaScript from `dist/`; consumers never
+execute the repository's TypeScript source from inside `node_modules`. Node 24 or
+newer is required. Pin a Canary-green commit SHA so the dependency remains
+reproducible while Coding Bible is still pre-npm.
+
 ```ts
 import { analyze } from "@coding-bible/analyzer";
 

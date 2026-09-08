@@ -23,8 +23,8 @@
     "dev": "pnpm --filter @coding-bible/web dev",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "generate": "pnpm registries:generate && pnpm automation:matrix:generate && pnpm rulebook:schema:generate && pnpm agent:generate && pnpm action:build",
-    "generate:check": "pnpm registries:check && pnpm automation:matrix:check && pnpm rulebook:schema:check && pnpm agent:check && pnpm action:check",
+    "generate": "pnpm registries:generate && pnpm automation:matrix:generate && pnpm rulebook:schema:generate && pnpm agent:generate && pnpm analyzer:build && pnpm action:build",
+    "generate:check": "pnpm registries:check && pnpm automation:matrix:check && pnpm rulebook:schema:check && pnpm agent:check && pnpm analyzer:check && pnpm action:check",
     "knip": "knip --include files,dependencies,unlisted,binaries,unresolved --use-tsconfig-files",
     "knip:fast": "knip --dependencies --use-tsconfig-files",
     "lint": "eslint . --cache --cache-location .cache/eslint --max-warnings=0",
@@ -46,7 +46,9 @@
     "rulebook:schema:generate": "node scripts/rules/generate-custom-rulebook-schema.mjs",
     "rulebook:schema:check": "node scripts/rules/generate-custom-rulebook-schema.mjs --check",
     "automation:matrix:generate": "node scripts/rules/generate-automation-matrix.mjs",
-    "automation:matrix:check": "node scripts/rules/generate-automation-matrix.mjs --check"
+    "automation:matrix:check": "node scripts/rules/generate-automation-matrix.mjs --check",
+    "analyzer:build": "pnpm --filter @coding-bible/analyzer build",
+    "analyzer:check": "pnpm --filter @coding-bible/analyzer build:check"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",
