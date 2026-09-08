@@ -1,6 +1,6 @@
 # ADR-009: Browser analyzer MVP uses the TypeScript AST
 
-- Status: Accepted
+- Status: Superseded by ADR-014
 - Date: 2026-08-28
 
 ## Context

@@ -26,3 +26,4 @@ CLAUDE.md
 .private/
 .agents/
 *.patch
+.tmp-*

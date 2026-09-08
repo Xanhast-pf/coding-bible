@@ -56,7 +56,7 @@ export const readProjectSelection = async (
 
   if (!candidates.length) {
     throw new Error(
-      "No TypeScript, JavaScript, declaration, or JSON files were found.",
+      "No supported source, declaration, or JSON files were found.",
     );
   }
 
@@ -71,7 +71,7 @@ export const readProjectSelection = async (
 
   if (!sourceFileCount) {
     throw new Error(
-      "No analyzable TypeScript or JavaScript source files were found.",
+      "No analyzable JavaScript, TypeScript, CSS, or GraphQL source files were found.",
     );
   }
 

@@ -38,6 +38,7 @@
     "typecheck": "pnpm -r --if-present typecheck",
     "registries:generate": "node scripts/rules/generate-registries.mjs",
     "registries:check": "node scripts/rules/generate-registries.mjs --check",
+    "release:tag:check": "node scripts/verify-release-tag.mjs",
     "rule:new": "node scripts/rules/new-rule.mjs",
     "rule:prompt": "node scripts/rules/generate-agent-prompt.mjs",
     "rulebook:new": "node scripts/rules/new-rulebook.mjs",

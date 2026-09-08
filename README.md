@@ -152,7 +152,12 @@ Contributors and forks can add full AST/project-aware detectors without hand-
 editing registries:
 
 ```bash
-pnpm rule:new -- --id APOLLO-004 --title "Prefer typed cache policies" --detector
+# New canonical rule + detector
+pnpm rule:new -- --id REACT-014 --title "Prefer explicit event ownership" --detector
+
+# Existing canonical rule that has been approved for automation
+pnpm rule:new -- --id "$RULE_ID" --detector
+
 pnpm registries:generate
 pnpm check
 ```
@@ -278,7 +283,7 @@ pnpm mcp --root /absolute/path/to/project --print-config claude-code
 
 It provides seven read-only tools:
 
-- `check_code` — deterministic analysis for an in-memory JS/TS snippet.
+- `check_code` — deterministic analysis for an in-memory JavaScript, TypeScript, CSS, or GraphQL snippet.
 - `check_files` — project-aware analysis for files/directories under the
   configured root. MCP scans force `--no-cache` so tool calls do not write the
   analyzer cache.
@@ -402,6 +407,7 @@ report, available safe/review patches, `fix-pack.json`, and `review-brief.md`.
 Behavior-sensitive proposed edits are isolated in `review-fixes.patch`; safe
 fixes are re-analyzed before export and can be reviewed with `git apply --check`
 before anything touches the working tree.
+See ADR-015 for the shared remediation and non-mutation contract across CLI, browser, Action, and MCP.
 
 ## Git quality gates
 

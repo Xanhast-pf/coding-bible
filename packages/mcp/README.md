@@ -61,8 +61,8 @@ Claude Code can also register the same stdio command permanently with
 
 ## Tools
 
-- `check_code` — deterministic checks for an in-memory JS/TS snippet. Best for
-  pasted or unsaved code.
+- `check_code` — deterministic checks for an in-memory JavaScript, TypeScript, CSS,
+  or GraphQL snippet. Best for pasted or unsaved code.
 - `check_files` — project-aware analyzer scan for files/directories under the
   configured root, including config/tsconfig/baseline semantics.
 - `review_diff` — analyzes current working-tree files and returns only findings

@@ -382,7 +382,7 @@ export const AnalyzeView = () => {
                   setSource(event.target.value);
                   resetResult();
                 }}
-                placeholder="Paste TypeScript, TSX, JavaScript, or JSX here…"
+                placeholder="Paste JavaScript, TypeScript, CSS, or GraphQL here…"
                 spellCheck={false}
                 value={source}
               />

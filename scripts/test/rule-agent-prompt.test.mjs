@@ -51,11 +51,34 @@ test("rule:prompt detector mode points canonical rules at the detector scaffold"
   ]);
 
   assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stdout, /pnpm rule:new -- --id APOLLO-004 --detector/u);
+  assert.doesNotMatch(
+    result.stdout,
+    /pnpm rule:new -- --id APOLLO-004 --title .* --detector/u,
+  );
+  assert.match(result.stdout, /canonical rule already exists/u);
+  assert.match(result.stdout, /full analyzer detector/u);
+});
+
+test("rule:prompt tells existing automated rules to refine their detector", () => {
+  const result = runPrompt([
+    "--id",
+    "REACT-006",
+    "--title",
+    "Use stable list keys",
+    "--goal",
+    "Refine the stable list-key detector without creating duplicate analyzer modules.",
+    "--mode",
+    "detector",
+  ]);
+
+  assert.equal(result.status, 0, result.stderr);
   assert.match(
     result.stdout,
-    /pnpm rule:new -- --id APOLLO-004 --title "Prefer typed cache policies" --detector/u,
+    /packages\/analyzer\/src\/detectors\/react\/REACT-006-stable-list-keys\.ts/u,
   );
-  assert.match(result.stdout, /full analyzer detector/u);
+  assert.match(result.stdout, /refine that detector/u);
+  assert.doesNotMatch(result.stdout, /pnpm rule:new -- --id REACT-006/u);
 });
 
 test("rule:prompt can write a reusable Markdown brief", () => {

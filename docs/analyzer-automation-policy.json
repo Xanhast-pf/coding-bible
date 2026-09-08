@@ -113,8 +113,8 @@
       "pack": "apollo",
       "status": "contextual-candidate",
       "priorityScore": 68,
-      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
-      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+      "reason": "Potentially automatable when cache identity can be resolved from schema and type-policy context.",
+      "blocker": "A hard finding needs proof that a normalized entity type lacks Apollo's default id/_id identity and has no effective keyFields policy. A source-local InMemoryCache() call alone cannot establish that."
     },
     {
       "ruleId": "APOLLO-002",
@@ -135,8 +135,8 @@
       "pack": "apollo",
       "status": "contextual-candidate",
       "priorityScore": 68,
-      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
-      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+      "reason": "Potentially automatable when mutation result shape and affected cache membership are known.",
+      "blocker": "Apollo can reconcile a mutation correctly from normalized returned entities without refetchQueries/update. A hard finding needs cache/schema evidence that the mutation leaves an affected list or derived field stale."
     },
     {
       "ruleId": "APOLLO-005",
@@ -425,8 +425,8 @@
       "pack": "graphql",
       "status": "contextual-candidate",
       "priorityScore": 68,
-      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
-      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+      "reason": "Potentially automatable with schema cardinality or an explicit project pagination contract.",
+      "blocker": "A query field that returns a list is not necessarily unbounded. A hard finding needs schema/product evidence about collection growth or a project policy requiring pagination for that field."
     },
     {
       "ruleId": "I18N-001",
@@ -610,8 +610,8 @@
       "pack": "performance",
       "status": "contextual-candidate",
       "priorityScore": 44,
-      "reason": "Potentially automatable as a contextual/strong finding, but not safe enough for a hard detector yet.",
-      "blocker": "Static evidence can likely surface useful signals, but the conclusion needs context or a tighter detector contract before promotion."
+      "reason": "Potentially automatable only when hot-path and collection-size evidence is available.",
+      "blocker": "The rule explicitly permits readable multi-pass chains on small or non-hot collections. Static syntax alone cannot prove runtime frequency or dataset size without profiling or project-specific annotations."
     },
     {
       "ruleId": "PERF-004",

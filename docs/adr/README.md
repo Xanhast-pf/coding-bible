@@ -17,3 +17,4 @@
 | [012](012-mcp-adoption-and-diff-review.md) | MCP adoption and change-focused review |
 | [013](013-github-action.md) | Self-contained GitHub Action and changed-line PR review |
 | [014](014-browser-project-analyzer.md) | Browser analysis uses a virtual TypeScript project in a Web Worker |
+| [015](015-shared-remediation-artifacts.md) | Remediation artifacts are shared, explicit, and non-mutating by default |
