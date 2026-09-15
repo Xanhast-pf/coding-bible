@@ -42,6 +42,21 @@ SARIF upload is not performed by the Coding Bible action itself. Consumers that
 want Code Scanning add GitHub's `upload-sarif` action and the required
 `security-events` permission separately.
 
+Coding Bible's own CI separates current-source dogfooding from published-release
+compatibility:
+
+1. the checked-out Action (`uses: ./`) analyzes the current repository and is the
+   authoritative Action dogfood gate for the branch being built;
+2. the most recently published Action remains pinned to its immutable release tag,
+   but analyzes a frozen compatibility fixture rather than current source; and
+3. the published-release smoke asserts that the released artifact still boots,
+   analyzes files, and exercises rules without allowing an older release to govern
+   how the current branch may evolve.
+
+This prevents a bootstrap trap where a previous analyzer release can block valid
+changes to the next release while retaining independent coverage of the published
+Action artifact.
+
 ## Consequences
 
 - `uses: Xanhast-pf/coding-bible@v0.28.0` is sufficient after checkout.

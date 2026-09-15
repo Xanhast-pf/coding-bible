@@ -47,14 +47,17 @@ test("repository dogfood always runs the complete automated rule set", async () 
   assert.equal(hasRuleSelectionFlag(bibleCheck), false);
 });
 
-test("GitHub Action dogfood does not narrow the automated rule set", async () => {
+test("GitHub Action validation does not narrow the automated rule set", async () => {
   const workflow = await readFile(
     path.join(repositoryRoot, ".github/workflows/deploy-pages.yml"),
     "utf8",
   );
   const blocks = getCodingBibleActionBlocks(workflow);
 
-  assert.ok(blocks.length >= 2, "expected local and released dogfood steps");
+  assert.ok(
+    blocks.length >= 2,
+    "expected current-branch dogfood and released compatibility steps",
+  );
   for (const block of blocks) {
     assert.doesNotMatch(block, /^\s+(?:exclude-)?rules:\s*/gmu);
   }

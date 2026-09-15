@@ -59,7 +59,7 @@ jobs:
           path: apps/web/dist
 
   action-smoke:
-    name: Self-contained Action smoke test
+    name: Current branch Action dogfood
     runs-on: ubuntu-latest
 
     steps:
@@ -69,7 +69,7 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Dogfood GitHub Action runtime
+      - name: Dogfood current branch GitHub Action
         id: smoke
         uses: ./
         with:
@@ -85,7 +85,7 @@ jobs:
           test "$RULES_CHECKED" -gt 0
 
   released-action:
-    name: Released Action dogfood · v0.28.0
+    name: Released Action compatibility smoke · v0.28.0
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -96,11 +96,26 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Review with published Coding Bible v0.28.0
+      - name: Review compatibility fixture with published Coding Bible v0.28.0
+        id: released-smoke
         uses: Xanhast-pf/coding-bible@v0.28.0
         with:
+          path: scripts/fixtures/released-action-smoke/src
           scope: project
+          config: scripts/fixtures/released-action-smoke/coding-bible.config.json
+          baseline: false
+          annotations: false
+          sarif: false
+          remediation: false
           fail-on: error
+
+      - name: Assert published Action exercised analyzer
+        env:
+          FILES_ANALYZED: ${{ steps.released-smoke.outputs.files-analyzed }}
+          RULES_CHECKED: ${{ steps.released-smoke.outputs.rules-checked }}
+        run: |
+          test "$FILES_ANALYZED" -gt 0
+          test "$RULES_CHECKED" -gt 0
 
   deploy:
     name: Deploy Pages

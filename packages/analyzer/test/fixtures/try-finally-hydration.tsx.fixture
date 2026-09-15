@@ -1,0 +1,19 @@
+async function checkHydration() {
+  const content = <Widget />;
+  const host = document.createElement("div");
+  host.innerHTML = renderToString(content);
+  document.body.append(host);
+  const root = hydrateRoot(host, content);
+  try {
+    await act(async () => {});
+    expect(host.textContent).toBe("Ready");
+  } finally {
+    act(() => root.unmount());
+    host.remove();
+  }
+}
+
+// A later test's render must not become evidence inside the earlier try.
+function checkRender() {
+  render(<Widget />);
+}
