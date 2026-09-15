@@ -52,7 +52,7 @@ test("release tags are wired into the repository quality workflow", () => {
   assert.match(workflow, /run: pnpm release:tag:check -- "\$GITHUB_REF_NAME"/u);
 });
 
-test("self-contained Action smoke cannot false-green without exercising the analyzer", () => {
+test("current branch Action dogfood cannot false-green without exercising the analyzer", () => {
   const workflow = fs.readFileSync(
     path.join(root, ".github/workflows/deploy-pages.yml"),
     "utf8",
@@ -60,7 +60,7 @@ test("self-contained Action smoke cannot false-green without exercising the anal
 
   assert.match(
     workflow,
-    /name: Dogfood GitHub Action runtime\n\s+id: smoke\n\s+uses: \.\/\n\s+with:\n\s+scope: project/u,
+    /id: smoke\n\s+uses: \.\/\n\s+with:\n\s+scope: project/u,
   );
   assert.match(
     workflow,
