@@ -25,6 +25,13 @@ const withFixture = async (callback) => {
   }
 };
 
+const configureTestRepository = async (run) => {
+  await run(["init", "-q"]);
+  await run(["config", "commit.gpgsign", "false"]);
+  await run(["config", "user.email", "test@example.com"]);
+  await run(["config", "user.name", "Test"]);
+};
+
 const createWriter = () => {
   let value = "";
 
@@ -310,9 +317,7 @@ test("--changed scans only working-tree and untracked source files", async () =>
         });
       });
 
-    await run(["init", "-q"]);
-    await run(["config", "user.email", "test@example.com"]);
-    await run(["config", "user.name", "Test"]);
+    await configureTestRepository(run);
     await writeFile(path.join(directory, "tracked.ts"), "const tracked = 1;\n");
     await writeFile(
       path.join(directory, "untouched.ts"),
@@ -351,9 +356,7 @@ test("--staged scans only staged source files", async () => {
         });
       });
 
-    await run(["init", "-q"]);
-    await run(["config", "user.email", "test@example.com"]);
-    await run(["config", "user.name", "Test"]);
+    await configureTestRepository(run);
     await writeFile(path.join(directory, "staged.ts"), "const staged = 1;\n");
     await writeFile(
       path.join(directory, "unstaged.ts"),
@@ -409,9 +412,7 @@ test("--since includes committed branch changes and current worktree changes", a
         });
       });
 
-    await run(["init", "-q"]);
-    await run(["config", "user.email", "test@example.com"]);
-    await run(["config", "user.name", "Test"]);
+    await configureTestRepository(run);
     await writeFile(
       path.join(directory, "committed.ts"),
       "const committed = 1;\n",
@@ -558,9 +559,7 @@ test("diff scope reports changed files while retaining their full tsconfig proje
       path.join(directory, "src", "context.ts"),
       "export const context = 1;\n",
     );
-    await run(["init", "-q"]);
-    await run(["config", "user.email", "test@example.com"]);
-    await run(["config", "user.name", "Test"]);
+    await configureTestRepository(run);
     await run(["add", "."]);
     await run(["commit", "-qm", "baseline"]);
 
