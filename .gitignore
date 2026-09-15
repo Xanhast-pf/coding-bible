@@ -22,8 +22,6 @@ playwright-report/
 test-results/
 
 # Private maintainer / agent context
-AGENT.md
-AGENTS.md
 CLAUDE.md
 .private/
 .agents/

@@ -6,6 +6,19 @@ import path from "node:path";
 
 import { resolveBaseRef } from "../src/git.mjs";
 
+async function configureTestRepository(exec, directory) {
+  await exec("git", ["init", "-q"], { cwd: directory });
+  await exec("git", ["config", "commit.gpgsign", "false"], {
+    cwd: directory,
+  });
+  await exec("git", ["config", "user.email", "coding-bible@example.invalid"], {
+    cwd: directory,
+  });
+  await exec("git", ["config", "user.name", "Coding Bible Test"], {
+    cwd: directory,
+  });
+}
+
 test("base ref prefers explicit input", async () => {
   assert.equal(
     await resolveBaseRef({ baseRef: "release-base", environment: {} }),
@@ -42,13 +55,9 @@ test("changed diff preserves pure renames instead of treating every line as new"
   const directory = await mkdtemp(
     path.join(os.tmpdir(), "coding-bible-action-rename-"),
   );
-  await exec("git", ["init", "-q"], { cwd: directory });
-  await exec("git", ["config", "user.email", "coding-bible@example.invalid"], {
-    cwd: directory,
-  });
-  await exec("git", ["config", "user.name", "Coding Bible Test"], {
-    cwd: directory,
-  });
+
+  await configureTestRepository(exec, directory);
+
   await mkdir(path.join(directory, "src"));
   await writeFile(
     path.join(directory, "src", "old.ts"),
@@ -90,13 +99,9 @@ test("changed diff keeps only edited lines when a file is renamed and modified",
   const directory = await mkdtemp(
     path.join(os.tmpdir(), "coding-bible-action-rename-edit-"),
   );
-  await exec("git", ["init", "-q"], { cwd: directory });
-  await exec("git", ["config", "user.email", "coding-bible@example.invalid"], {
-    cwd: directory,
-  });
-  await exec("git", ["config", "user.name", "Coding Bible Test"], {
-    cwd: directory,
-  });
+
+  await configureTestRepository(exec, directory);
+
   await mkdir(path.join(directory, "src"));
   await writeFile(
     path.join(directory, "src", "old.ts"),
